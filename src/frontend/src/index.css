@@ -4,68 +4,125 @@
 
 @layer base {
   :root {
-    /* Light mode - light blue tones */
-    --background: oklch(96% 0.015 240);
-    --foreground: oklch(20% 0.03 240);
-    --card: oklch(98% 0.01 240);
-    --card-foreground: oklch(20% 0.03 240);
-    --popover: oklch(98% 0.01 240);
-    --popover-foreground: oklch(20% 0.03 240);
-    --primary: oklch(55% 0.15 220);
-    --primary-foreground: oklch(98% 0.01 240);
-    --secondary: oklch(90% 0.02 240);
-    --secondary-foreground: oklch(20% 0.03 240);
-    --muted: oklch(92% 0.015 240);
-    --muted-foreground: oklch(50% 0.04 240);
-    --accent: oklch(88% 0.03 220);
-    --accent-foreground: oklch(20% 0.03 240);
+    /* Light mode - Premium light palette */
+    --background-rgb: 247 250 255;
+    --background: oklch(98.5% 0.008 240);
+    
+    --foreground-rgb: 26 31 46;
+    --foreground: oklch(15% 0.025 240);
+    
+    --card-rgb: 255 255 255;
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(15% 0.025 240);
+    
+    --popover-rgb: 229 234 243;
+    --popover: oklch(93% 0.012 240);
+    --popover-foreground: oklch(15% 0.025 240);
+    
+    --primary-rgb: 58 130 255;
+    --primary: oklch(62% 0.18 250);
+    --primary-foreground: oklch(100% 0 0);
+    
+    --secondary-rgb: 229 234 243;
+    --secondary: oklch(93% 0.012 240);
+    --secondary-foreground: oklch(15% 0.025 240);
+    
+    --muted-rgb: 229 234 243;
+    --muted: oklch(93% 0.012 240);
+    --muted-foreground-rgb: 155 161 166;
+    --muted-foreground: oklch(68% 0.01 240);
+    
+    --accent-rgb: 58 130 255;
+    --accent: oklch(62% 0.18 250);
+    --accent-foreground: oklch(100% 0 0);
+    
+    --destructive-rgb: 220 38 38;
     --destructive: oklch(58% 0.22 25);
-    --destructive-foreground: oklch(98% 0 0);
-    --border: oklch(85% 0.02 240);
-    --input: oklch(85% 0.02 240);
-    --ring: oklch(55% 0.15 220);
-    --radius: 0.75rem;
+    --destructive-foreground: oklch(100% 0 0);
+    
+    --border-rgb: 203 211 228;
+    --border: oklch(86% 0.015 240);
+    
+    --input-rgb: 229 234 243;
+    --input: oklch(93% 0.012 240);
+    
+    --ring-rgb: 58 130 255;
+    --ring: oklch(62% 0.18 250);
+    
+    --success-rgb: 22 163 74;
     --success: oklch(62% 0.17 145);
-    --success-foreground: oklch(98% 0 0);
-    --warning: oklch(72% 0.16 85);
-    --warning-foreground: oklch(20% 0.03 240);
+    --success-foreground: oklch(100% 0 0);
+    
+    --warning-rgb: 234 179 8;
+    --warning: oklch(78% 0.16 85);
+    --warning-foreground: oklch(15% 0.025 240);
+    
+    --radius: 0.5rem;
     
     /* Elevated surfaces */
-    --surface-elevated: oklch(99% 0.008 240);
-    --surface-elevated-hover: oklch(97% 0.012 240);
+    --surface-elevated: oklch(99.5% 0.004 240);
+    --surface-elevated-hover: oklch(98% 0.008 240);
   }
 
   .dark {
-    /* Dark blue base with light blue accents */
-    --background: oklch(15% 0.05 240);
-    --foreground: oklch(95% 0.01 220);
-    --card: oklch(19% 0.052 240);
-    --card-foreground: oklch(95% 0.01 220);
-    --popover: oklch(17% 0.048 240);
-    --popover-foreground: oklch(95% 0.01 220);
-    --primary: oklch(70% 0.16 210);
-    --primary-foreground: oklch(15% 0.05 240);
-    --secondary: oklch(25% 0.055 240);
-    --secondary-foreground: oklch(95% 0.01 220);
-    --muted: oklch(23% 0.053 240);
-    --muted-foreground: oklch(68% 0.06 220);
-    --accent: oklch(27% 0.058 220);
-    --accent-foreground: oklch(95% 0.01 220);
+    /* Dark mode - Premium deep navy palette */
+    --background-rgb: 11 14 20;
+    --background: oklch(8% 0.025 240);
+    
+    --foreground-rgb: 227 230 232;
+    --foreground: oklch(92% 0.008 240);
+    
+    --card-rgb: 21 25 33;
+    --card: oklch(12% 0.028 240);
+    --card-foreground: oklch(92% 0.008 240);
+    
+    --popover-rgb: 21 25 33;
+    --popover: oklch(12% 0.028 240);
+    --popover-foreground: oklch(92% 0.008 240);
+    
+    --primary-rgb: 112 161 255;
+    --primary: oklch(70% 0.16 250);
+    --primary-foreground: oklch(8% 0.025 240);
+    
+    --secondary-rgb: 21 25 33;
+    --secondary: oklch(12% 0.028 240);
+    --secondary-foreground: oklch(92% 0.008 240);
+    
+    --muted-rgb: 21 25 33;
+    --muted: oklch(12% 0.028 240);
+    --muted-foreground-rgb: 155 161 166;
+    --muted-foreground: oklch(68% 0.01 240);
+    
+    --accent-rgb: 112 161 255;
+    --accent: oklch(70% 0.16 250);
+    --accent-foreground: oklch(92% 0.008 240);
+    
+    --destructive-rgb: 239 68 68;
     --destructive: oklch(62% 0.24 25);
-    --destructive-foreground: oklch(95% 0.01 220);
-    --border: oklch(28% 0.055 240);
-    --input: oklch(25% 0.055 240);
-    --ring: oklch(70% 0.16 210);
+    --destructive-foreground: oklch(92% 0.008 240);
+    
+    --border-rgb: 42 49 67;
+    --border: oklch(22% 0.03 240);
+    
+    --input-rgb: 21 25 33;
+    --input: oklch(12% 0.028 240);
+    
+    --ring-rgb: 112 161 255;
+    --ring: oklch(70% 0.16 250);
+    
+    --success-rgb: 16 185 129;
     --success: oklch(68% 0.20 150);
-    --success-foreground: oklch(15% 0.05 240);
-    --warning: oklch(78% 0.18 85);
-    --warning-foreground: oklch(15% 0.05 240);
+    --success-foreground: oklch(8% 0.025 240);
     
-    /* Elevated surfaces with subtle blue gradients */
-    --surface-elevated: oklch(21% 0.054 240);
-    --surface-elevated-hover: oklch(23% 0.056 240);
+    --warning-rgb: 251 191 36;
+    --warning: oklch(82% 0.18 85);
+    --warning-foreground: oklch(8% 0.025 240);
     
-    /* Light blue accent colors for charts and highlights */
+    /* Elevated surfaces with subtle gradients */
+    --surface-elevated: oklch(14% 0.03 240);
+    --surface-elevated-hover: oklch(16% 0.032 240);
+    
+    /* Accent colors for charts and highlights */
     --accent-cyan: oklch(68% 0.14 210);
     --accent-lime: oklch(72% 0.16 200);
     --accent-amber: oklch(75% 0.12 220);
@@ -89,7 +146,7 @@
     overflow-x: hidden;
   }
 
-  /* Dark blue theme background with blue mesh gradient */
+  /* Background mesh gradient */
   body::before {
     content: '';
     position: fixed;
@@ -106,7 +163,7 @@
     pointer-events: none;
   }
 
-  /* Subtle blue noise texture overlay with animated gradients */
+  /* Subtle noise texture overlay with animated gradients */
   body::after {
     content: '';
     position: fixed;
@@ -124,6 +181,33 @@
     z-index: -1;
     pointer-events: none;
     animation: ambient-glow 25s ease-in-out infinite alternate;
+  }
+  
+  /* Enhanced focus-visible styling with Electric Accent glow */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="combobox"]:focus-visible,
+  [role="slider"]:focus-visible,
+  button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgb(var(--ring-rgb) / 0.6);
+    border-color: rgb(var(--ring-rgb));
+  }
+  
+  /* Specific glow for text inputs */
+  input[type="text"]:focus-visible,
+  input[type="email"]:focus-visible,
+  input[type="password"]:focus-visible,
+  input[type="search"]:focus-visible,
+  input[type="url"]:focus-visible,
+  input[type="tel"]:focus-visible,
+  input[type="number"]:focus-visible,
+  input[type="time"]:focus-visible,
+  input[type="date"]:focus-visible,
+  textarea:focus-visible {
+    box-shadow: 0 0 8px 2px rgb(var(--ring-rgb) / 0.6);
+    border-color: rgb(var(--ring-rgb));
   }
 }
 
@@ -432,11 +516,4 @@
   .transition-smooth-fast {
     transition: none !important;
   }
-}
-
-/* Focus ring enhancement */
-*:focus-visible {
-  outline: 2px solid oklch(var(--ring));
-  outline-offset: 2px;
-  border-radius: 0.25rem;
 }

@@ -33,29 +33,29 @@ export default {
                 ],
             },
             colors: {
-                border: 'oklch(var(--border))',
-                input: 'oklch(var(--input))',
-                ring: 'oklch(var(--ring) / <alpha-value>)',
-                background: 'oklch(var(--background))',
-                foreground: 'oklch(var(--foreground))',
+                border: 'rgb(var(--border-rgb) / <alpha-value>)',
+                input: 'rgb(var(--input-rgb) / <alpha-value>)',
+                ring: 'rgb(var(--ring-rgb) / <alpha-value>)',
+                background: 'rgb(var(--background-rgb) / <alpha-value>)',
+                foreground: 'rgb(var(--foreground-rgb) / <alpha-value>)',
                 primary: {
-                    DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--primary-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--primary-foreground))'
                 },
                 secondary: {
-                    DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--secondary-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--secondary-foreground))'
                 },
                 destructive: {
-                    DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--destructive-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--destructive-foreground))'
                 },
                 muted: {
-                    DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
-                    foreground: 'oklch(var(--muted-foreground) / <alpha-value>)'
+                    DEFAULT: 'rgb(var(--muted-rgb) / <alpha-value>)',
+                    foreground: 'rgb(var(--muted-foreground-rgb) / <alpha-value>)'
                 },
                 accent: {
-                    DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--accent-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--accent-foreground))',
                     cyan: 'oklch(var(--accent-cyan) / <alpha-value>)',
                     lime: 'oklch(var(--accent-lime) / <alpha-value>)',
@@ -64,19 +64,19 @@ export default {
                     purple: 'oklch(var(--accent-purple) / <alpha-value>)',
                 },
                 popover: {
-                    DEFAULT: 'oklch(var(--popover))',
+                    DEFAULT: 'rgb(var(--popover-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--popover-foreground))'
                 },
                 card: {
-                    DEFAULT: 'oklch(var(--card))',
+                    DEFAULT: 'rgb(var(--card-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--card-foreground))'
                 },
                 success: {
-                    DEFAULT: 'oklch(var(--success) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--success-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--success-foreground))'
                 },
                 warning: {
-                    DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
+                    DEFAULT: 'rgb(var(--warning-rgb) / <alpha-value>)',
                     foreground: 'oklch(var(--warning-foreground))'
                 },
                 chart: {
@@ -96,9 +96,9 @@ export default {
             },
             boxShadow: {
                 xs: '0 1px 2px 0 oklch(0% 0 0 / 0.05)',
-                'glow-sm': '0 0 12px oklch(var(--primary) / 0.35)',
-                'glow-md': '0 0 24px oklch(var(--primary) / 0.45)',
-                'glow-lg': '0 0 36px oklch(var(--primary) / 0.55)',
+                'glow-sm': '0 0 12px rgb(var(--primary-rgb) / 0.35)',
+                'glow-md': '0 0 24px rgb(var(--primary-rgb) / 0.45)',
+                'glow-lg': '0 0 36px rgb(var(--primary-rgb) / 0.55)',
                 'elevated': '0 4px 6px -1px oklch(0% 0 0 / 0.15), 0 2px 4px -1px oklch(0% 0 0 / 0.1), inset 0 1px 0 0 oklch(100% 0 0 / 0.05)',
             },
             keyframes: {
@@ -131,8 +131,8 @@ export default {
                     to: { opacity: '1', transform: 'scale(1)' }
                 },
                 'pulse-glow': {
-                    '0%, 100%': { boxShadow: '0 0 20px oklch(var(--primary) / 0.3)' },
-                    '50%': { boxShadow: '0 0 35px oklch(var(--primary) / 0.5)' }
+                    '0%, 100%': { boxShadow: '0 0 20px rgb(var(--primary-rgb) / 0.3)' },
+                    '50%': { boxShadow: '0 0 35px rgb(var(--primary-rgb) / 0.5)' }
                 },
                 'shimmer': {
                     '0%': { backgroundPosition: '-1000px 0' },

@@ -14,6 +14,7 @@ const APP_STORAGE_KEYS = [
   'jee-currently-working',
   'jee-dashboard-title',
   'jee-dashboard-note',
+  'dashboard-inside',
   'jee-customization-settings',
   'jee-customization-presets',
   'jee-notes-data',

@@ -8,6 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
 import { Separator } from '../components/ui/separator';
 import { useCustomization } from './CustomizationProvider';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
+import { Sun, Moon } from 'lucide-react';
 
 interface CustomizationPanelProps {
   open: boolean;
@@ -28,6 +29,40 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
+          {/* Theme Selection */}
+          <div className="space-y-3">
+            <Label>Theme</Label>
+            <ToggleGroup
+              type="single"
+              value={settings.darkModeOverride.enabled ? settings.darkModeOverride.mode : 'dark'}
+              onValueChange={(value) => {
+                if (value) {
+                  updateSettings({ 
+                    darkModeOverride: { 
+                      enabled: true, 
+                      mode: value as 'light' | 'dark' 
+                    } 
+                  });
+                }
+              }}
+              className="justify-start"
+            >
+              <ToggleGroupItem value="light" aria-label="Light mode" className="gap-2">
+                <Sun className="h-4 w-4" />
+                Light
+              </ToggleGroupItem>
+              <ToggleGroupItem value="dark" aria-label="Dark mode" className="gap-2">
+                <Moon className="h-4 w-4" />
+                Dark
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <p className="text-xs text-muted-foreground">
+              Choose your preferred color theme
+            </p>
+          </div>
+
+          <Separator />
+
           {/* Daily Target Hours */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -155,48 +190,6 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
               checked={settings.autoRecalculateDateToFinish}
               onCheckedChange={(checked) => updateSettings({ autoRecalculateDateToFinish: checked })}
             />
-          </div>
-
-          <Separator />
-
-          {/* Dark Mode Override */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="dark-mode-override">Dark Mode Override</Label>
-              <Switch
-                id="dark-mode-override"
-                checked={settings.darkModeOverride.enabled}
-                onCheckedChange={(checked) => 
-                  updateSettings({ 
-                    darkModeOverride: { ...settings.darkModeOverride, enabled: checked } 
-                  })
-                }
-              />
-            </div>
-            {settings.darkModeOverride.enabled && (
-              <ToggleGroup
-                type="single"
-                value={settings.darkModeOverride.mode}
-                onValueChange={(value) => 
-                  value && updateSettings({ 
-                    darkModeOverride: { ...settings.darkModeOverride, mode: value as 'light' | 'dark' } 
-                  })
-                }
-                className="justify-start"
-              >
-                <ToggleGroupItem value="light" aria-label="Light mode">
-                  Light
-                </ToggleGroupItem>
-                <ToggleGroupItem value="dark" aria-label="Dark mode">
-                  Dark
-                </ToggleGroupItem>
-              </ToggleGroup>
-            )}
-            <p className="text-xs text-muted-foreground">
-              {settings.darkModeOverride.enabled 
-                ? 'Force selected mode regardless of default' 
-                : 'Default dark mode (override to change)'}
-            </p>
           </div>
         </div>
 

@@ -1,259 +1,55 @@
 {
   "kind": "build_request",
-  "title": "Polish study planner UI: dark blue dashboards, animated icons/graphics, notifications, overlay fixes, improved graphs, and stronger persistence",
-  "priority": "high",
+  "title": "Add an editable \"Inside\" section to the Home (Dashboard) page",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Apply a dark-blue dashboard/background look across all main dashboards (Home/Dashboard, Calendar, Subjects, Notes, Tests) using a cohesive, accessible color palette for cards, text, borders, and accents; keep user-facing text in English.",
+      "text": "Add a new Dashboard (Home page) card/section titled \"Inside\" that lets the user view and edit a freeform text block, similar to the existing \"Quick Note\" pattern, and persist its content in localStorage.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "make the app dash board and other dashbords of app back ground be of dark blue use a perfect color combo for other components in the app"
+          "inside"
         ]
       },
       "acceptanceCriteria": [
-        "Home/Dashboard, Calendar, Subjects, Notes, and Tests pages visually share a consistent dark-blue background style and harmonized component colors (cards/headers/buttons/badges).",
-        "Contrast is readable (no low-contrast text on dark backgrounds) and colors for success/warning/destructive remain distinguishable.",
-        "No hard-coded page backgrounds conflict with theme variables; styling is driven primarily by existing CSS variables/Tailwind tokens."
+        "Dashboard shows a new card/section with the title \"Inside\".",
+        "The section supports toggling between read-only and edit mode (e.g., Edit/Save/Cancel) consistent with the existing \"Quick Note\" interactions.",
+        "The editable content persists across page reloads via localStorage using a new dedicated storage key (not reusing 'dashboard-note' or 'dashboard-title').",
+        "All user-facing text in this section is in English."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add subtle, consistent icon animations throughout the UI (hover/tap/active + state-change) that work on both desktop and mobile, and respect prefers-reduced-motion.",
+      "text": "Place the new \"Inside\" section in a sensible location on the Dashboard page layout so it feels like part of the existing Home page flow and works well on mobile and desktop.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "use animations at icons"
+          "inside"
         ]
       },
       "acceptanceCriteria": [
-        "Primary interactive icons (bottom navigation icons, common action icons like edit/save/delete/plus) animate on hover/tap (e.g., scale/tilt/fade) without jank.",
-        "Animations are disabled/reduced when the user has prefers-reduced-motion enabled.",
-        "Animations do not block clicks/taps and do not cause layout shift."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Introduce background and opening-interaction graphics/illustrations (lightweight SVG/PNG assets) that enhance the dark-blue theme, including subtle background visuals and small decorative graphics when opening panels/screens, without obscuring content.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "use graphics when ever i open anything and also use in background",
-          "also use some other illustrative icons at every possible area"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At least two generated background assets are added under frontend/public/assets/generated and are used by the app background (no backend routing).",
-        "Major panels/screens (e.g., dashboard hero area, subject page header, chapter detail panel header) include small decorative illustration accents that do not overlap text.",
-        "Graphics remain subtle (low opacity / behind content) and do not reduce readability."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure every subject detail area provides an in-place edit option to update: (a) number of lectures, (b) target hours, and (c) date to finish (where applicable), with immediate persistence.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "for every subject details add edit option there itself so that i can edit number of lectures, number of hours, and date to finish"
-        ]
-      },
-      "acceptanceCriteria": [
-        "From the subject context (Subject page), users can edit the subject-level values in-place without navigating away.",
-        "Edits are validated (no negative/NaN values) and are persisted after refresh/reopen.",
-        "If the app uses computed finish dates (auto-recalculate), the UI clearly supports either overriding the date or disabling auto-calc (using existing customization setting) so the user can set a finish date explicitly."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Add delete actions for every chapter and every subject anywhere they appear in the UI (not only in customization), including confirmation prompts and consistent destructive styling.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "also add delete option for every chapter and subject"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Every chapter card/list entry exposes a delete action with confirmation, and deleting removes it immediately and persists after reload.",
-        "Every subject list entry (where subjects are managed) exposes a delete action with confirmation, and deleting a subject also removes its associated chapters.",
-        "Delete actions are visually consistent and use destructive color styling."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Use clear, consistent colors/indicators for completion vs incompletion across chapters/todos/graphs, and ensure these indicators are visible in lists, detail panels, and charts.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "use colours for completion and incompletion"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Completed vs Incomplete states are always visually distinguishable via badge color and/or iconography in all relevant components.",
-        "Charts/graphs use the same semantic color mapping as the rest of the UI.",
-        "Color mapping is consistent across pages (no conflicting meanings)."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Add a Notifications section on the Home/Dashboard page that, when opened/viewed, shows (1) all incomplete work items and (2) work due today, displayed in two clearly separated lists.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "add a seperate portion in home called notification and in that portion every time when opened it shows all incomplete works and works to be done on that day seperately"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Dashboard contains a clearly labeled Notifications area/section.",
-        "Notifications section shows two groups: Incomplete items and Due today items, each with counts and empty-state messaging.",
-        "Items shown come from existing persisted app data (e.g., incomplete chapters and incomplete todos; due-today derived from existing date fields such as calendar entries and/or finish-date fields) and update immediately when the underlying data changes."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Fix overlapping/mixed UI layers by ensuring any opened panel/drawer/sheet is fully readable and does not visually overlap the main content incorrectly; use a backdrop blur overlay and correct z-index layering for panels like the Chapter detail sheet.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "when ever i open a chapter then a tab opens which displays about total lectures, target hours and etc this whole panel is not visible so make it back ground blur so that i can see all th details in that panel without over lapping similarly where ever i open a new panel it gets overlapped on the main panel and every thing gets mixed so fix it"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Opening the Chapter detail panel results in a clear modal/sheet experience with an overlay/backdrop blur behind it; the panel content is fully visible and scrollable.",
-        "No other panels (dialogs/sheets/drawers) appear underneath/overlap in a way that mixes content; only one primary overlay layer is visually active at a time.",
-        "Clicking/tapping outside the panel (when appropriate) dismisses it without leaving the UI in a mixed state."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Implement a user-facing Light/Dark mode toggle in Settings/Customize that switches between light mode and dark mode and persists the preference across reloads.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "in settings make a mode called dark mode which is costumizable as two ways one is light mode and other is dark mode so that i can switch it into dark and ligt mode"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Settings/Customize provides a clear two-way mode control: Light and Dark.",
-        "The selected mode is applied immediately and persists after refresh/reopen.",
-        "The toggle respects existing theme infrastructure (CSS variables and existing customization provider) and does not require editing immutable auth/actor hooks."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Ensure the bottom navigation icons area scrolls horizontally on small screens so all icons are reachable via swipe/scroll, with visible affordance when overflow exists.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "the main icons below are not scrolling horizontaly make sure that all ofthe icons may scroll horizontally"
-        ]
-      },
-      "acceptanceCriteria": [
-        "On narrow widths, bottom navigation allows horizontal swipe/scroll to access all items (including subject-driven entries if present).",
-        "Scrolling works on mobile touch (momentum scrolling) and desktop trackpad/mousewheel horizontal scroll.",
-        "No vertical jitter or content clipping occurs in the bottom bar."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Improve and expand graph usage and animations: add graphs where they are naturally required (e.g., completion trends, subject completion distribution) and enhance existing chart animations/transitions while respecting prefers-reduced-motion.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "install graphs where ever required and improve graph animation every where"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At least one additional dashboard-relevant visualization is added (beyond current completion progress bar), using existing data sources.",
-        "Existing SVG/chart components animate transitions smoothly on data change (e.g., line draw, point fade/scale) without hurting performance.",
-        "All graph animations are disabled/reduced under prefers-reduced-motion."
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "text": "Guarantee that user changes (edits, completion marks, deletes, settings) persist across app close/reopen and refresh; do not reset data unless the user explicitly confirms a destructive reset action.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "when ever i close the app or reset the app the changes whichever i have made should me as it is so that my data would not be reset",
-          "when ever i mark, or i complete, or do anything in the app and close it then the next time when i open it should be opened with the same changes i have made"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All edits/completions/deletes/settings remain after a full page refresh and after closing/reopening the browser tab.",
-        "No automatic code path clears localStorage or re-seeds INITIAL_* data on load when valid stored data exists.",
-        "The only way to clear data remains an explicit user-confirmed action (e.g., the existing 'Reset local data' confirmation in the error boundary), and normal 'Reload' does not clear data."
+        "The \"Inside\" section appears on the Dashboard without overlapping other sections (Stats, Currently Working, Notifications/Charts, Quick Note, Subjects).",
+        "The layout remains responsive (no horizontal scrolling or broken grid) on small screens and large screens."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (read-only shadcn components). Compose them instead.",
-    "Do not edit immutable frontend paths listed by the platform (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
-    "Backend remains single-actor Motoko; only introduce backend persistence if strictly necessary for the requested persistence behavior (otherwise keep localStorage-based persistence).",
-    "All user-facing text must be in English."
+    "Do not edit any files under frontend/src/components/ui (Shadcn components are read-only).",
+    "Keep backend as single-actor Motoko architecture; no backend changes are required for this request."
   ],
   "nonGoals": [
-    "Implementing third-party authentication providers (only Internet Identity is supported).",
-    "Adding real-time sync/chat/push notifications.",
-    "Introducing an external database or non-Motoko backend services.",
-    "Cross-device cloud backup unless explicitly requested later."
+    "Adding backend persistence for the \"Inside\" content (localStorage-only is sufficient).",
+    "Changing existing Dashboard sections or removing any current features."
   ],
   "imageRequirements": {
-    "required": [
-      "Abstract dark blue mesh gradient background (app-bg-mesh-blue.dim_1920x1080.png)",
-      "Seamless subtle blue noise texture (app-bg-noise-blue.dim_2048x2048.png)",
-      "Minimal line-art study illustration (study-illustration-line.dim_1200x400.png)"
-    ],
+    "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [
-      "Prefer dark blue themed dashboards with cohesive color palette",
-      "Prefer subtle icon animations and illustrative graphics",
-      "Require persistent local data across restarts"
-    ],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

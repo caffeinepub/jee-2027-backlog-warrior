@@ -8,6 +8,7 @@ import { useChapterData } from '../hooks/useChapterData';
 import { useSubjects } from '../hooks/useSubjects';
 import { useDashboardNote } from '../hooks/useDashboardNote';
 import { useDashboardTitle } from '../hooks/useDashboardTitle';
+import { useDashboardInside } from '../hooks/useDashboardInside';
 import { useCurrentlyWorkingChapters } from '../hooks/useCurrentlyWorkingChapters';
 import { useCustomization } from '../customization/CustomizationProvider';
 import { useState, useEffect, useMemo } from 'react';
@@ -20,6 +21,7 @@ export function Dashboard() {
   const { subjects } = useSubjects();
   const { note, setNote } = useDashboardNote();
   const { title, setTitle } = useDashboardTitle();
+  const { content: insideContent, setContent: setInsideContent } = useDashboardInside();
   const { getActiveChapters } = useCurrentlyWorkingChapters();
   const { settings } = useCustomization();
   
@@ -27,6 +29,8 @@ export function Dashboard() {
   const [editTitleValue, setEditTitleValue] = useState(title);
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [editNoteValue, setEditNoteValue] = useState(note);
+  const [isEditingInside, setIsEditingInside] = useState(false);
+  const [editInsideValue, setEditInsideValue] = useState(insideContent);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -76,6 +80,11 @@ export function Dashboard() {
   const handleSaveNote = () => {
     setNote(editNoteValue);
     setIsEditingNote(false);
+  };
+
+  const handleSaveInside = () => {
+    setInsideContent(editInsideValue);
+    setIsEditingInside(false);
   };
 
   return (
@@ -202,45 +211,88 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Note */}
-      <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '800ms' }}>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Quick Note</CardTitle>
-            {!isEditingNote ? (
-              <Button size="icon" variant="ghost" onClick={() => { setIsEditingNote(true); setEditNoteValue(note); }} className="icon-animated">
-                <Edit2 className="h-4 w-4" />
-              </Button>
+      {/* Quick Note and Inside Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Note */}
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '800ms' }}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Quick Note</CardTitle>
+              {!isEditingNote ? (
+                <Button size="icon" variant="ghost" onClick={() => { setIsEditingNote(true); setEditNoteValue(note); }} className="icon-animated">
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={handleSaveNote} className="icon-animated">
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setIsEditingNote(false)} className="icon-animated">
+                    <X className="h-4 w-4 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isEditingNote ? (
+              <Textarea
+                value={editNoteValue}
+                onChange={(e) => setEditNoteValue(e.target.value)}
+                placeholder="Write your notes here..."
+                className="min-h-[120px] resize-none"
+                autoFocus
+              />
             ) : (
-              <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={handleSaveNote} className="icon-animated">
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditingNote(false)} className="icon-animated">
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              </div>
+              <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
+                {note || 'Click edit to add a note...'}
+              </p>
             )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isEditingNote ? (
-            <Textarea
-              value={editNoteValue}
-              onChange={(e) => setEditNoteValue(e.target.value)}
-              placeholder="Write your notes here..."
-              className="min-h-[120px] resize-none"
-              autoFocus
-            />
-          ) : (
-            <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
-              {note || 'Click edit to add a note...'}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Inside */}
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '850ms' }}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Inside</CardTitle>
+              {!isEditingInside ? (
+                <Button size="icon" variant="ghost" onClick={() => { setIsEditingInside(true); setEditInsideValue(insideContent); }} className="icon-animated">
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={handleSaveInside} className="icon-animated">
+                    <Save className="h-4 w-4 mr-1" />
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setIsEditingInside(false)} className="icon-animated">
+                    <X className="h-4 w-4 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isEditingInside ? (
+              <Textarea
+                value={editInsideValue}
+                onChange={(e) => setEditInsideValue(e.target.value)}
+                placeholder="Write your thoughts here..."
+                className="min-h-[120px] resize-none"
+                autoFocus
+              />
+            ) : (
+              <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
+                {insideContent || 'Click edit to add content...'}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Subjects Quick Access */}
       <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up" style={{ animationDelay: '900ms' }}>

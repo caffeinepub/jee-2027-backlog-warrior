@@ -1,199 +1,30 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build/update a study-tracker style app UI/UX: dark blue dashboard theme, animated/illustrative icons and graphics, editable subject/chapter details with delete options, improved graphs/graph animations, notifications for incomplete/today tasks, fix overlapping panels with blur/backdrop, enable horizontal scrolling icons, add light/dark mode toggle, and ensure persistent saved data across app restarts/resets.",
-  "architectural_notes": [
-    "Introduce app-wide theming system (light/dark + custom palette) with consistent component styles.",
-    "Implement persistent storage for user data/state so changes survive app close/restart/reset.",
-    "Use a modal/overlay management pattern (backdrop blur, z-index layering, focus/scroll locking) to prevent panel overlap issues."
-  ],
-  "known_issues": [
-    "Chapter details/other panels overlap the main panel; details are not visible and UI layers get mixed.",
-    "Main bottom icons are not scrolling horizontally as expected.",
-    "User changes/data appear to reset after closing or resetting the app (persistence issue).",
-    "Last build/deploy attempt failed ('AI was unable to complete your request')."
-  ],
-  "isFixRequest": true,
-  "imageRequirements": "## Required Images\n- Abstract dark blue mesh gradient background (app-bg-mesh-blue.dim_1920x1080.png)\n- Seamless subtle blue noise texture (app-bg-noise-blue.dim_2048x2048.png)\n- Minimal line-art study illustration (study-illustration-line.dim_1200x400.png)",
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-apply-a-dark-blue-dashboard-background-look-across-all-main-dashboards-home-dashboard-calendar-subjects-notes-tests-using-a-cohesive-accessible-color-palette-for-cards-text-borders-and-accents-keep-user-facing-text-in-english",
-      "title": "Apply a dark-blue dashboard/background look across all main dashboards (Home/Dashboard, Calendar, Subjects, Notes, Tests) using a cohesive, accessible color palette for cards, text, borders, and accents; keep user-facing text in English.",
+      "id": "feature-add-a-new-dashboard-home-page-card-section-titled-inside-that-lets-the-user-view-and-edit-a-freeform-text-block-similar-to-the-existing-quick-note-pattern-and-persist-its-content-in-localstorage",
+      "title": "Add a new Dashboard (Home page) card/section titled \"Inside\" that lets the user view and edit a freeform text block, similar to the existing \"Quick Note\" pattern, and persist its content in localStorage.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-subtle-consistent-icon-animations-throughout-the-ui-hover-tap-active-state-change-that-work-on-both-desktop-and-mobile-and-respect-prefers-reduced-motion",
-      "title": "Add subtle, consistent icon animations throughout the UI (hover/tap/active + state-change) that work on both desktop and mobile, and respect prefers-reduced-motion.",
+      "id": "feature-place-the-new-inside-section-in-a-sensible-location-on-the-dashboard-page-layout-so-it-feels-like-part-of-the-existing-home-page-flow-and-works-well-on-mobile-and-desktop",
+      "title": "Place the new \"Inside\" section in a sensible location on the Dashboard page layout so it feels like part of the existing Home page flow and works well on mobile and desktop.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-introduce-background-and-opening-interaction-graphics-illustrations-lightweight-svg-png-assets-that-enhance-the-dark-blue-theme-including-subtle-background-visuals-and-small-decorative-graphics-when-opening-panels-screens-without-obscuring-content",
-      "title": "Introduce background and opening-interaction graphics/illustrations (lightweight SVG/PNG assets) that enhance the dark-blue theme, including subtle background visuals and small decorative graphics when opening panels/screens, without obscuring content.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-every-subject-detail-area-provides-an-in-place-edit-option-to-update-a-number-of-lectures-b-target-hours-and-c-date-to-finish-where-applicable-with-immediate-persistence",
-      "title": "Ensure every subject detail area provides an in-place edit option to update: (a) number of lectures, (b) target hours, and (c) date to finish (where applicable), with immediate persistence.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-delete-actions-for-every-chapter-and-every-subject-anywhere-they-appear-in-the-ui-not-only-in-customization-including-confirmation-prompts-and-consistent-destructive-styling",
-      "title": "Add delete actions for every chapter and every subject anywhere they appear in the UI (not only in customization), including confirmation prompts and consistent destructive styling.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-use-clear-consistent-colors-indicators-for-completion-vs-incompletion-across-chapters-todos-graphs-and-ensure-these-indicators-are-visible-in-lists-detail-panels-and-charts",
-      "title": "Use clear, consistent colors/indicators for completion vs incompletion across chapters/todos/graphs, and ensure these indicators are visible in lists, detail panels, and charts.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-notifications-section-on-the-home-dashboard-page-that-when-opened-viewed-shows-1-all-incomplete-work-items-and-2-work-due-today-displayed-in-two-clearly-separated-lists",
-      "title": "Add a Notifications section on the Home/Dashboard page that, when opened/viewed, shows (1) all incomplete work items and (2) work due today, displayed in two clearly separated lists.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-overlapping-mixed-ui-layers-by-ensuring-any-opened-panel-drawer-sheet-is-fully-readable-and-does-not-visually-overlap-the-main-content-incorrectly-use-a-backdrop-blur-overlay-and-correct-z-index-layering-for-panels-like-the-chapter-detail-sheet",
-      "title": "Fix overlapping/mixed UI layers by ensuring any opened panel/drawer/sheet is fully readable and does not visually overlap the main content incorrectly; use a backdrop blur overlay and correct z-index layering for panels like the Chapter detail sheet.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-user-facing-light-dark-mode-toggle-in-settings-customize-that-switches-between-light-mode-and-dark-mode-and-persists-the-preference-across-reloads",
-      "title": "Implement a user-facing Light/Dark mode toggle in Settings/Customize that switches between light mode and dark mode and persists the preference across reloads.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-bottom-navigation-icons-area-scrolls-horizontally-on-small-screens-so-all-icons-are-reachable-via-swipe-scroll-with-visible-affordance-when-overflow-exists",
-      "title": "Ensure the bottom navigation icons area scrolls horizontally on small screens so all icons are reachable via swipe/scroll, with visible affordance when overflow exists.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-and-expand-graph-usage-and-animations-add-graphs-where-they-are-naturally-required-e-g-completion-trends-subject-completion-distribution-and-enhance-existing-chart-animations-transitions-while-respecting-prefers-reduced-motion",
-      "title": "Improve and expand graph usage and animations: add graphs where they are naturally required (e.g., completion trends, subject completion distribution) and enhance existing chart animations/transitions while respecting prefers-reduced-motion.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-guarantee-that-user-changes-edits-completion-marks-deletes-settings-persist-across-app-close-reopen-and-refresh-do-not-reset-data-unless-the-user-explicitly-confirms-a-destructive-reset-action",
-      "title": "Guarantee that user changes (edits, completion marks, deletes, settings) persist across app close/reopen and refresh; do not reset data unless the user explicitly confirms a destructive reset action.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Apply dark blue background theme to dashboard and other dashboards with cohesive color palette for all components",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add icon animations throughout the app",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Add graphics/illustrations for screens, opening interactions, and background visuals",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Add inline edit options on subject details to edit number of lectures, target hours, and finish date",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Use illustrative icons in as many appropriate areas as possible",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Add graphs where required and improve graph animations across the app",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Add delete option for every chapter and subject",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add distinct colors/indicators for completion vs incompletion states",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Add a Notifications section on Home showing (a) all incomplete works and (b) tasks due today, separated",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Fix UI overlays/panels: chapter details tab (total lectures/target hours/etc) should be fully visible; use background blur/backdrop and prevent overlapping/mixed panels throughout app",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Make the main bottom icons area scroll horizontally so all icons are accessible",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Add Settings toggle for Light/Dark modes (customizable two-way switch)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Ensure persistent data: user changes should remain after closing or resetting the app; reopen should reflect latest state",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Polish study planner UI: dark blue dashboards, animated icons/graphics, notifications, overlay fixes, improved graphs, and stronger persistence",
+  "new_feature_requests": [],
+  "projectName": "Add an editable \"Inside\" section to the Home (Dashboard) page",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
