@@ -1,123 +1,59 @@
 {
   "kind": "build_request",
-  "title": "Make Dashboard title editable, add Notes app, and add Tests tracking with per-test graphs",
-  "priority": "normal",
+  "title": "Add per-subject completion graph with animated chapter fill and fix Minified React error #185",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-38",
-      "text": "Replace the hardcoded Dashboard hero heading text \"Friday\" with an in-place, user-editable title on the Dashboard page, and persist the title in LocalStorage so it is restored on reload.",
+      "id": "REQ-57",
+      "text": "Add a Subject Completion Graph to every Subject page (Mathematics/Physics/Chemistry and any user-created subjects) that visualizes chapter-by-chapter completion for that subject, and animate each chapter’s segment to fill slowly when the chapter becomes Completed.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-4"
         ],
         "quotes": [
-          "REMOVE NAME FRIDAY AND LET IT BE COSTUMIZABLE THERE IT SELF"
+          "ALSO ADD A SUBJECT COMPLETION GRAPH  IN ALL SUBJECTS IF COIMPLETED THEN THE GRAPH OF EACH CHAPTER FILLS SLOWLY"
         ]
       },
       "acceptanceCriteria": [
-        "On the Dashboard (route '/'), the hero heading is no longer hardcoded to \"Friday\".",
-        "The heading can be edited directly on the Dashboard (in-place edit UX) without navigating to another page.",
-        "The edited title persists via LocalStorage and is restored after a refresh/reopen.",
-        "All user-facing text and placeholders used for this edit UI are in English."
+        "On each Subject page, a Subject Completion Graph is displayed above the chapter grid (or another clearly visible location on the page).",
+        "The graph represents all chapters for the current subject and clearly distinguishes Completed vs Not Completed chapters (chapter-level granularity, not only an overall %).",
+        "When a chapter status changes to Completed, the corresponding segment animates from unfilled to filled with a visibly slow fill effect (not an instant jump).",
+        "The graph updates immediately when chapter status changes and reflects persisted LocalStorage state after a reload.",
+        "The graph works for default subjects and user-created subjects (subjectId-based).",
+        "All user-facing labels related to the graph are in English."
       ]
     },
     {
-      "id": "REQ-39",
-      "text": "Add a new \"Notes\" option accessible from the app menu (the left-side hamburger drawer) that opens a dedicated Notes page implementing a basic phone-notes style experience: create, view, edit, delete notes; persist all notes in LocalStorage.",
+      "id": "REQ-58",
+      "text": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage (including navigating between pages and interacting with chapters/settings).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-4"
         ],
         "quotes": [
-          "ADD A OPTION IN MENU NOTE WHICH SHOULD WORK AS A BASIC NOTE APP IN EVERY PHONE"
+          "ALSO IT IS SJOWING A ERROR FIX IT Minified React error #185; visit https://react.dev/errors/185 for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
         ]
       },
       "acceptanceCriteria": [
-        "A new route (e.g., '/notes') exists and renders a Notes page.",
-        "The hamburger drawer includes a clear navigation entry labeled \"Notes\" that navigates to the Notes page.",
-        "Users can create a note (title optional, body required), edit an existing note, and delete notes.",
-        "Notes are persisted in LocalStorage with versioning (similar robustness to existing LocalStorage hooks) and are restored after reload.",
-        "Notes UI is mobile-first and usable on desktop; all labels are English.",
-        "No backend changes are required for notes."
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "text": "Add a new \"Tests\" area as a dedicated dashboard page where the user can manage unlimited tests: create tests with a customizable label/name, configurable total marks, and record scored marks entries; persist all test data in LocalStorage.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "ADD ANOTHER DASH BORD DOWN CALLED TESTS",
-          "I CAN COSTUMISE LABEL OF THE TESTS",
-          "ICAN ADD AS MANY TESTS AS I CAN",
-          "ICAN COSTUMIZE TOTAL MARKS OF THE TEST AND HOW MUCH I HAVE SCORE IN THAT TEST"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new route (e.g., '/tests') exists and renders a Tests page.",
-        "Users can create unlimited tests with fields: test label/name and total marks.",
-        "Within each test, users can add one or more score entries (scored marks; optionally include date/time of entry).",
-        "Users can edit and delete tests and edit/delete individual score entries.",
-        "All test data is persisted in LocalStorage with versioning and restored after reload.",
-        "All user-facing text is in English."
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "text": "For each test on the Tests page, display a customizable graph similar to common NTA-style test progress charts, with user controls to adjust the graph appearance (at minimum: chart type line vs bar, and an accent color).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "FOR EVERY MAIN TEST LABEL THERE SHOULD BE A GRAPH WHICH CAN BE COSTUMIZABLE WHICH WE CAN OFTENLYY SEEN IN NTA APP TEST"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Each test displays a chart of score entries (e.g., score over attempts in entry order, or by date if present).",
-        "The chart has per-test customization controls that change the chart appearance (minimum: line vs bar; and a selectable accent color).",
-        "Graph customization selections persist in LocalStorage as part of the test data and are restored after reload.",
-        "The graph renders correctly on mobile widths without overflowing and remains readable in dark mode.",
-        "All graph-related labels and controls are in English."
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "text": "Update navigation so \"Tests\" is easily accessible on mobile and desktop: add a clear entry point in the bottom navigation and in the hamburger drawer, consistent with existing styling.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "ADD ANOTHER DASH BORD DOWN CALLED TESTS"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Bottom navigation includes a \"Tests\" item that routes to the Tests page.",
-        "Hamburger drawer includes a \"Tests\" navigation entry.",
-        "Navigation highlights the active route consistently with existing nav behavior.",
-        "No existing routes (/ , /math, /physics, /chemistry, /calendar, /customize) are broken."
+        "The app no longer throws “Minified React error #185” in production build during normal navigation and interactions.",
+        "No new React runtime errors are introduced in the browser console related to the fix.",
+        "Subject pages, Dashboard, Customize page, and chapter interactions (including Currently Working controls) remain functional after the fix.",
+        "If the fix requires changing component rendering logic, verify that it does not break LocalStorage persistence behavior for chapters/subjects/settings."
       ]
     }
   ],
   "constraints": [
-    "Frontend files under frontend/src/components/ui must not be edited directly; compose them as-is.",
-    "Do not edit any frontend immutablePaths listed in SYSTEM_CONTEXT (e.g., frontend/src/main.tsx and auth/actor hooks).",
-    "Keep persistence client-side in LocalStorage (no external databases or third-party services).",
-    "Backend remains single-actor; avoid adding backend requirements unless strictly necessary."
+    "Frontend must not modify files under frontend/src/components/ui (read-only Shadcn components).",
+    "Do not edit files listed in frontend.immutablePaths (compose/wrap them instead).",
+    "Keep the existing dark-mode theme direction and do not introduce a blue/purple theme.",
+    "Do not introduce new backend services or databases; continue to use LocalStorage for persistence."
   ],
   "nonGoals": [
-    "No integration with NTA or any third-party test platform APIs.",
-    "No real-time sync across devices or cloud backup.",
-    "No push notifications or messaging for notes/tests.",
-    "No changes to Internet Identity authentication flow."
+    "Adding backend canister APIs for graphs or analytics.",
+    "Implementing real-time/multiplayer updates (WebSockets, etc.).",
+    "Redesigning unrelated pages beyond what is necessary to add the subject graph and fix the React error."
   ],
   "imageRequirements": {
     "required": [],

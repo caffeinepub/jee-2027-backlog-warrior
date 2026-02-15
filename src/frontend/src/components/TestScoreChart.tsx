@@ -8,36 +8,39 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
   if (test.scores.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground text-sm">
-        No scores to display
+        No scores recorded yet
       </div>
     );
   }
 
+  const chartType = test.chartType || 'line';
+  const accentColor = test.chartColor || '#8b5cf6';
+
+  // Calculate dimensions with better mobile support
+  const width = 800;
+  const height = 400;
+  const padding = { top: 40, right: 40, bottom: 80, left: 80 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  // Find max score for scaling
   const maxScore = test.totalMarks;
-  const chartHeight = 200;
-  const chartWidth = 100; // percentage
-  const padding = { top: 20, right: 20, bottom: 40, left: 50 };
-  
-  // Sort scores by timestamp
-  const sortedScores = [...test.scores].sort((a, b) => a.timestamp - b.timestamp);
-  
-  const dataPoints = sortedScores.map((score, index) => ({
-    x: index,
-    y: score.score,
-    label: `#${index + 1}`,
-  }));
+  const scores = test.scores;
 
-  const xStep = (chartWidth - padding.left - padding.right) / Math.max(dataPoints.length - 1, 1);
-  const yScale = (chartHeight - padding.top - padding.bottom) / maxScore;
+  // Scale functions
+  const xScale = (index: number) => {
+    return (index / Math.max(scores.length - 1, 1)) * chartWidth;
+  };
 
-  const getX = (index: number) => padding.left + index * xStep;
-  const getY = (score: number) => chartHeight - padding.bottom - score * yScale;
+  const yScale = (score: number) => {
+    return chartHeight - (score / maxScore) * chartHeight;
+  };
 
   // Generate path for line chart
-  const linePath = dataPoints
-    .map((point, i) => {
-      const x = getX(point.x);
-      const y = getY(point.y);
+  const linePath = scores
+    .map((s, i) => {
+      const x = xScale(i);
+      const y = yScale(s.score);
       return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
     })
     .join(' ');
@@ -45,168 +48,143 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
   return (
     <div className="w-full overflow-x-auto">
       <svg
-        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-        className="w-full h-auto"
-        style={{ minWidth: '300px' }}
+        viewBox={`0 0 ${width} ${height}`}
+        className="w-full"
+        style={{ minWidth: '320px', maxHeight: '400px' }}
       >
         {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((fraction) => {
-          const y = chartHeight - padding.bottom - maxScore * fraction * yScale;
+        {[0, 0.25, 0.5, 0.75, 1].map((tick) => {
+          const y = chartHeight * (1 - tick);
+          const scoreValue = maxScore * tick;
           return (
-            <g key={fraction}>
+            <g key={tick}>
               <line
                 x1={padding.left}
-                y1={y}
-                x2={chartWidth - padding.right}
-                y2={y}
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-border"
-                strokeDasharray="2,2"
+                y1={padding.top + y}
+                x2={padding.left + chartWidth}
+                y2={padding.top + y}
+                className="stroke-border/50"
+                strokeWidth="1"
+                strokeDasharray="4,4"
               />
               <text
-                x={padding.left - 5}
-                y={y + 3}
+                x={padding.left - 10}
+                y={padding.top + y}
                 textAnchor="end"
-                fontSize="8"
-                className="fill-muted-foreground"
+                className="text-[14px] fill-muted-foreground font-medium"
+                dominantBaseline="middle"
               >
-                {Math.round(maxScore * fraction)}
+                {scoreValue.toFixed(0)}
               </text>
             </g>
           );
         })}
 
-        {/* X-axis labels */}
-        {dataPoints.map((point) => {
-          const x = getX(point.x);
-          return (
-            <text
-              key={point.x}
-              x={x}
-              y={chartHeight - padding.bottom + 15}
-              textAnchor="middle"
-              fontSize="8"
-              className="fill-muted-foreground"
-            >
-              {point.label}
-            </text>
-          );
-        })}
-
         {/* Chart content */}
-        {test.chartType === 'line' ? (
-          <>
-            {/* Line */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke={test.chartColor}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Points */}
-            {dataPoints.map((point) => {
-              const x = getX(point.x);
-              const y = getY(point.y);
+        <g transform={`translate(${padding.left}, ${padding.top})`}>
+          {chartType === 'line' ? (
+            <>
+              {/* Line path */}
+              <path
+                d={linePath}
+                fill="none"
+                stroke={accentColor}
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Data points */}
+              {scores.map((s, i) => (
+                <circle
+                  key={s.id}
+                  cx={xScale(i)}
+                  cy={yScale(s.score)}
+                  r="6"
+                  fill={accentColor}
+                  className="stroke-background"
+                  strokeWidth="2"
+                >
+                  <title>{`Attempt ${i + 1}: ${s.score}/${maxScore} (${((s.score / maxScore) * 100).toFixed(1)}%)`}</title>
+                </circle>
+              ))}
+            </>
+          ) : (
+            /* Bar chart */
+            scores.map((s, i) => {
+              const barWidth = Math.max(chartWidth / scores.length - 8, 20);
+              const x = xScale(i) - barWidth / 2;
+              const y = yScale(s.score);
+              const barHeight = chartHeight - y;
               return (
-                <g key={point.x}>
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r="3"
-                    fill={test.chartColor}
-                    stroke="white"
-                    strokeWidth="1.5"
-                  />
-                  <text
-                    x={x}
-                    y={y - 10}
-                    textAnchor="middle"
-                    fontSize="9"
-                    fontWeight="600"
-                    className="fill-foreground"
-                  >
-                    {point.y}
-                  </text>
-                </g>
+                <rect
+                  key={s.id}
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
+                  fill={accentColor}
+                  opacity="0.85"
+                  rx="4"
+                >
+                  <title>{`Attempt ${i + 1}: ${s.score}/${maxScore} (${((s.score / maxScore) * 100).toFixed(1)}%)`}</title>
+                </rect>
               );
-            })}
-          </>
-        ) : (
-          <>
-            {/* Bars */}
-            {dataPoints.map((point) => {
-              const x = getX(point.x);
-              const y = getY(point.y);
-              const barWidth = Math.min(xStep * 0.6, 8);
-              const barHeight = chartHeight - padding.bottom - y;
-              return (
-                <g key={point.x}>
-                  <rect
-                    x={x - barWidth / 2}
-                    y={y}
-                    width={barWidth}
-                    height={barHeight}
-                    fill={test.chartColor}
-                    rx="1"
-                  />
-                  <text
-                    x={x}
-                    y={y - 5}
-                    textAnchor="middle"
-                    fontSize="9"
-                    fontWeight="600"
-                    className="fill-foreground"
-                  >
-                    {point.y}
-                  </text>
-                </g>
-              );
-            })}
-          </>
-        )}
+            })
+          )}
+        </g>
 
-        {/* Axes */}
+        {/* X-axis */}
         <line
           x1={padding.left}
-          y1={chartHeight - padding.bottom}
-          x2={chartWidth - padding.right}
-          y2={chartHeight - padding.bottom}
-          stroke="currentColor"
-          strokeWidth="1"
-          className="text-border"
+          y1={padding.top + chartHeight}
+          x2={padding.left + chartWidth}
+          y2={padding.top + chartHeight}
+          className="stroke-border"
+          strokeWidth="2"
         />
+
+        {/* Y-axis */}
         <line
           x1={padding.left}
           y1={padding.top}
           x2={padding.left}
-          y2={chartHeight - padding.bottom}
-          stroke="currentColor"
-          strokeWidth="1"
-          className="text-border"
+          y2={padding.top + chartHeight}
+          className="stroke-border"
+          strokeWidth="2"
         />
+
+        {/* X-axis labels */}
+        {scores.map((s, i) => {
+          if (scores.length > 15 && i % 2 !== 0) return null;
+          return (
+            <text
+              key={s.id}
+              x={padding.left + xScale(i)}
+              y={padding.top + chartHeight + 25}
+              textAnchor="middle"
+              className="text-[14px] fill-muted-foreground font-medium"
+            >
+              {i + 1}
+            </text>
+          );
+        })}
 
         {/* Axis labels */}
         <text
-          x={chartWidth / 2}
-          y={chartHeight - 5}
+          x={padding.left + chartWidth / 2}
+          y={height - 20}
           textAnchor="middle"
-          fontSize="10"
-          fontWeight="500"
-          className="fill-muted-foreground"
+          className="text-[16px] fill-foreground font-semibold"
         >
-          Attempts
+          Attempt Number
         </text>
+
         <text
-          x={10}
-          y={chartHeight / 2}
+          x={25}
+          y={padding.top + chartHeight / 2}
           textAnchor="middle"
-          fontSize="10"
-          fontWeight="500"
-          className="fill-muted-foreground"
-          transform={`rotate(-90, 10, ${chartHeight / 2})`}
+          className="text-[16px] fill-foreground font-semibold"
+          transform={`rotate(-90, 25, ${padding.top + chartHeight / 2})`}
         >
           Score
         </text>

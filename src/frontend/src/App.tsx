@@ -6,7 +6,6 @@ import { CalendarDashboard } from './pages/CalendarDashboard';
 import { Notes } from './pages/Notes';
 import { Tests } from './pages/Tests';
 import { Layout } from './components/Layout';
-import { LEGACY_ROUTE_MAP } from './data/subjects';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -18,33 +17,48 @@ const indexRoute = createRoute({
   component: Dashboard,
 });
 
+// Stable component definitions to avoid hook order issues
+function MathPage() {
+  return <SubjectPage subjectId="mathematics" />;
+}
+
+function PhysicsPage() {
+  return <SubjectPage subjectId="physics" />;
+}
+
+function ChemistryPage() {
+  return <SubjectPage subjectId="chemistry" />;
+}
+
+function DynamicSubjectPage() {
+  const { subjectId } = subjectRoute.useParams();
+  return <SubjectPage subjectId={subjectId} />;
+}
+
 // Legacy routes for backward compatibility
 const mathRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/math',
-  component: () => <SubjectPage subjectId="mathematics" />,
+  component: MathPage,
 });
 
 const physicsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/physics',
-  component: () => <SubjectPage subjectId="physics" />,
+  component: PhysicsPage,
 });
 
 const chemistryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/chemistry',
-  component: () => <SubjectPage subjectId="chemistry" />,
+  component: ChemistryPage,
 });
 
 // Dynamic subject route
 const subjectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/subject/$subjectId',
-  component: () => {
-    const { subjectId } = subjectRoute.useParams();
-    return <SubjectPage subjectId={subjectId} />;
-  },
+  component: DynamicSubjectPage,
 });
 
 const calendarRoute = createRoute({

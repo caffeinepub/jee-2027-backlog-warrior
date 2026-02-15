@@ -1,12 +1,15 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Check, X, Clock, BookOpen, Calendar } from 'lucide-react';
+import { Input } from './ui/input';
+import { Check, X, Clock, BookOpen, Calendar, Edit2, Save } from 'lucide-react';
 import { type Chapter } from '../data/chapters';
 import { useChapterData } from '../hooks/useChapterData';
 import { useCustomization } from '../customization/CustomizationProvider';
 import { useSubjects } from '../hooks/useSubjects';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface ChapterDetailPanelProps {
   chapter: Chapter;
@@ -15,19 +18,32 @@ interface ChapterDetailPanelProps {
 }
 
 export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetailPanelProps) {
-  const { updateChapterStatus } = useChapterData();
+  const { updateChapterStatus, updateChapterFields } = useChapterData();
   const { settings, draftSettings } = useCustomization();
   const { getSubjectById } = useSubjects();
   const activeSettings = draftSettings || settings;
   
+  const [isEditingLectures, setIsEditingLectures] = useState(false);
+  const [editLecturesValue, setEditLecturesValue] = useState(chapter.totalLectures.toString());
+  
+  const [isEditingTargetHours, setIsEditingTargetHours] = useState(false);
+  const [editTargetHoursValue, setEditTargetHoursValue] = useState(
+    chapter.targetHoursOverride?.toString() || ''
+  );
+  
   const subject = getSubjectById(chapter.subjectId);
-  const targetHours = (chapter.totalLectures * chapter.lectureDuration) / (activeSettings.lectureSpeedFactor * 60);
+  
+  // Calculate target hours: use override if present, otherwise compute
+  const computedTargetHours = (chapter.totalLectures * chapter.lectureDuration) / (activeSettings.lectureSpeedFactor * 60);
+  const effectiveTargetHours = chapter.targetHoursOverride !== undefined 
+    ? chapter.targetHoursOverride 
+    : computedTargetHours;
   
   const calculateDateToFinish = () => {
     if (!activeSettings.autoRecalculateDateToFinish) return null;
     
     const today = new Date();
-    const daysNeeded = Math.ceil(targetHours / activeSettings.dailyTargetHours);
+    const daysNeeded = Math.ceil(effectiveTargetHours / activeSettings.dailyTargetHours);
     const finishDate = new Date(today);
     finishDate.setDate(finishDate.getDate() + daysNeeded);
     
@@ -36,17 +52,43 @@ export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetai
 
   const handleComplete = () => {
     updateChapterStatus(chapter.id, 'Completed');
-    onOpenChange(false);
   };
 
   const handleIncomplete = () => {
     updateChapterStatus(chapter.id, 'Incomplete');
-    onOpenChange(false);
   };
 
   const handleTough = () => {
     updateChapterStatus(chapter.id, 'Tough');
-    onOpenChange(false);
+  };
+
+  const handleSaveLectures = () => {
+    const value = parseInt(editLecturesValue, 10);
+    if (isNaN(value) || value <= 0) {
+      toast.error('Please enter a valid number of lectures');
+      return;
+    }
+    updateChapterFields(chapter.id, { totalLectures: value });
+    setIsEditingLectures(false);
+    toast.success('Total lectures updated');
+  };
+
+  const handleSaveTargetHours = () => {
+    const value = parseFloat(editTargetHoursValue);
+    if (editTargetHoursValue.trim() === '') {
+      // Clear override
+      updateChapterFields(chapter.id, { targetHoursOverride: undefined });
+      setIsEditingTargetHours(false);
+      toast.success('Target hours override cleared');
+      return;
+    }
+    if (isNaN(value) || value <= 0) {
+      toast.error('Please enter a valid number of hours');
+      return;
+    }
+    updateChapterFields(chapter.id, { targetHoursOverride: value });
+    setIsEditingTargetHours(false);
+    toast.success('Target hours override saved');
   };
 
   const dateToFinish = calculateDateToFinish();
@@ -61,20 +103,111 @@ export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetai
         
         <div className="mt-6 space-y-6">
           <div className="space-y-4">
+            {/* Total Lectures */}
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
                 <span className="font-medium">Total Lectures</span>
               </div>
-              <span className="text-2xl font-bold">{chapter.totalLectures}</span>
+              {isEditingLectures ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={editLecturesValue}
+                    onChange={(e) => setEditLecturesValue(e.target.value)}
+                    className="w-20 h-8 text-right"
+                    min="1"
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleSaveLectures}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsEditingLectures(false);
+                      setEditLecturesValue(chapter.totalLectures.toString());
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">{chapter.totalLectures}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditingLectures(true)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
             
+            {/* Target Hours */}
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                <span className="font-medium">Target Hours</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">Target Hours</span>
+                  {chapter.targetHoursOverride !== undefined && (
+                    <span className="text-xs text-muted-foreground">(Override)</span>
+                  )}
+                </div>
               </div>
-              <span className="text-2xl font-bold">{targetHours.toFixed(1)}</span>
+              {isEditingTargetHours ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={editTargetHoursValue}
+                    onChange={(e) => setEditTargetHoursValue(e.target.value)}
+                    placeholder="Auto"
+                    className="w-20 h-8 text-right"
+                    min="0"
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleSaveTargetHours}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsEditingTargetHours(false);
+                      setEditTargetHoursValue(chapter.targetHoursOverride?.toString() || '');
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold">{effectiveTargetHours.toFixed(1)}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditingTargetHours(true)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
             
             {dateToFinish && (
@@ -137,7 +270,10 @@ export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetai
           
           <div className="pt-4 border-t">
             <p className="text-sm text-muted-foreground">
-              Calculation based on {activeSettings.lectureSpeedFactor}x playback speed and {activeSettings.dailyTargetHours}h daily target.
+              {chapter.targetHoursOverride !== undefined 
+                ? 'Using custom target hours override.'
+                : `Calculation based on ${activeSettings.lectureSpeedFactor}x playback speed and ${activeSettings.dailyTargetHours}h daily target.`
+              }
             </p>
           </div>
         </div>

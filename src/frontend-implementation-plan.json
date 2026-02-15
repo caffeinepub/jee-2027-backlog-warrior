@@ -1,140 +1,71 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Editable Dashboard title, Notes page, and Tests tracking with per-test charts",
+  "title": "Per-subject completion graph with animated chapter fill + fix React error #185",
   "requirements": [
     {
-      "id": "REQ-38",
-      "summary": "Make the Dashboard hero heading editable in-place and persist the title in LocalStorage.",
+      "id": "REQ-57",
+      "summary": "Add a per-subject completion graph on each Subject page that visualizes chapter-level completion and animates newly completed chapters with a slow fill.",
       "acceptanceCriteria": [
-        "On the Dashboard (route '/'), the hero heading is no longer hardcoded to \"Friday\".",
-        "The heading can be edited directly on the Dashboard (in-place edit UX) without navigating to another page.",
-        "The edited title persists via LocalStorage and is restored after a refresh/reopen.",
-        "All user-facing text and placeholders used for this edit UI are in English."
+        "On each Subject page, a Subject Completion Graph is displayed above the chapter grid (or another clearly visible location on the page).",
+        "The graph represents all chapters for the current subject and clearly distinguishes Completed vs Not Completed chapters (chapter-level granularity, not only an overall %).",
+        "When a chapter status changes to Completed, the corresponding segment animates from unfilled to filled with a visibly slow fill effect (not an instant jump).",
+        "The graph updates immediately when chapter status changes and reflects persisted LocalStorage state after a reload.",
+        "The graph works for default subjects and user-created subjects (subjectId-based).",
+        "All user-facing labels related to the graph are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useDashboardTitle.ts",
+          "path": "frontend/src/components/SubjectCompletionGraph.tsx",
           "operation": "create",
-          "description": "Create a versioned LocalStorage hook for the Dashboard title (load with validation + save on change), following the robustness pattern used in existing LocalStorage hooks."
+          "description": "Create a SubjectCompletionGraph component that renders a chapter-by-chapter completion visualization for a given subjectId using current chapter data, with per-segment filled/unfilled styling and a slow fill animation when a chapter transitions to Completed (detect transitions via previous-status tracking). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Wire SubjectCompletionGraph into the Subject page UI above the chapter grid (within the Chapters tab), passing subjectId and the subject-scoped chapters so the graph updates immediately on status changes and reflects LocalStorage-backed state after reload. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-58",
+      "summary": "Reproduce and eliminate the production crash (“Minified React error #185”) by capturing the full dev error/stack, fixing the root cause, and ensuring normal navigation/interactions remain stable.",
+      "acceptanceCriteria": [
+        "The app no longer throws “Minified React error #185” in production build during normal navigation and interactions.",
+        "No new React runtime errors are introduced in the browser console related to the fix.",
+        "Subject pages, Dashboard, Customize page, and chapter interactions (including Currently Working controls) remain functional after the fix.",
+        "If the fix requires changing component rendering logic, verify that it does not break LocalStorage persistence behavior for chapters/subjects/settings."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AppErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Add a lightweight React error boundary component to capture runtime crashes and surface a readable fallback in dev/production, preserving the error stack/logging to help reproduce and verify the fix for React error #185. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Wrap the app root with AppErrorBoundary so the full, non-minified error details can be observed in dev (and crashes are contained), supporting reproduction/verification while implementing the underlying fix. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Refactor route component definitions to avoid patterns that can trigger hook order/identity issues under minification (e.g., ensure any hooks used by route components are called in stable, named components rather than ad-hoc inline closures), and implement the identified root-cause fix so error #185 no longer occurs during navigation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Audit and adjust SubjectPage rendering/state patterns implicated by the reproduced stack trace (e.g., ensure stable keys, avoid any conditional hook invocation paths, and keep chapter interaction flows intact) as part of the root-cause fix for React error #185. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Replace the hardcoded hero heading \"Friday\" with an in-place editable title UI backed by useDashboardTitle (e.g., click-to-edit with Input, blur/Enter to save, Escape to cancel). Ensure all labels/placeholders are English."
-        }
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "summary": "Add a Notes page accessible from the left hamburger drawer with LocalStorage-persisted create/view/edit/delete notes.",
-      "acceptanceCriteria": [
-        "A new route (e.g., '/notes') exists and renders a Notes page.",
-        "The hamburger drawer includes a clear navigation entry labeled \"Notes\" that navigates to the Notes page.",
-        "Users can create a note (title optional, body required), edit an existing note, and delete notes.",
-        "Notes are persisted in LocalStorage with versioning (similar robustness to existing LocalStorage hooks) and are restored after reload.",
-        "Notes UI is mobile-first and usable on desktop; all labels are English.",
-        "No backend changes are required for notes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useNotes.ts",
-          "operation": "create",
-          "description": "Implement a versioned LocalStorage notes hook providing CRUD for notes (title optional, body required) and safe migrations/validation similar to existing hooks."
+          "description": "Apply the root-cause fix indicated by the reproduced dev stack trace to Dashboard (commonly: remove any conditional hook invocation, stabilize derived state/memoization inputs, and ensure list rendering uses stable keys) and confirm LocalStorage-backed behavior remains unchanged. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/Notes.tsx",
-          "operation": "create",
-          "description": "Create the Notes page UI (mobile-first): list notes, create note, select/view note, edit note, and delete note using shadcn-ui components composed as-is (e.g., Card, Button, Input, Textarea, ScrollArea). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/pages/Customize.tsx",
           "operation": "modify",
-          "description": "Register a new TanStack Router route for '/notes' that renders the Notes page, ensuring it is reachable via navigation."
-        },
-        {
-          "path": "frontend/src/components/TasksDrawer.tsx",
-          "operation": "modify",
-          "description": "Add a clear drawer navigation entry labeled \"Notes\" that routes to '/notes' while keeping existing Tasks functionality intact. Use existing shadcn-ui Sheet/Select/ScrollArea/Button components as composed (do not edit ui components). Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "summary": "Add a Tests page where users can create/edit/delete tests and score entries, persisted in versioned LocalStorage.",
-      "acceptanceCriteria": [
-        "A new route (e.g., '/tests') exists and renders a Tests page.",
-        "Users can create unlimited tests with fields: test label/name and total marks.",
-        "Within each test, users can add one or more score entries (scored marks; optionally include date/time of entry).",
-        "Users can edit and delete tests and edit/delete individual score entries.",
-        "All test data is persisted in LocalStorage with versioning and restored after reload.",
-        "All user-facing text is in English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useTests.ts",
-          "operation": "create",
-          "description": "Create a versioned LocalStorage hook for Tests data: CRUD for tests (label, total marks) and CRUD for per-test score entries (scored marks + optional timestamp), with validation and migration safety."
-        },
-        {
-          "path": "frontend/src/pages/Tests.tsx",
-          "operation": "create",
-          "description": "Create the Tests page UI to manage unlimited tests and per-test score entries (add/edit/delete), using shadcn-ui components composed as-is (e.g., Card, Button, Input, Select). Ensure all labels/help text are English and layout is mobile-first. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register a new TanStack Router route for '/tests' that renders the Tests page, ensuring it is reachable via navigation."
-        }
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "summary": "Render a per-test customizable progress graph (line/bar + accent color) and persist per-test graph settings in LocalStorage.",
-      "acceptanceCriteria": [
-        "Each test displays a chart of score entries (e.g., score over attempts in entry order, or by date if present).",
-        "The chart has per-test customization controls that change the chart appearance (minimum: line vs bar; and a selectable accent color).",
-        "Graph customization selections persist in LocalStorage as part of the test data and are restored after reload.",
-        "The graph renders correctly on mobile widths without overflowing and remains readable in dark mode.",
-        "All graph-related labels and controls are in English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/TestScoreChart.tsx",
-          "operation": "create",
-          "description": "Create a reusable chart component that renders score history per test using responsive SVG (supporting line and bar modes) and accepts an accent color prop; ensure it is readable in dark mode and does not overflow on mobile. Use existing Tailwind theme tokens where possible."
-        },
-        {
-          "path": "frontend/src/hooks/useTests.ts",
-          "operation": "modify",
-          "description": "Extend the Tests LocalStorage model to include per-test chart settings (at minimum chart type and accent color), ensure these settings are versioned/persisted and restored on load."
-        },
-        {
-          "path": "frontend/src/pages/Tests.tsx",
-          "operation": "modify",
-          "description": "Wire TestScoreChart into each test section and add per-test customization controls (minimum: line vs bar selector + accent color picker/selector). Ensure controls update persisted test data and all labels are English. Use shadcn-ui components composed as-is where applicable. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "summary": "Add navigation entry points to Tests in both bottom navigation and the hamburger drawer, with active route highlighting consistent with existing behavior.",
-      "acceptanceCriteria": [
-        "Bottom navigation includes a \"Tests\" item that routes to the Tests page.",
-        "Hamburger drawer includes a \"Tests\" navigation entry.",
-        "Navigation highlights the active route consistently with existing nav behavior.",
-        "No existing routes (/ , /math, /physics, /chemistry, /calendar, /customize) are broken."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/BottomNavigation.tsx",
-          "operation": "modify",
-          "description": "Add a \"Tests\" item to the bottom navigation that routes to '/tests' and highlights as active when on that route, matching existing styling/behavior. Use existing shadcn-ui Button and current nav patterns as composed. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/TasksDrawer.tsx",
-          "operation": "modify",
-          "description": "Add a drawer navigation entry labeled \"Tests\" routing to '/tests', and ensure active-route behavior remains consistent with the rest of the app navigation. Use existing shadcn-ui components as composed (do not edit ui components). Verify the component's usage instructions before implementing."
+          "description": "Apply the root-cause fix indicated by the reproduced dev stack trace to Customize (commonly: remove any conditional hook invocation and stabilize component rendering logic) and confirm settings/subjects persistence remains unchanged. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -3,111 +3,98 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --radius: 0.5rem;
-        --background: 0.98 0 0;
-        --foreground: 0.15 0 0;
-        --card: 1 0 0;
-        --card-foreground: 0.15 0 0;
-        --popover: 1 0 0;
-        --popover-foreground: 0.15 0 0;
-        --primary: 0.45 0.18 265;
-        --primary-foreground: 0.98 0 0;
-        --secondary: 0.92 0.02 265;
-        --secondary-foreground: 0.15 0 0;
-        --muted: 0.94 0.01 265;
-        --muted-foreground: 0.50 0.02 265;
-        --accent: 0.92 0.02 265;
-        --accent-foreground: 0.15 0 0;
-        --destructive: 0.55 0.22 25;
-        --destructive-foreground: 0.98 0 0;
-        --border: 0.88 0.01 265;
-        --input: 0.88 0.01 265;
-        --ring: 0.45 0.18 265;
-        --chart-1: 0.60 0.20 265;
-        --chart-2: 0.55 0.18 180;
-        --chart-3: 0.65 0.16 340;
-        --chart-4: 0.70 0.20 45;
-        --chart-5: 0.50 0.22 150;
-    }
+  :root {
+    --background: oklch(100% 0 0);
+    --foreground: oklch(15% 0 0);
+    --card: oklch(100% 0 0);
+    --card-foreground: oklch(15% 0 0);
+    --popover: oklch(100% 0 0);
+    --popover-foreground: oklch(15% 0 0);
+    --primary: oklch(55% 0.18 280);
+    --primary-foreground: oklch(100% 0 0);
+    --secondary: oklch(95% 0.01 280);
+    --secondary-foreground: oklch(15% 0 0);
+    --muted: oklch(95% 0.01 280);
+    --muted-foreground: oklch(45% 0.01 280);
+    --accent: oklch(95% 0.01 280);
+    --accent-foreground: oklch(15% 0 0);
+    --destructive: oklch(55% 0.22 25);
+    --destructive-foreground: oklch(100% 0 0);
+    --border: oklch(90% 0.01 280);
+    --input: oklch(90% 0.01 280);
+    --ring: oklch(55% 0.18 280);
+    --radius: 0.5rem;
+    --success: oklch(60% 0.15 145);
+    --success-foreground: oklch(100% 0 0);
+    --warning: oklch(70% 0.15 85);
+    --warning-foreground: oklch(15% 0 0);
+  }
 
-    .dark {
-        --background: 0.12 0.02 265;
-        --foreground: 0.95 0.01 265;
-        --card: 0.16 0.02 265;
-        --card-foreground: 0.95 0.01 265;
-        --popover: 0.14 0.02 265;
-        --popover-foreground: 0.95 0.01 265;
-        --primary: 0.65 0.20 265;
-        --primary-foreground: 0.12 0.02 265;
-        --secondary: 0.22 0.03 265;
-        --secondary-foreground: 0.95 0.01 265;
-        --muted: 0.22 0.03 265;
-        --muted-foreground: 0.65 0.03 265;
-        --accent: 0.28 0.04 265;
-        --accent-foreground: 0.95 0.01 265;
-        --destructive: 0.60 0.24 25;
-        --destructive-foreground: 0.12 0.02 265;
-        --border: 0.25 0.03 265;
-        --input: 0.25 0.03 265;
-        --ring: 0.65 0.20 265;
-        --chart-1: 0.65 0.22 265;
-        --chart-2: 0.60 0.20 180;
-        --chart-3: 0.70 0.18 340;
-        --chart-4: 0.75 0.22 45;
-        --chart-5: 0.55 0.24 150;
-    }
-
-    * {
-        @apply border-border;
-    }
-    
-    html, body {
-        @apply bg-background text-foreground;
-        font-feature-settings: "rlig" 1, "calt" 1;
-        overflow-x: hidden;
-        max-width: 100vw;
-    }
-    
-    body {
-        min-height: 100vh;
-        min-height: 100dvh;
-    }
+  .dark {
+    --background: oklch(15% 0.01 280);
+    --foreground: oklch(98% 0 0);
+    --card: oklch(18% 0.01 280);
+    --card-foreground: oklch(98% 0 0);
+    --popover: oklch(18% 0.01 280);
+    --popover-foreground: oklch(98% 0 0);
+    --primary: oklch(65% 0.20 280);
+    --primary-foreground: oklch(15% 0 0);
+    --secondary: oklch(25% 0.02 280);
+    --secondary-foreground: oklch(98% 0 0);
+    --muted: oklch(25% 0.02 280);
+    --muted-foreground: oklch(65% 0.02 280);
+    --accent: oklch(25% 0.02 280);
+    --accent-foreground: oklch(98% 0 0);
+    --destructive: oklch(55% 0.22 25);
+    --destructive-foreground: oklch(98% 0 0);
+    --border: oklch(25% 0.02 280);
+    --input: oklch(25% 0.02 280);
+    --ring: oklch(65% 0.20 280);
+    --success: oklch(60% 0.15 145);
+    --success-foreground: oklch(98% 0 0);
+    --warning: oklch(70% 0.15 85);
+    --warning-foreground: oklch(15% 0 0);
+  }
 }
 
-@layer utilities {
-    .container {
-        @apply mx-auto px-4;
-        max-width: 100%;
-    }
-    
-    @media (min-width: 640px) {
-        .container {
-            max-width: 640px;
-        }
-    }
-    
-    @media (min-width: 768px) {
-        .container {
-            max-width: 768px;
-        }
-    }
-    
-    @media (min-width: 1024px) {
-        .container {
-            max-width: 1024px;
-        }
-    }
-    
-    @media (min-width: 1280px) {
-        .container {
-            max-width: 1280px;
-        }
-    }
-    
-    @media (min-width: 1536px) {
-        .container {
-            max-width: 1536px;
-        }
-    }
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  html {
+    overflow-x: hidden;
+  }
+}
+
+/* Horizontal scroll container for touch-enabled swipe gestures */
+.horizontal-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animation for slow fill effect on newly completed chapters */
+@keyframes fill-slow {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fill-slow {
+  animation: fill-slow 2s ease-out;
 }

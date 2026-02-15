@@ -1,86 +1,46 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T16:49:15.088Z",
+  "generatedAt": "2026-02-15T17:55:59.536Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-38",
-        "summary": "Replace the hardcoded Dashboard hero heading text \"Friday\" with an in-place, user-editable title on the Dashboard page, and persist the title in LocalStorage so it is restored on reload.",
+        "id": "REQ-57",
+        "summary": "Add a Subject Completion Graph to every Subject page (Mathematics/Physics/Chemistry and any user-created subjects) that visualizes chapter-by-chapter completion for that subject, and animate each chapter’s segment to fill slowly when the chapter becomes Completed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useDashboardTitle.ts",
-          "frontend/src/pages/Dashboard.tsx"
+          "frontend/src/components/SubjectCompletionGraph.tsx",
+          "frontend/src/pages/SubjectPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useDashboardTitle.ts",
-          "frontend/src/pages/Dashboard.tsx"
+          "frontend/src/components/SubjectCompletionGraph.tsx",
+          "frontend/src/pages/SubjectPage.tsx"
         ]
       },
       {
-        "id": "REQ-39",
-        "summary": "Add a new \"Notes\" option accessible from the app menu (the left-side hamburger drawer) that opens a dedicated Notes page implementing a basic phone-notes style experience: create, view, edit, delete notes; persist all notes in LocalStorage.",
+        "id": "REQ-58",
+        "summary": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage (including navigating between pages and interacting with chapters/settings).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useNotes.ts",
-          "frontend/src/pages/Notes.tsx",
+          "frontend/src/components/AppErrorBoundary.tsx",
+          "frontend/src/main.tsx",
           "frontend/src/App.tsx",
-          "frontend/src/components/TasksDrawer.tsx"
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Customize.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useNotes.ts",
-          "frontend/src/pages/Notes.tsx",
+          "frontend/src/components/AppErrorBoundary.tsx",
           "frontend/src/App.tsx",
-          "frontend/src/components/TasksDrawer.tsx"
-        ]
-      },
-      {
-        "id": "REQ-40",
-        "summary": "Add a new \"Tests\" area as a dedicated dashboard page where the user can manage unlimited tests: create tests with a customizable label/name, configurable total marks, and record scored marks entries; persist all test data in LocalStorage.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useTests.ts",
-          "frontend/src/pages/Tests.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useTests.ts",
-          "frontend/src/pages/Tests.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-41",
-        "summary": "For each test on the Tests page, display a customizable graph similar to common NTA-style test progress charts, with user controls to adjust the graph appearance (at minimum: chart type line vs bar, and an accent color).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/TestScoreChart.tsx",
-          "frontend/src/hooks/useTests.ts",
-          "frontend/src/pages/Tests.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/TestScoreChart.tsx",
-          "frontend/src/hooks/useTests.ts",
-          "frontend/src/pages/Tests.tsx"
-        ]
-      },
-      {
-        "id": "REQ-42",
-        "summary": "Update navigation so \"Tests\" is easily accessible on mobile and desktop: add a clear entry point in the bottom navigation and in the hamburger drawer, consistent with existing styling.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/BottomNavigation.tsx",
-          "frontend/src/components/TasksDrawer.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/BottomNavigation.tsx",
-          "frontend/src/components/TasksDrawer.tsx"
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Customize.tsx"
         ]
       }
     ]
@@ -91,15 +51,12 @@
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/components/BottomNavigation.tsx",
-    "frontend/src/components/TasksDrawer.tsx",
-    "frontend/src/components/TestScoreChart.tsx",
-    "frontend/src/hooks/useDashboardTitle.ts",
-    "frontend/src/hooks/useNotes.ts",
-    "frontend/src/hooks/useTests.ts",
+    "frontend/src/components/AppErrorBoundary.tsx",
+    "frontend/src/components/SubjectCompletionGraph.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Customize.tsx",
     "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/pages/Notes.tsx",
-    "frontend/src/pages/Tests.tsx",
+    "frontend/src/pages/SubjectPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

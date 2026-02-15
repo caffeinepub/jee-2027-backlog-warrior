@@ -1,40 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T16:49:15.083Z",
-  "summary": "Most requested features appear implemented: editable/persisted Dashboard title, new Notes page with LocalStorage persistence, new Tests page with LocalStorage persistence and per-test charts plus chart settings, and a Tests entry in bottom navigation. One key navigation requirement is not clearly implemented: adding a \"Tests\" entry in the hamburger drawer/menu (only \"Notes\" is evidenced).",
+  "generatedAt": "2026-02-15T17:55:59.532Z",
+  "summary": "REQ-57 appears implemented by adding a new SubjectCompletionGraph component and rendering it on SubjectPage above the chapter grid, including a slow-fill animation class for newly completed chapters. REQ-58 appears addressed by changing TanStack Router route components to stable named components to avoid hook-order/runtime issues commonly associated with Minified React error #185. However, the diff also introduces an unrequested purple-themed primary color palette in index.css, which conflicts with the BuildRequest constraint to not introduce a blue/purple theme.",
   "missing_requirements": [
     {
-      "id": "REQ-42",
-      "requirement": "Hamburger drawer includes a \"Tests\" navigation entry that routes to the Tests page.",
-      "reason": "The modified hamburger drawer component (TasksDrawer) shows a navigation link for \"Notes\" but no visible \"Tests\" button/link in the provided diff snippet; only a handler function exists.",
+      "id": "REQ-58",
+      "requirement": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage.",
+      "reason": "While App.tsx mentions avoiding hook order issues via stable component definitions, the diff summary provides no evidence of the required reproduction step (capturing the full dev error/stack) or explicit root-cause documentation tied to #185 beyond the inline comment. The added AppErrorBoundary is not shown as wired into the app to help capture/confirm the full error either.",
       "evidence": [
-        "frontend/src/components/TasksDrawer.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/AppErrorBoundary.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Live countdown timer on Dashboard updating every second (and additional derived UI data like \"tomorrow\" day/date).",
-      "reason": "REQ-38 only requests making the Dashboard hero heading editable and persisted; a live countdown update loop and extra date calculations are not part of the requested changes.",
+      "description": "Changed the app’s core theme color variables to a purple hue (e.g., --primary with hue ~280) including corresponding secondary/muted/accent/ring values.",
+      "reason": "Not requested by REQ-57 or REQ-58, and it conflicts with the constraint: “Keep the existing dark-mode theme direction and do not introduce a blue/purple theme.”",
       "evidence": [
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "description": "Added a new AppErrorBoundary component with a full-page error UI (card, stack trace, reset/reload actions).",
+      "reason": "Not explicitly requested by REQ-57 or REQ-58; the diff summary does not show it being integrated into App.tsx, so it may be extraneous or incomplete relative to the stated goal.",
+      "evidence": [
+        "frontend/src/components/AppErrorBoundary.tsx",
+        "frontend/src/App.tsx"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/BottomNavigation.tsx",
-    "frontend/src/components/TasksDrawer.tsx",
-    "frontend/src/components/TestScoreChart.tsx",
-    "frontend/src/hooks/useDashboardTitle.ts",
-    "frontend/src/hooks/useNotes.ts",
-    "frontend/src/hooks/useTests.ts",
+    "frontend/src/components/AppErrorBoundary.tsx",
+    "frontend/src/components/SubjectCompletionGraph.tsx",
+    "frontend/src/index.css",
+    "frontend/src/pages/Customize.tsx",
     "frontend/src/pages/Dashboard.tsx",
-    "frontend/src/pages/Notes.tsx",
-    "frontend/src/pages/Tests.tsx",
+    "frontend/src/pages/SubjectPage.tsx",
     "project_state.json"
   ]
 }

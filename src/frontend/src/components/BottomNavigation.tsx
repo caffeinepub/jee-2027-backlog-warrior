@@ -2,7 +2,6 @@ import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Button } from './ui/button';
 import { Calculator, Atom, FlaskConical, Palette, BookOpen, Home, CalendarDays, Trophy } from 'lucide-react';
 import { useSubjects } from '../hooks/useSubjects';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
 
 const SUBJECT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'mathematics': Calculator,
@@ -31,24 +30,24 @@ export function BottomNavigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <div className="container flex items-center h-16 px-2">
-        {/* Home Button */}
-        <div className="border-r border-border pr-2 mr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate({ to: '/' })}
-            className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-              currentPath === '/' ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
-            <Home className="h-5 w-5" />
-            <span className="text-xs font-medium">Home</span>
-          </Button>
-        </div>
+      <div className="w-full h-16 px-2">
+        {/* Single Horizontally Scrollable Container */}
+        <div className="horizontal-scroll-container overflow-x-auto overflow-y-hidden h-full">
+          <div className="flex items-center gap-1 h-full px-1">
+            {/* Home Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/' })}
+              className={`flex flex-col items-center gap-1 h-auto py-2 px-3 flex-shrink-0 ${
+                currentPath === '/' ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <Home className="h-5 w-5" />
+              <span className="text-xs font-medium">Home</span>
+            </Button>
 
-        <ScrollArea className="flex-1">
-          <div className="flex items-center gap-1 px-1">
+            {/* Subject Icons */}
             {subjects.map((subject) => {
               const Icon = SUBJECT_ICONS[subject.id] || BookOpen;
               const isActive = isSubjectActive(subject.id);
@@ -69,44 +68,46 @@ export function BottomNavigation() {
                 </Button>
               );
             })}
+
+            {/* Calendar Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/calendar' })}
+              className={`flex flex-col items-center gap-1 h-auto py-2 px-3 flex-shrink-0 ${
+                currentPath === '/calendar' ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <CalendarDays className="h-5 w-5" />
+              <span className="text-xs font-medium">Calendar</span>
+            </Button>
+
+            {/* Tests Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/tests' })}
+              className={`flex flex-col items-center gap-1 h-auto py-2 px-3 flex-shrink-0 ${
+                currentPath === '/tests' ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <Trophy className="h-5 w-5" />
+              <span className="text-xs font-medium">Tests</span>
+            </Button>
+
+            {/* Customize Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/customize' })}
+              className={`flex flex-col items-center gap-1 h-auto py-2 px-3 flex-shrink-0 ${
+                currentPath === '/customize' ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <Palette className="h-5 w-5" />
+              <span className="text-xs font-medium">Customize</span>
+            </Button>
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-        
-        <div className="border-l border-border pl-2 ml-2 flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate({ to: '/calendar' })}
-            className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-              currentPath === '/calendar' ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
-            <CalendarDays className="h-5 w-5" />
-            <span className="text-xs font-medium">Calendar</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate({ to: '/tests' })}
-            className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-              currentPath === '/tests' ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
-            <Trophy className="h-5 w-5" />
-            <span className="text-xs font-medium">Tests</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate({ to: '/customize' })}
-            className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-              currentPath === '/customize' ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
-            <Palette className="h-5 w-5" />
-            <span className="text-xs font-medium">Customize</span>
-          </Button>
         </div>
       </div>
     </nav>

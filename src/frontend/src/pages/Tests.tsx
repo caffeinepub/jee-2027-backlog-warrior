@@ -7,6 +7,7 @@ import { useTests, Test } from '../hooks/useTests';
 import { Plus, Trash2, Edit2, Save, X, Trophy, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { TestScoreChart } from '../components/TestScoreChart';
+import { OverallPerformanceTrendChart } from '../components/OverallPerformanceTrendChart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 const CHART_COLORS = [
@@ -153,6 +154,11 @@ export function Tests() {
             New Test
           </Button>
         </div>
+
+        {/* Overall Performance Trend Chart */}
+        {tests.length > 0 && tests.some(t => t.scores.length > 0) && (
+          <OverallPerformanceTrendChart tests={tests} />
+        )}
 
         {/* Create Test Form */}
         {isCreatingTest && (
@@ -414,7 +420,7 @@ export function Tests() {
                                         </Button>
                                         <Button
                                           size="sm"
-                                          variant="outline"
+                                          variant="destructive"
                                           onClick={() => {
                                             deleteScore(test.id, score.id);
                                             toast.success('Score deleted');

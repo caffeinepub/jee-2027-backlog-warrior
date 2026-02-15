@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -34,34 +34,34 @@ export function Customize() {
 
   const sampleChapters = useMemo(() => chapters.slice(0, 3), [chapters]);
 
-  const handleDraftChange = (updates: Partial<CustomizationSettings>) => {
+  const handleDraftChange = useCallback((updates: Partial<CustomizationSettings>) => {
     setDraftSettings(prev => ({ ...prev, ...updates }));
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     updateSettings(draftSettings);
     setHasUnsavedChanges(false);
-  };
+  }, [draftSettings, updateSettings]);
 
-  const handleDiscard = () => {
+  const handleDiscard = useCallback(() => {
     setDraftSettings(globalSettings);
     setHasUnsavedChanges(false);
-  };
+  }, [globalSettings]);
 
-  const handleSavePreset = () => {
+  const handleSavePreset = useCallback(() => {
     if (presetName.trim()) {
       savePreset(presetName.trim(), draftSettings);
       setPresetName('');
     }
-  };
+  }, [presetName, draftSettings, savePreset]);
 
-  const handleApplyPreset = (preset: CustomizationSettings) => {
+  const handleApplyPreset = useCallback((preset: CustomizationSettings) => {
     setDraftSettings(preset);
     setHasUnsavedChanges(true);
-  };
+  }, []);
 
-  const handleAddSubject = (e: React.FormEvent) => {
+  const handleAddSubject = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (newSubjectName.trim()) {
       const success = addSubject(newSubjectName.trim());
@@ -72,7 +72,7 @@ export function Customize() {
         toast.error('Failed to add subject. It may already exist.');
       }
     }
-  };
+  }, [newSubjectName, addSubject]);
 
   return (
     <div className="min-h-screen bg-background">

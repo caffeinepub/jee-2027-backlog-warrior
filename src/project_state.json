@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 35,
   "summary": "Build \"11\" — a responsive dark-mode React + Tailwind web app to track JEE study backlog across Math/Physics/Chem chapters with progress tracking, scheduling calculations, to-dos, resources, health alerts, an advanced in-app customization/settings panel, and a new per-chapter \"Currently Working\" mode with a running timer displayed/notified on the Home screen; persisted in LocalStorage with a July 31, 2026 deadline countdown.",
   "architectural_notes": [
     "Frontend: React.js + Tailwind CSS.",
@@ -16,9 +16,16 @@
   ],
   "known_issues": [
     "Deployment/build process encountered an error (\"Unable to complete deployment\").",
-    "Runtime error: \"useCustomization must be used within CustomizationProvider\" (hook used outside provider / provider not mounted around component tree)."
+    "Runtime error: \"useCustomization must be used within CustomizationProvider\" (hook used outside provider / provider not mounted around component tree).",
+    "Bug: user cannot horizontally scroll the bottom icons/navigation (horizontal icon row not scrollable).",
+    "\"Currently Working\" controls are missing under some/all chapters: pause/resume and ability to record/delete working hours per chapter not deployed everywhere.",
+    "On mobile, horizontal scrolling currently applies only to Math/Physics/Chemistry icons; user wants all navigation options/icons to be horizontally scrollable.",
+    "Tests graphs need improvement; missing an overall/main performance trend graph on the Tests dashboard.",
+    "Cannot customize/edit chapter Total Lectures and Target Hours directly under the chapter UI (in-place editing not working/available).",
+    "Completed chapters are not clearly recorded/indicated visually as fully completed (user expects full green chapter card when marked Completed).",
+    "Runtime error occurring in production: \"Minified React error #185\" (needs debugging with non-minified/dev build to identify root cause)."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-the-core-data-model-and-seed-dataset-for-the-jee-backlog-tracker-with-three-subjects-mathematics-physics-chemistry-each-chapter-must-include-id-name-totallectures-lectureduration-default-average-90-minutes-status-not-started-incomplete-tough-completed-and-subject-prepopulate-the-chapter-lists-exactly-as-provided-by-the-user-math-24-physics-20-chemistry-22",
@@ -355,6 +362,134 @@
         "REQ-42"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-make-the-bottom-navigation-s-subject-icon-row-horizontally-scrollable-on-touch-devices-and-trackpads-so-users-can-swipe-scroll-left-right-to-reach-all-subject-icons-when-there-are-more-subjects-than-available-width",
+      "title": "Make the bottom navigation’s subject icon row horizontally scrollable on touch devices and trackpads so users can swipe/scroll left-right to reach all subject icons when there are more subjects than available width.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-bottomnavigation-implementation-to-avoid-relying-on-the-read-only-shadcn-scrollarea-scrollbar-behavior-for-horizontal-scrolling-implement-the-subject-icon-row-with-standard-horizontal-overflow-e-g-an-overflow-x-auto-container-and-appropriate-touch-scrolling-behavior",
+      "title": "Update the BottomNavigation implementation to avoid relying on the read-only shadcn ScrollArea/ScrollBar behavior for horizontal scrolling; implement the subject icon row with standard horizontal overflow (e.g., an overflow-x-auto container) and appropriate touch scrolling behavior.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-per-chapter-currently-working-controls-so-that-every-chaptercard-in-the-subject-chapters-grid-supports-a-pausing-resuming-the-working-timer-and-b-recording-editing-and-deleting-logged-working-time-entries-for-that-chapter-ensure-these-controls-are-visible-accessible-under-every-chapter-card-not-only-in-some-cases-and-that-all-data-persists-in-localstorage-and-survives-reloads",
+      "title": "Enhance the per-chapter \"Currently Working\" controls so that every ChapterCard in the Subject chapters grid supports: (a) pausing/resuming the working timer, and (b) recording, editing, and deleting logged working-time entries for that chapter. Ensure these controls are visible/accessible under every chapter card (not only in some cases) and that all data persists in LocalStorage and survives reloads.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-mobile-bottom-navigation-so-that-all-navigation-options-icons-including-home-all-subjects-calendar-tests-and-customize-are-reachable-via-a-single-horizontal-scroll-swipe-interaction-on-mobile-not-just-the-math-physics-chemistry-subject-icons",
+      "title": "Update the mobile bottom navigation so that all navigation options/icons (including Home, all Subjects, Calendar, Tests, and Customize) are reachable via a single horizontal scroll/swipe interaction on mobile, not just the Math/Physics/Chemistry subject icons.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-tests-charts-ui-and-add-a-main-overall-performance-graph-at-the-top-of-the-tests-page-that-indicates-whether-the-user-s-performance-is-increasing-or-decreasing-over-time-across-all-tests-combined",
+      "title": "Improve the Tests charts UI and add a main/overall performance graph at the top of the Tests page that indicates whether the user’s performance is increasing or decreasing over time across all tests combined.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-tests-page-charts-for-readability-and-visual-quality-including-both-the-per-test-chart-and-the-overall-main-performance-chart-at-the-top-of-the-tests-page",
+      "title": "Improve the Tests page charts for readability and visual quality, including both the per-test chart and the overall/main performance chart at the top of the Tests page.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-dashboard-days-remaining-card-remove-the-tomorrow-upcoming-day-display-and-replace-it-with-a-today-display-showing-the-current-day-of-week-and-current-date-local-time",
+      "title": "On the Dashboard \"Days Remaining\" card, remove the \"Tomorrow\" (upcoming day) display and replace it with a \"Today\" display showing the current day-of-week and current date (local time).",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-day-to-day-24-hour-countdown-timer-on-the-dashboard-that-counts-down-to-the-end-of-the-current-day-local-midnight-and-resets-automatically-at-the-day-boundary",
+      "title": "Add a day-to-day 24-hour countdown timer on the Dashboard that counts down to the end of the current day (local midnight) and resets automatically at the day boundary.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-in-app-feedback-request-changes-flow-that-lets-the-user-write-what-changes-they-want-save-the-request-locally-and-view-past-requests-later",
+      "title": "Add an in-app \"Feedback\" / \"Request changes\" flow that lets the user write what changes they want, save the request locally, and view past requests later.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-in-place-editing-controls-under-each-chapter-in-the-chapter-detail-panel-and-or-directly-on-the-chapter-card-that-allow-the-user-to-change-a-the-chapter-s-total-lectures-value-and-b-the-chapter-s-target-hours-value-without-requiring-changes-in-global-settings",
+      "title": "Add in-place editing controls under each chapter (in the Chapter Detail panel and/or directly on the Chapter Card) that allow the user to change (a) the chapter’s Total Lectures value and (b) the chapter’s Target Hours value, without requiring changes in global settings.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-chapter-data-model-and-persistence-to-support-a-per-chapter-target-hours-override-including-backward-compatible-localstorage-migration-for-existing-saved-chapter-data",
+      "title": "Extend the chapter data model and persistence to support a per-chapter Target Hours override, including backward-compatible LocalStorage migration for existing saved chapter data.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-chapter-updates-made-in-the-chapter-detail-panel-status-total-lectures-target-hours-override-update-the-currently-open-panel-view-and-the-underlying-chapter-list-immediately-without-requiring-the-user-to-close-reopen-the-panel",
+      "title": "Ensure chapter updates made in the Chapter Detail panel (status, Total Lectures, Target Hours override) update the currently open panel view and the underlying chapter list immediately, without requiring the user to close/reopen the panel.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-a-chapter-is-marked-as-completed-visually-indicate-completion-by-rendering-the-entire-chaptercard-with-a-clearly-fully-green-completed-style-background-border-overall-visual-treatment-not-only-a-green-badge",
+      "title": "When a chapter is marked as Completed, visually indicate completion by rendering the entire ChapterCard with a clearly “fully green” completed style (background + border + overall visual treatment), not only a green badge.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-home-dashboard-route-add-a-new-section-that-lists-every-chapter-grouped-by-subject-including-user-created-subjects-and-clearly-indicates-for-each-chapter-whether-it-is-completed-or-not-completed",
+      "title": "On the Home Dashboard (route '/'), add a new section that lists every chapter grouped by subject (including user-created subjects), and clearly indicates for each chapter whether it is Completed or Not Completed.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-subject-completion-graph-to-every-subject-page-mathematics-physics-chemistry-and-any-user-created-subjects-that-visualizes-chapter-by-chapter-completion-for-that-subject-and-animate-each-chapter-s-segment-to-fill-slowly-when-the-chapter-becomes-completed",
+      "title": "Add a Subject Completion Graph to every Subject page (Mathematics/Physics/Chemistry and any user-created subjects) that visualizes chapter-by-chapter completion for that subject, and animate each chapter’s segment to fill slowly when the chapter becomes Completed.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-production-runtime-crash-showing-minified-react-error-185-by-reproducing-it-in-a-non-minified-dev-environment-to-obtain-the-full-error-message-stack-identifying-the-root-cause-and-implementing-a-code-fix-so-the-error-no-longer-occurs-during-normal-app-usage-including-navigating-between-pages-and-interacting-with-chapters-settings",
+      "title": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage (including navigating between pages and interacting with chapters/settings).",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -511,6 +646,54 @@
     {
       "id": "AR-27",
       "summary": "Add a Dashboard section/page called \"Tests\" where the user can create unlimited test entries with customizable test label/name, total marks, and scored marks; show a per-test customizable graph similar to NTA test apps",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Add per-chapter \"Currently Working\" controls under every chapter: pause/resume, and ability to record/edit/delete logged working hours for that chapter (with persistence)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Update mobile navigation so ALL bottom-nav options/icons (not just Math/Physics/Chemistry) can be horizontally scrolled/swiped to access every item",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Improve Tests graphs and add a main/overall Tests dashboard graph that shows performance trend over time (increasing vs decreasing) across tests",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Update Dashboard countdown area: remove the \"Tomorrow\"/upcoming day display and instead show the current day-of-week + current date; add a daily 24-hour countdown timer that resets every day (ends at day boundary)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Allow in-place editing/customization of per-chapter Total Lectures and Target Hours directly under the chapter (chapter card/detail), with changes persisted and used in calculations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "When a chapter is marked Completed, visually indicate completion by rendering the entire chapter card in a full green style (clear completed state)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Show/record all chapters on the Home Dashboard grouped subject-wise (Math/Physics/Chem/any custom subjects) with clear indication of whether each chapter is Completed or Not Completed",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add a subject-wise completion graph on all Subject pages; when a chapter is completed, its portion should fill with a slow/animated progress effect",
       "reqIds": [],
       "status": "pending"
     }

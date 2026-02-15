@@ -2,14 +2,15 @@ import { useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
 import { Button } from '../components/ui/button';
-import { Calendar, Clock, TrendingUp, Plus, Timer, Square, Edit2, Check, X } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, Plus, Timer, Square, Edit2, Check, X, Pause, Play } from 'lucide-react';
 import { useChapterData } from '../hooks/useChapterData';
 import { useStudyLog } from '../hooks/useStudyLog';
 import { useSubjects } from '../hooks/useSubjects';
 import { useCurrentlyWorkingChapters } from '../hooks/useCurrentlyWorkingChapters';
 import { useDashboardNote } from '../hooks/useDashboardNote';
 import { useDashboardTitle } from '../hooks/useDashboardTitle';
-import { useMemo, useState, useEffect } from 'react';
+import { AllChaptersBySubjectSection } from '../components/AllChaptersBySubjectSection';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { toast } from 'sonner';
@@ -33,7 +34,7 @@ export function Dashboard() {
   const { chapters } = useChapterData();
   const { getTodayHours } = useStudyLog();
   const { subjects, addSubject } = useSubjects();
-  const { getActiveChapters, stopWorking } = useCurrentlyWorkingChapters();
+  const { getActiveChapters, stopWorking, pauseWorking, startWorking } = useCurrentlyWorkingChapters();
   const { note, setNote } = useDashboardNote();
   const { title, setTitle } = useDashboardTitle();
   const [newSubjectName, setNewSubjectName] = useState('');
@@ -49,6 +50,11 @@ export function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // Sync editedTitle when title changes externally
+  useEffect(() => {
+    setEditedTitle(title);
+  }, [title]);
+
   const stats = useMemo(() => {
     const total = chapters.length;
     const completed = chapters.filter(ch => ch.status === 'Completed').length;
@@ -58,18 +64,24 @@ export function Dashboard() {
     const today = new Date();
     const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
-    // Calculate time remaining for live countdown
+    // Calculate time remaining for live countdown to July 31, 2026
     const timeRemaining = targetDate.getTime() - currentTime.getTime();
     const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
     
-    // Calculate tomorrow's date
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowDayName = tomorrow.toLocaleDateString('en-US', { weekday: 'long' });
-    const tomorrowDate = tomorrow.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    // Calculate today's day name and date
+    const todayDayName = currentTime.toLocaleDateString('en-US', { weekday: 'long' });
+    const todayDate = currentTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    
+    // Calculate time remaining until midnight (daily timer)
+    const midnight = new Date(currentTime);
+    midnight.setHours(24, 0, 0, 0);
+    const timeUntilMidnight = midnight.getTime() - currentTime.getTime();
+    const dailyHours = Math.floor(timeUntilMidnight / (1000 * 60 * 60));
+    const dailyMinutes = Math.floor((timeUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
+    const dailySeconds = Math.floor((timeUntilMidnight % (1000 * 60)) / 1000);
     
     const todayHours = getTodayHours();
     
@@ -80,7 +92,8 @@ export function Dashboard() {
       completed, 
       total,
       countdown: { days, hours, minutes, seconds },
-      tomorrow: { dayName: tomorrowDayName, date: tomorrowDate }
+      today: { dayName: todayDayName, date: todayDate },
+      dailyTimer: { hours: dailyHours, minutes: dailyMinutes, seconds: dailySeconds }
     };
   }, [chapters, getTodayHours, currentTime]);
 
@@ -95,7 +108,7 @@ export function Dashboard() {
     });
   }, [activeChapters, chapters]);
 
-  const handleAddSubject = (e: React.FormEvent) => {
+  const handleAddSubject = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (newSubjectName.trim()) {
       const success = addSubject(newSubjectName.trim());
@@ -106,9 +119,9 @@ export function Dashboard() {
         toast.error('Failed to add subject. It may already exist.');
       }
     }
-  };
+  }, [newSubjectName, addSubject]);
 
-  const handleSaveTitle = () => {
+  const handleSaveTitle = useCallback(() => {
     if (editedTitle.trim()) {
       setTitle(editedTitle.trim());
       setIsEditingTitle(false);
@@ -116,20 +129,20 @@ export function Dashboard() {
       setEditedTitle(title);
       setIsEditingTitle(false);
     }
-  };
+  }, [editedTitle, title, setTitle]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditedTitle(title);
     setIsEditingTitle(false);
-  };
+  }, [title]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSaveTitle();
     } else if (e.key === 'Escape') {
       handleCancelEdit();
     }
-  };
+  }, [handleSaveTitle, handleCancelEdit]);
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -180,44 +193,58 @@ export function Dashboard() {
             Days Remaining
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="text-center">
             <div className="text-5xl sm:text-6xl font-bold text-primary mb-2">{stats.daysRemaining}</div>
             <p className="text-sm sm:text-base text-muted-foreground">Until July 31, 2026</p>
           </div>
           
-          {/* Live Countdown Timer */}
-          <div className="border-t border-border pt-4">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <Timer className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Live Countdown</span>
-            </div>
-            <div className="grid grid-cols-4 gap-2 sm:gap-4">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.countdown.days}</div>
+          {/* Live Countdown to July 31, 2026 */}
+          <div>
+            <p className="text-xs text-muted-foreground text-center mb-2">Time Remaining Until Exam</p>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.days}</div>
                 <div className="text-xs text-muted-foreground">Days</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.countdown.hours}</div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.hours}</div>
                 <div className="text-xs text-muted-foreground">Hours</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.countdown.minutes}</div>
-                <div className="text-xs text-muted-foreground">Minutes</div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.minutes}</div>
+                <div className="text-xs text-muted-foreground">Mins</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.countdown.seconds}</div>
-                <div className="text-xs text-muted-foreground">Seconds</div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.seconds}</div>
+                <div className="text-xs text-muted-foreground">Secs</div>
               </div>
             </div>
           </div>
 
-          {/* Tomorrow's Date */}
-          <div className="border-t border-border pt-4">
-            <div className="text-center">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Tomorrow</p>
-              <p className="text-lg font-semibold">{stats.tomorrow.dayName}</p>
-              <p className="text-sm text-muted-foreground">{stats.tomorrow.date}</p>
+          {/* Today's Date */}
+          <div className="text-center pt-2 border-t">
+            <p className="text-sm text-muted-foreground">Today</p>
+            <p className="text-base font-semibold">{stats.today.dayName}</p>
+            <p className="text-xs text-muted-foreground">{stats.today.date}</p>
+          </div>
+
+          {/* Daily 24-Hour Timer */}
+          <div className="pt-2 border-t">
+            <p className="text-xs text-muted-foreground text-center mb-2">Time Remaining Today</p>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.hours).padStart(2, '0')}</div>
+                <div className="text-xs text-muted-foreground">Hours</div>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.minutes).padStart(2, '0')}</div>
+                <div className="text-xs text-muted-foreground">Minutes</div>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.seconds).padStart(2, '0')}</div>
+                <div className="text-xs text-muted-foreground">Seconds</div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -227,95 +254,88 @@ export function Dashboard() {
       {activeChaptersWithNames.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Clock className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2">
+              <Timer className="h-5 w-5 text-primary" />
               Currently Working
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {activeChaptersWithNames.map(ac => (
-                <div
-                  key={ac.chapterId}
-                  className="flex items-center justify-between p-3 border border-border rounded-lg bg-primary/5"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{ac.chapterName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatElapsedTime(ac.elapsedSeconds)}
-                    </p>
-                  </div>
+          <CardContent className="space-y-3">
+            {activeChaptersWithNames.map((ac) => (
+              <div
+                key={ac.chapterId}
+                className="flex items-center justify-between p-3 border border-border rounded-lg bg-muted/30"
+              >
+                <div className="flex-1">
+                  <p className="font-medium">{ac.chapterName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatElapsedTime(ac.elapsedSeconds)}
+                    {ac.isPaused && <span className="ml-2 text-yellow-600">(Paused)</span>}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {ac.isPaused ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => startWorking(ac.chapterId)}
+                    >
+                      <Play className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => pauseWorking(ac.chapterId)}
+                    >
+                      <Pause className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
-                    variant="destructive"
                     size="sm"
+                    variant="destructive"
                     onClick={() => stopWorking(ac.chapterId)}
                   >
-                    <Square className="h-3 w-3 mr-2" />
-                    Stop
+                    <Square className="h-4 w-4" />
                   </Button>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
 
-      {/* Progress Ring */}
+      {/* Completion Progress */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <TrendingUp className="h-5 w-5" />
-            Overall Syllabus Completion
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Overall Progress
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="relative w-40 h-40 sm:w-48 sm:h-48">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  stroke="currentColor"
-                  strokeWidth="12"
-                  fill="none"
-                  className="text-muted/20"
-                />
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  stroke="currentColor"
-                  strokeWidth="12"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 88}`}
-                  strokeDashoffset={`${2 * Math.PI * 88 * (1 - stats.completionPercentage / 100)}`}
-                  className="text-primary transition-all duration-500"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl sm:text-4xl font-bold">{stats.completionPercentage}%</span>
-                <span className="text-xs sm:text-sm text-muted-foreground">{stats.completed}/{stats.total} chapters</span>
-              </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Chapters Completed</span>
+              <span className="font-semibold">{stats.completed} / {stats.total}</span>
             </div>
+            <Progress value={stats.completionPercentage} className="h-3" />
+            <p className="text-center text-2xl font-bold text-primary">{stats.completionPercentage}%</p>
           </div>
-          <Progress value={stats.completionPercentage} className="h-2" />
         </CardContent>
       </Card>
 
       {/* Daily Grind */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Clock className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
             Daily Grind
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center space-y-2">
-            <div className="text-4xl sm:text-5xl font-bold text-primary">{stats.todayHours.toFixed(1)}</div>
-            <p className="text-sm sm:text-base text-muted-foreground">Hours studied today</p>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-primary mb-2">{stats.todayHours.toFixed(1)}h</div>
+            <p className="text-sm text-muted-foreground">Hours studied today</p>
           </div>
         </CardContent>
       </Card>
@@ -323,8 +343,8 @@ export function Dashboard() {
       {/* Quick Add Subject */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Plus className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" />
             Quick Add Subject
           </CardTitle>
         </CardHeader>
@@ -334,28 +354,15 @@ export function Dashboard() {
               placeholder="Enter subject name..."
               value={newSubjectName}
               onChange={(e) => setNewSubjectName(e.target.value)}
+              className="flex-1"
             />
-            <Button type="submit">
-              <Plus className="h-4 w-4 mr-2" />
-              Add
-            </Button>
+            <Button type="submit">Add</Button>
           </form>
-          <p className="text-xs text-muted-foreground mt-2">
-            You have {subjects.length} subject{subjects.length !== 1 ? 's' : ''} in total
-          </p>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => navigate({ to: '/customize' })}
-        >
-          Manage Subjects & Settings
-        </Button>
-      </div>
+      {/* All Chapters Section */}
+      <AllChaptersBySubjectSection />
     </div>
   );
 }
