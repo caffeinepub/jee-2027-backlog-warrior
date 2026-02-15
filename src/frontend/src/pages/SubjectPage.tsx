@@ -34,6 +34,7 @@ export function SubjectPage() {
     getElapsedTime,
     startWorking,
     pauseWorking,
+    resumeWorking,
     stopWorking,
     getWorkingEntries,
     addWorkingEntry,
@@ -60,6 +61,8 @@ export function SubjectPage() {
     const success = deleteSubject(subjectId);
     if (success) {
       navigate({ to: '/' });
+    } else {
+      toast.error('Cannot delete default subjects');
     }
   };
 
@@ -68,16 +71,18 @@ export function SubjectPage() {
     if (selectedChapter?.id === chapterId) {
       setSelectedChapter(null);
     }
+    toast.success('Chapter deleted successfully');
   };
 
-  const handleAddChapter = (name: string, totalLectures: number, lectureDuration: number) => {
+  const handleAddChapter = (name: string, totalLectures: number, hours: number) => {
     const newChapter: Chapter = {
       id: `chapter-${Date.now()}`,
       name,
       subjectId,
       totalLectures,
-      lectureDuration,
+      lectureDuration: 90, // Default lecture duration
       status: 'Not Started',
+      targetHoursOverride: hours, // Store hours as override
     };
     addChapter(newChapter);
     toast.success(`Chapter "${name}" added successfully!`);
@@ -123,6 +128,9 @@ export function SubjectPage() {
     );
   }
 
+  // Only show delete button for non-default subjects
+  const canDelete = !subject.isDefault;
+
   return (
     <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
       {/* Header with decorative accent */}
@@ -151,10 +159,12 @@ export function SubjectPage() {
               subjectName={subject.name}
               onAdd={handleAddChapter}
             />
-            <SubjectDeleteButton
-              subjectName={subject.name}
-              onDelete={handleDeleteSubject}
-            />
+            {canDelete && (
+              <SubjectDeleteButton
+                subjectName={subject.name}
+                onDelete={handleDeleteSubject}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -291,6 +301,7 @@ export function SubjectPage() {
                       elapsedSeconds={elapsedSeconds}
                       onStartWorking={() => startWorking(chapter.id)}
                       onPauseWorking={() => pauseWorking(chapter.id)}
+                      onResumeWorking={() => resumeWorking(chapter.id)}
                       onStopWorking={() => stopWorking(chapter.id)}
                       workingEntries={workingEntries}
                       onAddEntry={(duration) => addWorkingEntry(chapter.id, duration)}

@@ -8,7 +8,6 @@ import { useChapterData } from '../hooks/useChapterData';
 import { useSubjects } from '../hooks/useSubjects';
 import { useDashboardNote } from '../hooks/useDashboardNote';
 import { useDashboardTitle } from '../hooks/useDashboardTitle';
-import { useDashboardInside } from '../hooks/useDashboardInside';
 import { useCurrentlyWorkingChapters } from '../hooks/useCurrentlyWorkingChapters';
 import { useCustomization } from '../customization/CustomizationProvider';
 import { useState, useEffect, useMemo } from 'react';
@@ -21,7 +20,6 @@ export function Dashboard() {
   const { subjects } = useSubjects();
   const { note, setNote } = useDashboardNote();
   const { title, setTitle } = useDashboardTitle();
-  const { content: insideContent, setContent: setInsideContent } = useDashboardInside();
   const { getActiveChapters } = useCurrentlyWorkingChapters();
   const { settings } = useCustomization();
   
@@ -29,8 +27,6 @@ export function Dashboard() {
   const [editTitleValue, setEditTitleValue] = useState(title);
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [editNoteValue, setEditNoteValue] = useState(note);
-  const [isEditingInside, setIsEditingInside] = useState(false);
-  const [editInsideValue, setEditInsideValue] = useState(insideContent);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -80,11 +76,6 @@ export function Dashboard() {
   const handleSaveNote = () => {
     setNote(editNoteValue);
     setIsEditingNote(false);
-  };
-
-  const handleSaveInside = () => {
-    setInsideContent(editInsideValue);
-    setIsEditingInside(false);
   };
 
   return (
@@ -169,31 +160,45 @@ export function Dashboard() {
             <Clock className="h-5 w-5 text-accent-cyan icon-animated" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-accent-cyan">{stats.totalTargetHours.toFixed(1)}h</div>
+            <div className="text-3xl font-bold text-accent-cyan">{stats.totalTargetHours.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total study time
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Notifications Section */}
+      <NotificationsSection />
+
+      {/* Completion Distribution Chart */}
+      <DashboardCompletionDistributionChart />
+
       {/* Currently Working Section */}
       {currentlyWorking.length > 0 && (
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/40 shadow-glow-md animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary icon-animated icon-active" />
+              <Clock className="h-5 w-5 text-primary" />
               Currently Working
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {currentlyWorking.map((item) => (
-                <div key={item.chapterId} className="flex items-center justify-between p-3 bg-card/50 rounded-lg backdrop-blur-sm">
+                <div
+                  key={item.chapterId}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-smooth"
+                >
                   <div>
                     <p className="font-medium">{item.chapterName}</p>
                     <p className="text-sm text-muted-foreground">{item.subjectName}</p>
                   </div>
-                  <Badge className={`${item.isPaused ? 'bg-warning/20 text-warning border-warning/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
-                    {item.isPaused ? 'Paused' : 'Active'}
-                  </Badge>
+                  {item.isPaused && (
+                    <Badge variant="outline" className="text-warning border-warning">
+                      Paused
+                    </Badge>
+                  )}
                 </div>
               ))}
             </div>
@@ -201,123 +206,67 @@ export function Dashboard() {
         </Card>
       )}
 
-      {/* Notifications and Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
-          <NotificationsSection />
-        </div>
-        <div className="animate-fade-in-up" style={{ animationDelay: '700ms' }}>
-          <DashboardCompletionDistributionChart />
-        </div>
-      </div>
-
-      {/* Quick Note and Inside Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Note */}
-        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '800ms' }}>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Quick Note</CardTitle>
-              {!isEditingNote ? (
-                <Button size="icon" variant="ghost" onClick={() => { setIsEditingNote(true); setEditNoteValue(note); }} className="icon-animated">
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" onClick={handleSaveNote} className="icon-animated">
-                    <Save className="h-4 w-4 mr-1" />
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsEditingNote(false)} className="icon-animated">
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isEditingNote ? (
-              <Textarea
-                value={editNoteValue}
-                onChange={(e) => setEditNoteValue(e.target.value)}
-                placeholder="Write your notes here..."
-                className="min-h-[120px] resize-none"
-                autoFocus
-              />
-            ) : (
-              <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
-                {note || 'Click edit to add a note...'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Inside */}
-        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '850ms' }}>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Inside</CardTitle>
-              {!isEditingInside ? (
-                <Button size="icon" variant="ghost" onClick={() => { setIsEditingInside(true); setEditInsideValue(insideContent); }} className="icon-animated">
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" onClick={handleSaveInside} className="icon-animated">
-                    <Save className="h-4 w-4 mr-1" />
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsEditingInside(false)} className="icon-animated">
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isEditingInside ? (
-              <Textarea
-                value={editInsideValue}
-                onChange={(e) => setEditInsideValue(e.target.value)}
-                placeholder="Write your thoughts here..."
-                className="min-h-[120px] resize-none"
-                autoFocus
-              />
-            ) : (
-              <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
-                {insideContent || 'Click edit to add content...'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Subjects Quick Access */}
-      <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+      {/* Quick Note Section */}
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up">
         <CardHeader>
-          <CardTitle>Subjects</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Quick Note</CardTitle>
+            {!isEditingNote ? (
+              <Button size="icon" variant="ghost" onClick={() => { setEditNoteValue(note); setIsEditingNote(true); }} className="icon-animated">
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button size="icon" variant="ghost" onClick={handleSaveNote} className="icon-animated">
+                  <Save className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setIsEditingNote(false)} className="icon-animated">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isEditingNote ? (
+            <Textarea
+              value={editNoteValue}
+              onChange={(e) => setEditNoteValue(e.target.value)}
+              placeholder="Jot down quick thoughts..."
+              className="min-h-[120px] resize-none"
+              autoFocus
+            />
+          ) : (
+            <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
+              {note || 'Click edit to add a quick note...'}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Subject Quick Access */}
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up">
+        <CardHeader>
+          <CardTitle>Subject Quick Access</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {subjects.map((subject, idx) => {
+            {subjects.map((subject) => {
               const subjectChapters = chapters.filter(ch => ch.subjectId === subject.id);
-              const completed = subjectChapters.filter(ch => ch.status === 'Completed').length;
-              const total = subjectChapters.length;
-
+              const completedCount = subjectChapters.filter(ch => ch.status === 'Completed').length;
+              const totalCount = subjectChapters.length;
+              
               return (
                 <Button
                   key={subject.id}
                   variant="outline"
-                  className="h-auto flex-col items-start p-4 hover:bg-primary/10 hover:border-primary transition-smooth icon-animated"
-                  onClick={() => navigate({ to: `/subject/${subject.id}` })}
-                  style={{ animationDelay: `${idx * 50}ms` }}
+                  className="h-auto flex-col items-start p-4 hover:border-primary/50 transition-smooth hover-lift"
+                  onClick={() => navigate({ to: '/subject/$subjectId', params: { subjectId: subject.id } })}
                 >
-                  <span className="font-semibold text-base">{subject.name}</span>
-                  <span className="text-xs text-muted-foreground mt-1">
-                    {completed}/{total} chapters
-                  </span>
+                  <div className="font-semibold text-left w-full">{subject.name}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {completedCount}/{totalCount} chapters
+                  </div>
                 </Button>
               );
             })}

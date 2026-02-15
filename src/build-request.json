@@ -1,53 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Allow chapter status selection to be changed or cleared in Chapter Details",
-  "priority": "normal",
+  "title": "Rollback deployment to version 37 (undo latest deployed changes)",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
-      "target": "frontend",
+      "text": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced in the latest deployment(s) (e.g., versions 38–40).",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "when i open chapter detials then if i select completed or incomplete or tough options there is only going front but no renwing option if i select any one of the three the i can deselect any  three"
+          "Undo latest deployment changes (restore to 37 version)"
         ]
       },
       "acceptanceCriteria": [
-        "In ChapterDetailPanel, if the chapter is currently \"Completed\", \"Incomplete\", or \"Tough\", the user can clear that selection and set the status back to \"Not Started\" without needing to refresh or leave the panel.",
-        "The status UI no longer blocks the user from undoing a status choice (i.e., there is an explicit way to reset/clear, or clicking the active selection toggles it off).",
-        "After clearing the status, the status badge in the Chapter Detail panel updates immediately to show \"Not Started\".",
-        "Status changes (including clearing to \"Not Started\") persist the same way as other chapter status updates (via the existing localStorage-backed chapter data)."
+        "After deployment, the app reports and/or is labeled as version 37 (or an unambiguous equivalent identifier mapped to version 37).",
+        "The deployed frontend and backend behavior matches version 37 and does not include changes introduced after version 37.",
+        "No new data migrations run as part of this rollback unless version 37 requires a different stable state schema (in which case the rollback includes a safe, tested migration plan)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
-      "target": "frontend",
+      "text": "If the system cannot uniquely identify or reproduce version 37 from available build/deployment metadata, add a safeguard that blocks rollback until an explicit target version identifier is provided/confirmed (e.g., v37, v38, v39, v40, or a commit hash), and ensure the rollback action uses that exact identifier.",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "if i select any one of the three the i can deselect any  three"
+          "Undo latest deployment changes (restore to 37 version)"
         ]
       },
       "acceptanceCriteria": [
-        "The status buttons in ChapterDetailPanel are not implemented in a way that prevents the user from clicking the currently-selected status when toggle-to-clear is supported.",
-        "A user can set status to Completed, then change to Incomplete, then change to Tough, and the badge reflects each change immediately.",
-        "A user can set any of the three statuses and then clear back to \"Not Started\" using the supported interaction."
+        "When rollback target is ambiguous, the rollback process fails closed (does not deploy anything) and clearly indicates that an explicit target version identifier is required.",
+        "Once a valid explicit target identifier for version 37 is provided/confirmed, the system performs the restore using that exact identifier and records/logs which version was restored.",
+        "User-facing text for any prompts/confirmations is in English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (shadcn components); compose them from feature components only.",
-    "Keep the existing chapter status enum values unchanged: \"Not Started\", \"Incomplete\", \"Tough\", \"Completed\"."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo changes if state upgrade/downgrade requires it per the conditional migration policy.",
+    "Do not edit files under frontend/src/components/ui or any frontend immutable paths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx)."
   ],
   "nonGoals": [
-    "Do not add backend persistence for chapter status (keep the existing localStorage-based persistence).",
-    "Do not redesign unrelated Chapter Details fields (lectures, target hours, date-to-finish) beyond what is necessary to support status deselection."
+    "Adding new product features unrelated to restoring version 37.",
+    "Refactoring or redesigning UI beyond what is necessary to match version 37.",
+    "Introducing external databases, third-party auth providers, or additional backend services."
   ],
   "imageRequirements": {
     "required": [],

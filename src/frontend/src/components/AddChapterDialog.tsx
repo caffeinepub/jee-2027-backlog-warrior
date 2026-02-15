@@ -8,26 +8,26 @@ import { Plus } from 'lucide-react';
 interface AddChapterDialogProps {
   subjectId: string;
   subjectName: string;
-  onAdd: (name: string, totalLectures: number, lectureDuration: number) => void;
+  onAdd: (name: string, totalLectures: number, hours: number) => void;
 }
 
 export function AddChapterDialog({ subjectId, subjectName, onAdd }: AddChapterDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [totalLectures, setTotalLectures] = useState('');
-  const [lectureDuration, setLectureDuration] = useState('90');
+  const [hours, setHours] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const lectures = parseInt(totalLectures);
-    const duration = parseInt(lectureDuration);
+    const hoursValue = parseFloat(hours);
     
-    if (name.trim() && lectures > 0 && duration > 0) {
-      onAdd(name.trim(), lectures, duration);
+    if (name.trim() && lectures > 0 && hoursValue > 0) {
+      onAdd(name.trim(), lectures, hoursValue);
       setName('');
       setTotalLectures('');
-      setLectureDuration('90');
+      setHours('');
       setOpen(false);
     }
   };
@@ -72,16 +72,18 @@ export function AddChapterDialog({ subjectId, subjectName, onAdd }: AddChapterDi
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lecture-duration">Lecture Duration (minutes)</Label>
+              <Label htmlFor="hours">Hours *</Label>
               <Input
-                id="lecture-duration"
+                id="hours"
                 type="number"
-                min="1"
-                placeholder="90"
-                value={lectureDuration}
-                onChange={(e) => setLectureDuration(e.target.value)}
+                min="0.1"
+                step="0.5"
+                placeholder="e.g., 22.5"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                required
               />
-              <p className="text-xs text-muted-foreground">Default: 90 minutes</p>
+              <p className="text-xs text-muted-foreground">Estimated hours to complete this chapter</p>
             </div>
           </div>
           <DialogFooter>

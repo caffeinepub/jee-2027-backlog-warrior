@@ -4,7 +4,7 @@
  */
 
 // All known LocalStorage keys used by this application
-const APP_STORAGE_KEYS = [
+const STORAGE_KEYS = [
   'jee-chapters-data',
   'jee-subjects-data',
   'jee-todos-data',
@@ -20,7 +20,30 @@ const APP_STORAGE_KEYS = [
   'jee-notes-data',
   'jee-study-log',
   'countdown-target-date',
+  'countdown-timers-list',
+  'countdown-selected-timer-id',
 ] as const;
+
+// Export storage keys as a structured object
+export const APP_STORAGE_KEYS = {
+  CHAPTERS: 'jee-chapters-data',
+  SUBJECTS: 'jee-subjects-data',
+  TODOS: 'jee-todos-data',
+  RESOURCES: 'jee-resources-data',
+  TESTS: 'jee-tests-data',
+  CALENDAR_ENTRIES: 'jee-calendar-entries',
+  WORKING_CHAPTERS: 'jee-currently-working',
+  DASHBOARD_TITLE: 'jee-dashboard-title',
+  DASHBOARD_NOTE: 'jee-dashboard-note',
+  DASHBOARD_INSIDE: 'dashboard-inside',
+  CUSTOMIZATION_SETTINGS: 'jee-customization-settings',
+  CUSTOMIZATION_PRESETS: 'jee-customization-presets',
+  NOTES: 'jee-notes-data',
+  STUDY_LOG: 'jee-study-log',
+  COUNTDOWN_TARGET_DATE: 'countdown-target-date',
+  COUNTDOWN_TIMERS_LIST: 'countdown-timers-list',
+  COUNTDOWN_SELECTED_TIMER_ID: 'countdown-selected-timer-id',
+} as const;
 
 /**
  * Clears only this app's LocalStorage entries, preserving unrelated storage.
@@ -28,7 +51,7 @@ const APP_STORAGE_KEYS = [
  */
 export function clearAppLocalStorage(): void {
   try {
-    APP_STORAGE_KEYS.forEach(key => {
+    STORAGE_KEYS.forEach(key => {
       localStorage.removeItem(key);
     });
     console.log('App LocalStorage cleared successfully');
@@ -41,5 +64,5 @@ export function clearAppLocalStorage(): void {
  * Gets all app storage keys for reference.
  */
 export function getAppStorageKeys(): readonly string[] {
-  return APP_STORAGE_KEYS;
+  return STORAGE_KEYS;
 }

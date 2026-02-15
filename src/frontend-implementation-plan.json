@@ -1,38 +1,57 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Chapter Detail status toggle-to-clear and free switching",
+  "title": "Frontend rollback identification and safeguard (restore UX labeling to v37)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Allow clearing an active chapter status in ChapterDetailPanel to revert back to \"Not Started\" and update immediately with existing localStorage persistence.",
+      "summary": "Ensure the UI clearly reports version 37 and does not surface post-v37 UI behavior.",
       "acceptanceCriteria": [
-        "In ChapterDetailPanel, if the chapter is currently \"Completed\", \"Incomplete\", or \"Tough\", the user can clear that selection and set the status back to \"Not Started\" without needing to refresh or leave the panel.",
-        "The status UI no longer blocks the user from undoing a status choice (i.e., there is an explicit way to reset/clear, or clicking the active selection toggles it off).",
-        "After clearing the status, the status badge in the Chapter Detail panel updates immediately to show \"Not Started\".",
-        "Status changes (including clearing to \"Not Started\") persist the same way as other chapter status updates (via the existing localStorage-backed chapter data)."
+        "After deployment, the app reports and/or is labeled as version 37 (or an unambiguous equivalent identifier mapped to version 37).",
+        "The deployed frontend and backend behavior matches version 37 and does not include changes introduced after version 37.",
+        "No new data migrations run as part of this rollback unless version 37 requires a different stable state schema (in which case the rollback includes a safe, tested migration plan)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ChapterDetailPanel.tsx",
+          "path": "frontend/src/lib/appVersion.ts",
+          "operation": "create",
+          "description": "Create a single source of truth for the frontend’s deployed version identifier (set to 37) and any optional mapping/metadata needed to display it consistently across the UI."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Update the status action handlers to support toggle-to-clear: when the user clicks the currently-selected status (Completed/Incomplete/Tough), call the existing localStorage-backed updateChapterStatus with \"Not Started\" instead of re-applying the same status. Keep the existing ChapterStatus enum values unchanged. Use the shadcn-ui Button components already present for the status controls; verify the component's usage instructions before implementing."
+          "description": "Display the app version label sourced from frontend/src/lib/appVersion.ts in the main (non-/customize) header so users can verify the deployment is version 37 at runtime."
+        },
+        {
+          "path": "frontend/src/pages/Customize.tsx",
+          "operation": "modify",
+          "description": "Add a read-only “App Version” section that displays the version identifier from frontend/src/lib/appVersion.ts to provide an unambiguous place to confirm the deployed version on the Customize page."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Adjust ChapterDetailPanel status controls so users can switch statuses freely and still click the active status to toggle it off (no disabled active button behavior).",
+      "summary": "Add a fail-closed rollback-target confirmation UX when a rollback target cannot be determined unambiguously.",
       "acceptanceCriteria": [
-        "The status buttons in ChapterDetailPanel are not implemented in a way that prevents the user from clicking the currently-selected status when toggle-to-clear is supported.",
-        "A user can set status to Completed, then change to Incomplete, then change to Tough, and the badge reflects each change immediately.",
-        "A user can set any of the three statuses and then clear back to \"Not Started\" using the supported interaction."
+        "When rollback target is ambiguous, the rollback process fails closed (does not deploy anything) and clearly indicates that an explicit target version identifier is required.",
+        "Once a valid explicit target identifier for version 37 is provided/confirmed, the system performs the restore using that exact identifier and records/logs which version was restored.",
+        "User-facing text for any prompts/confirmations is in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ChapterDetailPanel.tsx",
+          "path": "frontend/src/components/RollbackTargetSafeguard.tsx",
+          "operation": "create",
+          "description": "Create a small UI safeguard component that (when enabled via an explicit flag such as a router search param or build-time value) blocks the rollback-related UI flow until the user provides/confirms an explicit target identifier (e.g., “v37” or a commit hash) in English. Use shadcn-ui dialog/alert primitives already present in the repo to present the confirmation UI; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Remove/replace the current disabled logic on the three status buttons so the active status remains clickable (required for toggle-to-clear), while still visually indicating selection (e.g., via variant/class changes on the existing shadcn-ui Button). Ensure switching between statuses updates immediately in-panel. Verify the component's usage instructions before implementing."
+          "description": "Wire RollbackTargetSafeguard into the app shell so it can activate when the rollback target is ambiguous (fail-closed) and only unblock once the explicit identifier is provided/confirmed. Ensure all user-facing prompt/confirmation text is in English. Use shadcn-ui components already available; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/lib/appVersion.ts",
+          "operation": "modify",
+          "description": "Extend version utilities to support validating a provided explicit target identifier against the expected v37 identifier and to store the last confirmed rollback target locally (for display/audit in the UI), without introducing any new migrations."
         }
       ]
     }

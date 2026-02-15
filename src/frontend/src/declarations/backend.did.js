@@ -8,10 +8,50 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const ReminderId = IDL.Nat;
+export const ReminderName = IDL.Text;
+export const Time = IDL.Int;
+export const Reminder = IDL.Record({
+  'isCancelled' : IDL.Bool,
+  'isCompleted' : IDL.Bool,
+  'scheduledTime' : Time,
+  'name' : ReminderName,
+  'creationTime' : Time,
+});
+
+export const idlService = IDL.Service({
+  'cancelReminder' : IDL.Func([ReminderId], [IDL.Bool], []),
+  'completeReminder' : IDL.Func([ReminderId], [IDL.Bool], []),
+  'createReminder' : IDL.Func([ReminderName, Time], [ReminderId], []),
+  'getActiveReminders' : IDL.Func([], [IDL.Vec(Reminder)], ['query']),
+  'getCompletedReminders' : IDL.Func([], [IDL.Vec(Reminder)], ['query']),
+  'getReminder' : IDL.Func([ReminderId], [IDL.Opt(Reminder)], ['query']),
+  'getTotalReminders' : IDL.Func([], [IDL.Nat], ['query']),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const ReminderId = IDL.Nat;
+  const ReminderName = IDL.Text;
+  const Time = IDL.Int;
+  const Reminder = IDL.Record({
+    'isCancelled' : IDL.Bool,
+    'isCompleted' : IDL.Bool,
+    'scheduledTime' : Time,
+    'name' : ReminderName,
+    'creationTime' : Time,
+  });
+  
+  return IDL.Service({
+    'cancelReminder' : IDL.Func([ReminderId], [IDL.Bool], []),
+    'completeReminder' : IDL.Func([ReminderId], [IDL.Bool], []),
+    'createReminder' : IDL.Func([ReminderName, Time], [ReminderId], []),
+    'getActiveReminders' : IDL.Func([], [IDL.Vec(Reminder)], ['query']),
+    'getCompletedReminders' : IDL.Func([], [IDL.Vec(Reminder)], ['query']),
+    'getReminder' : IDL.Func([ReminderId], [IDL.Opt(Reminder)], ['query']),
+    'getTotalReminders' : IDL.Func([], [IDL.Nat], ['query']),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };

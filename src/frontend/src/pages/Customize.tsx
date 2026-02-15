@@ -1,180 +1,383 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Separator } from '../components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { useSubjects } from '../hooks/useSubjects';
+import { useCustomization } from '../customization/CustomizationProvider';
+import { useCustomizationPresets } from '../customization/useCustomizationPresets';
+import { useState, useCallback } from 'react';
+import { Trash2, Plus, Save, Check } from 'lucide-react';
+import { SubjectDeleteButton } from '../components/SubjectDeleteButton';
+import { getSubjectIcon } from '../data/subjects';
 import { Slider } from '../components/ui/slider';
 import { Switch } from '../components/ui/switch';
-import { Separator } from '../components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
-import { ScrollArea } from '../components/ui/scroll-area';
+import { Sun, Moon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
-import { ArrowLeft, Save, X, Smartphone, Monitor, Trash2, Plus } from 'lucide-react';
-import { useCustomization } from '../customization/CustomizationProvider';
-import { type CustomizationSettings } from '../customization/settingsModel';
-import { useCustomizationPresets } from '../customization/useCustomizationPresets';
-import { useSubjects } from '../hooks/useSubjects';
-import { ChapterCard } from '../components/ChapterCard';
-import { useChapterData } from '../hooks/useChapterData';
-import { toast } from 'sonner';
+import { APP_VERSION, getConfirmedRollbackTarget } from '../lib/appVersion';
+import { Badge } from '../components/ui/badge';
 
 export function Customize() {
-  const navigate = useNavigate();
-  const { settings: globalSettings, updateSettings } = useCustomization();
-  const { chapters } = useChapterData();
-  const { presets, savePreset, applyPreset, deletePreset } = useCustomizationPresets();
   const { subjects, addSubject, deleteSubject } = useSubjects();
-  const { deleteChaptersBySubjectId } = useChapterData();
-  
-  const [draftSettings, setDraftSettings] = useState<CustomizationSettings>(globalSettings);
-  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
-  const [presetName, setPresetName] = useState('');
+  const { settings, updateSettings, resetToDefaults } = useCustomization();
+  const { presets, savePreset, applyPreset, deletePreset } = useCustomizationPresets();
+
   const [newSubjectName, setNewSubjectName] = useState('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [subjectToDelete, setSubjectToDelete] = useState<string | null>(null);
+  const [newPresetName, setNewPresetName] = useState('');
 
-  const sampleChapters = useMemo(() => chapters.slice(0, 3), [chapters]);
-
-  const handleDraftChange = useCallback((updates: Partial<CustomizationSettings>) => {
-    setDraftSettings(prev => ({ ...prev, ...updates }));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const handleSave = useCallback(() => {
-    updateSettings(draftSettings);
-    setHasUnsavedChanges(false);
-    toast.success('Settings saved successfully!');
-  }, [draftSettings, updateSettings]);
-
-  const handleDiscard = useCallback(() => {
-    setDraftSettings(globalSettings);
-    setHasUnsavedChanges(false);
-    toast.info('Changes discarded');
-  }, [globalSettings]);
-
-  const handleSavePreset = useCallback(() => {
-    if (presetName.trim()) {
-      savePreset(presetName.trim(), draftSettings);
-      setPresetName('');
-      toast.success('Preset saved!');
-    }
-  }, [presetName, draftSettings, savePreset]);
-
-  const handleApplyPreset = useCallback((presetName: string) => {
-    const settings = applyPreset(presetName);
-    if (settings) {
-      setDraftSettings(settings);
-      setHasUnsavedChanges(true);
-      toast.success('Preset applied!');
-    }
-  }, [applyPreset]);
-
-  const handleAddSubject = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddSubject = useCallback(() => {
     if (newSubjectName.trim()) {
-      const success = addSubject(newSubjectName.trim());
-      if (success) {
-        toast.success(`Subject "${newSubjectName.trim()}" added successfully!`);
-        setNewSubjectName('');
-      } else {
-        toast.error('Failed to add subject. It may already exist.');
-      }
+      addSubject(newSubjectName.trim());
+      setNewSubjectName('');
     }
   }, [newSubjectName, addSubject]);
 
-  const handleDeleteSubject = useCallback((subjectId: string) => {
-    const success = deleteSubject(subjectId);
-    if (success) {
-      deleteChaptersBySubjectId(subjectId);
-      toast.success('Subject and associated chapters deleted successfully!');
-      setSubjectToDelete(null);
-    } else {
-      toast.error('Failed to delete subject.');
+  const handleSavePreset = useCallback(() => {
+    if (newPresetName.trim()) {
+      savePreset(newPresetName.trim(), settings);
+      setNewPresetName('');
     }
-  }, [deleteSubject, deleteChaptersBySubjectId]);
+  }, [newPresetName, settings, savePreset]);
+
+  const confirmedRollback = getConfirmedRollbackTarget();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-lg font-bold">Customize</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {hasUnsavedChanges && (
-              <>
-                <Button variant="ghost" size="sm" onClick={handleDiscard}>
-                  <X className="h-4 w-4 mr-2" />
-                  Discard
+    <div className="container max-w-6xl mx-auto px-4 py-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Customize Your Study Planner</h1>
+        <p className="text-muted-foreground">
+          Manage subjects, adjust settings, and personalize your experience
+        </p>
+      </div>
+
+      <Tabs defaultValue="subjects" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="subjects">Subjects</TabsTrigger>
+          <TabsTrigger value="settings">Study Settings</TabsTrigger>
+          <TabsTrigger value="display">Display</TabsTrigger>
+          <TabsTrigger value="presets">Presets</TabsTrigger>
+        </TabsList>
+
+        {/* Subjects Tab */}
+        <TabsContent value="subjects" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Manage Subjects</CardTitle>
+              <CardDescription>
+                Add or remove subjects from your study plan
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="New subject name"
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddSubject()}
+                />
+                <Button onClick={handleAddSubject}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
                 </Button>
-                <Button size="sm" onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+              </div>
 
-      <div className="container max-w-7xl mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Settings Panel */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Subjects</CardTitle>
-                <CardDescription>Manage your study subjects</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <form onSubmit={handleAddSubject} className="flex gap-2">
-                  <Input
-                    placeholder="Add a new subject..."
-                    value={newSubjectName}
-                    onChange={(e) => setNewSubjectName(e.target.value)}
-                  />
-                  <Button type="submit" size="icon">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </form>
+              <Separator />
 
-                <Separator />
-
-                <ScrollArea className="h-48">
-                  <div className="space-y-2">
-                    {subjects.map((subject) => (
-                      <div
-                        key={subject.id}
-                        className="flex items-center justify-between p-3 border border-border rounded-lg"
-                      >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {subjects.map((subject) => {
+                  const Icon = getSubjectIcon(subject.name);
+                  return (
+                    <div
+                      key={subject.id}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-5 w-5 text-primary" />
                         <span className="font-medium">{subject.name}</span>
-                        <AlertDialog open={subjectToDelete === subject.id} onOpenChange={(open) => !open && setSubjectToDelete(null)}>
+                        {subject.isDefault && (
+                          <Badge variant="secondary" className="text-xs">
+                            Default
+                          </Badge>
+                        )}
+                      </div>
+                      {!subject.isDefault && (
+                        <SubjectDeleteButton
+                          subjectName={subject.name}
+                          onDelete={() => deleteSubject(subject.id)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Study Settings Tab */}
+        <TabsContent value="settings" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Study Settings</CardTitle>
+              <CardDescription>
+                Configure your study preferences and goals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label>Daily Target Hours: {settings.dailyTargetHours}h</Label>
+                <Slider
+                  value={[settings.dailyTargetHours]}
+                  onValueChange={([value]) => updateSettings({ dailyTargetHours: value })}
+                  min={1}
+                  max={16}
+                  step={0.5}
+                  className="w-full"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Label>Lecture Speed Factor: {settings.lectureSpeedFactor}x</Label>
+                <Slider
+                  value={[settings.lectureSpeedFactor]}
+                  onValueChange={([value]) => updateSettings({ lectureSpeedFactor: value })}
+                  min={1}
+                  max={2}
+                  step={0.1}
+                  className="w-full"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Label>Sleep Window</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="sleep-start" className="text-xs text-muted-foreground">
+                      Start
+                    </Label>
+                    <Input
+                      id="sleep-start"
+                      type="time"
+                      value={settings.sleepWindowStart}
+                      onChange={(e) => updateSettings({ sleepWindowStart: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sleep-end" className="text-xs text-muted-foreground">
+                      End
+                    </Label>
+                    <Input
+                      id="sleep-end"
+                      type="time"
+                      value={settings.sleepWindowEnd}
+                      onChange={(e) => updateSettings({ sleepWindowEnd: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Enable Notifications</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Show alerts for incomplete work
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.notificationsEnabled}
+                  onCheckedChange={(checked) => updateSettings({ notificationsEnabled: checked })}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto-recalculate Date to Finish</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically update completion dates
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.autoRecalculateDateToFinish}
+                  onCheckedChange={(checked) =>
+                    updateSettings({ autoRecalculateDateToFinish: checked })
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Display Tab */}
+        <TabsContent value="display" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Display Settings</CardTitle>
+              <CardDescription>
+                Customize the appearance of your study planner
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label>Theme</Label>
+                <ToggleGroup
+                  type="single"
+                  value={settings.darkModeOverride.enabled ? settings.darkModeOverride.mode : 'dark'}
+                  onValueChange={(value) => {
+                    if (value) {
+                      updateSettings({
+                        darkModeOverride: {
+                          enabled: true,
+                          mode: value as 'light' | 'dark',
+                        },
+                      });
+                    }
+                  }}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="light" aria-label="Light mode" className="gap-2">
+                    <Sun className="h-4 w-4" />
+                    Light
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="dark" aria-label="Dark mode" className="gap-2">
+                    <Moon className="h-4 w-4" />
+                    Dark
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Label>Chapter Card Size</Label>
+                <ToggleGroup
+                  type="single"
+                  value={settings.chapterCardSize}
+                  onValueChange={(value) => {
+                    if (value) {
+                      updateSettings({ chapterCardSize: value as 'compact' | 'detailed' });
+                    }
+                  }}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="compact">Compact</ToggleGroupItem>
+                  <ToggleGroupItem value="detailed">Detailed</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* App Version Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>App Version</CardTitle>
+              <CardDescription>
+                Current application version information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/50">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Version</p>
+                  <p className="text-2xl font-bold text-primary">{APP_VERSION.label}</p>
+                  <p className="text-xs text-muted-foreground">{APP_VERSION.description}</p>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  <Check className="h-3 w-3 mr-1" />
+                  Active
+                </Badge>
+              </div>
+
+              {confirmedRollback && (
+                <div className="p-4 rounded-lg border border-warning/50 bg-warning/10">
+                  <p className="text-sm font-medium text-warning mb-2">Last Rollback Confirmation</p>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <p>Target: {confirmedRollback.target}</p>
+                    <p>Confirmed: {new Date(confirmedRollback.confirmedAt).toLocaleString()}</p>
+                    <p>From Version: {confirmedRollback.currentVersion}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Presets Tab */}
+        <TabsContent value="presets" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Settings Presets</CardTitle>
+              <CardDescription>
+                Save and load your favorite settings configurations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Preset name"
+                  value={newPresetName}
+                  onChange={(e) => setNewPresetName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
+                />
+                <Button onClick={handleSavePreset}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Current
+                </Button>
+              </div>
+
+              <Separator />
+
+              {presets.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  No saved presets. Create one by entering a name and clicking "Save Current".
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {presets.map((preset) => (
+                    <div
+                      key={preset.name}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                    >
+                      <span className="font-medium">{preset.name}</span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const settings = applyPreset(preset.name);
+                            if (settings) {
+                              updateSettings(settings);
+                            }
+                          }}
+                        >
+                          Apply
+                        </Button>
+                        <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setSubjectToDelete(subject.id)}
-                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                            >
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Subject</AlertDialogTitle>
+                              <AlertDialogTitle>Delete Preset</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{subject.name}"? This will also delete all chapters associated with this subject. This action cannot be undone.
+                                Are you sure you want to delete the preset "{preset.name}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDeleteSubject(subject.id)}
+                                onClick={() => deletePreset(preset.name)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete
@@ -183,257 +386,38 @@ export function Customize() {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Study Settings</CardTitle>
-                <CardDescription>Configure your daily targets and playback speed</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Daily Target Hours: {draftSettings.dailyTargetHours}h</Label>
-                  <Slider
-                    value={[draftSettings.dailyTargetHours]}
-                    onValueChange={([value]) => handleDraftChange({ dailyTargetHours: value })}
-                    min={1}
-                    max={16}
-                    step={0.5}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Lecture Speed Factor: {draftSettings.lectureSpeedFactor}x</Label>
-                  <Slider
-                    value={[draftSettings.lectureSpeedFactor]}
-                    onValueChange={([value]) => handleDraftChange({ lectureSpeedFactor: value })}
-                    min={1}
-                    max={2}
-                    step={0.1}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="notifications">Enable Notifications</Label>
-                    <Switch
-                      id="notifications"
-                      checked={draftSettings.notificationsEnabled}
-                      onCheckedChange={(checked) => handleDraftChange({ notificationsEnabled: checked })}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-recalc">Auto-recalculate Date to Finish</Label>
-                    <Switch
-                      id="auto-recalc"
-                      checked={draftSettings.autoRecalculateDateToFinish}
-                      onCheckedChange={(checked) => handleDraftChange({ autoRecalculateDateToFinish: checked })}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label>Sleep Window</Label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="sleep-start" className="text-xs text-muted-foreground">Start</Label>
-                      <Input
-                        id="sleep-start"
-                        type="time"
-                        value={draftSettings.sleepWindowStart}
-                        onChange={(e) => handleDraftChange({ sleepWindowStart: e.target.value })}
-                      />
                     </div>
-                    <div>
-                      <Label htmlFor="sleep-end" className="text-xs text-muted-foreground">End</Label>
-                      <Input
-                        id="sleep-end"
-                        type="time"
-                        value={draftSettings.sleepWindowEnd}
-                        onChange={(e) => handleDraftChange({ sleepWindowEnd: e.target.value })}
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Display Settings</CardTitle>
-                <CardDescription>Customize the appearance of your dashboard</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Chapter Card Size</Label>
-                  <ToggleGroup
-                    type="single"
-                    value={draftSettings.chapterCardSize}
-                    onValueChange={(value) => value && handleDraftChange({ chapterCardSize: value as 'compact' | 'detailed' })}
-                    className="justify-start"
-                  >
-                    <ToggleGroupItem value="compact" aria-label="Compact">
-                      Compact
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="detailed" aria-label="Detailed">
-                      Detailed
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
+              <Separator />
 
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="dark-mode-override">Dark Mode Override</Label>
-                    <Switch
-                      id="dark-mode-override"
-                      checked={draftSettings.darkModeOverride.enabled}
-                      onCheckedChange={(checked) => 
-                        handleDraftChange({ 
-                          darkModeOverride: { 
-                            ...draftSettings.darkModeOverride, 
-                            enabled: checked 
-                          } 
-                        })
-                      }
-                    />
-                  </div>
-                  {draftSettings.darkModeOverride.enabled && (
-                    <ToggleGroup
-                      type="single"
-                      value={draftSettings.darkModeOverride.mode}
-                      onValueChange={(value) => 
-                        value && handleDraftChange({ 
-                          darkModeOverride: { 
-                            ...draftSettings.darkModeOverride, 
-                            mode: value as 'light' | 'dark' 
-                          } 
-                        })
-                      }
-                      className="justify-start"
-                    >
-                      <ToggleGroupItem value="light" aria-label="Light mode">
-                        Light
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="dark" aria-label="Dark mode">
-                        Dark
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Presets</CardTitle>
-                <CardDescription>Save and load customization presets</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Preset name..."
-                    value={presetName}
-                    onChange={(e) => setPresetName(e.target.value)}
-                  />
-                  <Button onClick={handleSavePreset} disabled={!presetName.trim()}>
-                    Save
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    Reset to Defaults
                   </Button>
-                </div>
-
-                <Separator />
-
-                <ScrollArea className="h-32">
-                  <div className="space-y-2">
-                    {presets.map((preset) => (
-                      <div
-                        key={preset.name}
-                        className="flex items-center justify-between p-2 border border-border rounded-lg"
-                      >
-                        <span className="text-sm font-medium">{preset.name}</span>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleApplyPreset(preset.name)}
-                          >
-                            Apply
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              deletePreset(preset.name);
-                              toast.success('Preset deleted');
-                            }}
-                            className="hover:bg-destructive/10 hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Preview Panel */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Preview</CardTitle>
-                  <ToggleGroup
-                    type="single"
-                    value={previewMode}
-                    onValueChange={(value) => value && setPreviewMode(value as 'desktop' | 'mobile')}
-                  >
-                    <ToggleGroupItem value="desktop" aria-label="Desktop preview">
-                      <Monitor className="h-4 w-4" />
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="mobile" aria-label="Mobile preview">
-                      <Smartphone className="h-4 w-4" />
-                    </ToggleGroupItem>
-                  </ToggleGroup>
-                </div>
-                <CardDescription>See how your changes will look</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={`border border-border rounded-lg p-4 bg-background ${
-                    previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
-                  }`}
-                >
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold mb-4">Sample Chapters</h3>
-                    <div className={`grid gap-4 ${previewMode === 'desktop' ? 'sm:grid-cols-2' : ''}`}>
-                      {sampleChapters.map((chapter) => (
-                        <ChapterCard
-                          key={chapter.id}
-                          chapter={chapter}
-                          onClick={() => {}}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will reset all customization settings to their default values. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={resetToDefaults}>
+                      Reset
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

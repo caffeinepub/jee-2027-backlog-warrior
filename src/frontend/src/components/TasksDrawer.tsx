@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, StickyNote } from 'lucide-react';
+import { Menu, StickyNote, Home, Calendar, Timer, FileText, ClipboardList, Plus, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -8,12 +8,12 @@ import { useSubjects } from '../hooks/useSubjects';
 import { useTodos } from '../hooks/useTodos';
 import { Input } from './ui/input';
 import { Checkbox } from './ui/checkbox';
-import { Trash2, Plus } from 'lucide-react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { Separator } from './ui/separator';
 
 export function TasksDrawer() {
   const navigate = useNavigate();
+  const routerState = useRouterState();
   const { subjects } = useSubjects();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>(
     subjects.length > 0 ? subjects[0].id : ''
@@ -23,6 +23,8 @@ export function TasksDrawer() {
 
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedSubjectId);
   const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
+
+  const currentPath = routerState.location.pathname;
 
   // Update selected subject if it becomes invalid (use effect to avoid state update during render)
   useEffect(() => {
@@ -39,10 +41,20 @@ export function TasksDrawer() {
     }
   };
 
-  const handleNavigateToNotes = () => {
+  const handleNavigate = (path: string) => {
     setIsOpen(false);
-    navigate({ to: '/notes' });
+    navigate({ to: path });
   };
+
+  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path);
+
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/calendar', label: 'Calendar', icon: Calendar },
+    { path: '/countdown', label: 'Countdown', icon: Timer },
+    { path: '/notes', label: 'Notes', icon: FileText },
+    { path: '/tests', label: 'Tests', icon: ClipboardList },
+  ];
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -60,14 +72,26 @@ export function TasksDrawer() {
         <div className="space-y-4 flex-1 flex flex-col min-h-0">
           {/* Navigation Links */}
           <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full justify-start transition-smooth-fast hover:bg-primary/10 hover:text-primary hover:border-primary/50"
-              onClick={handleNavigateToNotes}
-            >
-              <StickyNote className="h-4 w-4 mr-2" />
-              Notes
-            </Button>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+
+              return (
+                <Button
+                  key={item.path}
+                  variant={active ? "default" : "outline"}
+                  className={`w-full justify-start transition-smooth-fast ${
+                    active
+                      ? 'bg-primary text-primary-foreground shadow-glow-sm'
+                      : 'hover:bg-primary/10 hover:text-primary hover:border-primary/50'
+                  }`}
+                  onClick={() => handleNavigate(item.path)}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.label}
+                </Button>
+              );
+            })}
           </div>
 
           <Separator className="bg-border/60" />

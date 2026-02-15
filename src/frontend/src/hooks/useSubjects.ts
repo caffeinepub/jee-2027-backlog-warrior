@@ -2,11 +2,35 @@ import { useState, useEffect } from 'react';
 import { DEFAULT_SUBJECTS, type Subject } from '../data/subjects';
 
 const STORAGE_KEY = 'jee-subjects';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
-interface StoredSubjects {
-  version: number;
+interface StoredSubjectsV1 {
+  version: 1;
+  subjects: Array<{ id: string; name: string }>;
+}
+
+interface StoredSubjectsV2 {
+  version: 2;
   subjects: Subject[];
+}
+
+type StoredSubjects = StoredSubjectsV1 | StoredSubjectsV2;
+
+function migrateSubjects(data: StoredSubjects): Subject[] {
+  if (data.version === 2) {
+    return data.subjects;
+  }
+  
+  // Migrate from v1 to v2: add isDefault flag
+  if (data.version === 1) {
+    const defaultIds = new Set(DEFAULT_SUBJECTS.map(s => s.id));
+    return data.subjects.map(subject => ({
+      ...subject,
+      isDefault: defaultIds.has(subject.id),
+    }));
+  }
+  
+  return DEFAULT_SUBJECTS;
 }
 
 export function useSubjects() {
@@ -15,8 +39,8 @@ export function useSubjects() {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const data: StoredSubjects = JSON.parse(stored);
-        if (data.version === STORAGE_VERSION && Array.isArray(data.subjects) && data.subjects.length > 0) {
-          return data.subjects;
+        if (data.version && Array.isArray(data.subjects) && data.subjects.length > 0) {
+          return migrateSubjects(data);
         }
       }
     } catch (error) {
@@ -27,7 +51,7 @@ export function useSubjects() {
 
   useEffect(() => {
     try {
-      const data: StoredSubjects = {
+      const data: StoredSubjectsV2 = {
         version: STORAGE_VERSION,
         subjects,
       };
@@ -50,6 +74,7 @@ export function useSubjects() {
     const newSubject: Subject = {
       id: `subject-${Date.now()}`,
       name: trimmedName,
+      isDefault: false,
     };
     
     setSubjects(prev => [...prev, newSubject]);
@@ -58,6 +83,12 @@ export function useSubjects() {
 
   const deleteSubject = (subjectId: string): boolean => {
     try {
+      // Prevent deletion of default subjects
+      const subject = subjects.find(s => s.id === subjectId);
+      if (subject?.isDefault) {
+        return false;
+      }
+      
       setSubjects(prev => prev.filter(s => s.id !== subjectId));
       return true;
     } catch (error) {

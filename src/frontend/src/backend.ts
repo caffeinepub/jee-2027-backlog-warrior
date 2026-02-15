@@ -89,10 +89,129 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface backendInterface {
+export type Time = bigint;
+export type ReminderName = string;
+export type ReminderId = bigint;
+export interface Reminder {
+    isCancelled: boolean;
+    isCompleted: boolean;
+    scheduledTime: Time;
+    name: ReminderName;
+    creationTime: Time;
 }
+export interface backendInterface {
+    cancelReminder(reminderId: ReminderId): Promise<boolean>;
+    completeReminder(reminderId: ReminderId): Promise<boolean>;
+    createReminder(name: ReminderName, scheduledTime: Time): Promise<ReminderId>;
+    getActiveReminders(): Promise<Array<Reminder>>;
+    getCompletedReminders(): Promise<Array<Reminder>>;
+    getReminder(reminderId: ReminderId): Promise<Reminder | null>;
+    getTotalReminders(): Promise<bigint>;
+}
+import type { Reminder as _Reminder } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async cancelReminder(arg0: ReminderId): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.cancelReminder(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.cancelReminder(arg0);
+            return result;
+        }
+    }
+    async completeReminder(arg0: ReminderId): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.completeReminder(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.completeReminder(arg0);
+            return result;
+        }
+    }
+    async createReminder(arg0: ReminderName, arg1: Time): Promise<ReminderId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createReminder(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createReminder(arg0, arg1);
+            return result;
+        }
+    }
+    async getActiveReminders(): Promise<Array<Reminder>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getActiveReminders();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getActiveReminders();
+            return result;
+        }
+    }
+    async getCompletedReminders(): Promise<Array<Reminder>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCompletedReminders();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCompletedReminders();
+            return result;
+        }
+    }
+    async getReminder(arg0: ReminderId): Promise<Reminder | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getReminder(arg0);
+                return from_candid_opt_n1(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getReminder(arg0);
+            return from_candid_opt_n1(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getTotalReminders(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getTotalReminders();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getTotalReminders();
+            return result;
+        }
+    }
+}
+function from_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Reminder]): Reminder | null {
+    return value.length === 0 ? null : value[0];
 }
 export interface CreateActorOptions {
     agent?: Agent;

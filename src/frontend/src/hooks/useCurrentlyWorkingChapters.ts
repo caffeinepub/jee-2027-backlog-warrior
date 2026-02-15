@@ -1,252 +1,316 @@
 import { useState, useEffect, useCallback } from 'react';
+import { APP_STORAGE_KEYS } from '../lib/appLocalStorage';
 
 interface WorkingEntry {
   id: string;
-  duration: number; // in seconds
-  timestamp: number; // when it was recorded
+  duration: number;
+  timestamp: number;
 }
 
-interface CurrentlyWorkingChapter {
+interface WorkingChapterState {
   chapterId: string;
-  startTime: number; // timestamp in milliseconds
-  isPaused: boolean;
-  pausedAt?: number; // timestamp when paused
-  accumulatedTime: number; // accumulated seconds before current session
-  workingEntries: WorkingEntry[]; // recorded working time entries
+  startTime: number;
+  pausedAt?: number;
+  accumulatedTime: number;
+  entries: WorkingEntry[];
 }
 
-interface CurrentlyWorkingState {
-  chapters: CurrentlyWorkingChapter[];
+interface WorkingChaptersData {
   version: number;
+  chapters: Record<string, WorkingChapterState>;
 }
 
-const STORAGE_KEY = 'currently-working-chapters';
-const STORAGE_VERSION = 2;
+interface ActiveChapter {
+  chapterId: string;
+  isPaused: boolean;
+  elapsedTime: number;
+}
 
-function loadState(): CurrentlyWorkingState {
+const STORAGE_KEY = APP_STORAGE_KEYS.WORKING_CHAPTERS;
+const CURRENT_VERSION = 2;
+
+function loadWorkingChapters(): Record<string, WorkingChapterState> {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return { chapters: [], version: STORAGE_VERSION };
-    }
-    const parsed = JSON.parse(stored);
-    
-    // Backward compatibility: migrate from version 1 to version 2
+    if (!stored) return {};
+
+    const parsed = JSON.parse(stored) as WorkingChaptersData;
+
+    // Migration from v1 to v2
     if (parsed.version === 1) {
-      const migratedChapters = parsed.chapters.map((ch: any) => ({
-        chapterId: ch.chapterId,
-        startTime: ch.startTime,
-        isPaused: false,
-        accumulatedTime: 0,
-        workingEntries: [],
-      }));
-      return { chapters: migratedChapters, version: STORAGE_VERSION };
+      const migratedChapters: Record<string, WorkingChapterState> = {};
+      for (const [id, state] of Object.entries(parsed.chapters)) {
+        migratedChapters[id] = {
+          ...state,
+          entries: state.entries || [],
+        };
+      }
+      return migratedChapters;
     }
-    
-    if (parsed.version !== STORAGE_VERSION) {
-      return { chapters: [], version: STORAGE_VERSION };
-    }
-    return parsed;
-  } catch {
-    return { chapters: [], version: STORAGE_VERSION };
+
+    return parsed.chapters || {};
+  } catch (error) {
+    console.error('Failed to load working chapters:', error);
+    return {};
   }
 }
 
-function saveState(state: CurrentlyWorkingState) {
+function saveWorkingChapters(chapters: Record<string, WorkingChapterState>) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const data: WorkingChaptersData = {
+      version: CURRENT_VERSION,
+      chapters,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    window.dispatchEvent(new Event('storage'));
   } catch (error) {
-    console.error('Failed to save currently working state:', error);
+    console.error('Failed to save working chapters:', error);
   }
 }
 
 export function useCurrentlyWorkingChapters() {
-  const [state, setState] = useState<CurrentlyWorkingState>(loadState);
-  const [now, setNow] = useState(Date.now());
+  const [workingChapters, setWorkingChapters] = useState<Record<string, WorkingChapterState>>(loadWorkingChapters);
+  const [, setTick] = useState(0);
 
-  // Update 'now' every second for live elapsed time
+  // Live update every second for active timers
   useEffect(() => {
     const interval = setInterval(() => {
-      setNow(Date.now());
+      setTick(t => t + 1);
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Persist state changes
+  // Sync across tabs
   useEffect(() => {
-    saveState(state);
-  }, [state]);
+    const handleStorageChange = () => {
+      setWorkingChapters(loadWorkingChapters());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const isWorking = useCallback((chapterId: string): boolean => {
+    return !!workingChapters[chapterId] && !workingChapters[chapterId].pausedAt;
+  }, [workingChapters]);
+
+  const isPaused = useCallback((chapterId: string): boolean => {
+    return !!workingChapters[chapterId] && !!workingChapters[chapterId].pausedAt;
+  }, [workingChapters]);
+
+  const getElapsedTime = useCallback((chapterId: string): number => {
+    const state = workingChapters[chapterId];
+    if (!state) return 0;
+
+    const now = Date.now();
+    let elapsed = state.accumulatedTime;
+
+    if (state.pausedAt) {
+      // Paused: use accumulated time only
+      elapsed = state.accumulatedTime;
+    } else {
+      // Running: add current session time
+      elapsed = state.accumulatedTime + Math.floor((now - state.startTime) / 1000);
+    }
+
+    return elapsed;
+  }, [workingChapters]);
+
+  const getActiveChapters = useCallback((): ActiveChapter[] => {
+    const active: ActiveChapter[] = [];
+    
+    for (const [chapterId, state] of Object.entries(workingChapters)) {
+      // Only include chapters that have an active or paused session
+      if (state.startTime > 0 || state.pausedAt) {
+        const now = Date.now();
+        let elapsedTime = state.accumulatedTime;
+        
+        if (!state.pausedAt) {
+          elapsedTime += Math.floor((now - state.startTime) / 1000);
+        }
+        
+        active.push({
+          chapterId,
+          isPaused: !!state.pausedAt,
+          elapsedTime,
+        });
+      }
+    }
+    
+    return active;
+  }, [workingChapters]);
 
   const startWorking = useCallback((chapterId: string) => {
-    setState(prev => {
-      const existing = prev.chapters.find(ch => ch.chapterId === chapterId);
-      if (existing) {
-        // If paused, resume
-        if (existing.isPaused && existing.pausedAt) {
-          return {
-            ...prev,
-            chapters: prev.chapters.map(ch =>
-              ch.chapterId === chapterId
-                ? { ...ch, isPaused: false, startTime: Date.now(), pausedAt: undefined }
-                : ch
-            ),
-          };
-        }
-        return prev; // Already working on it
-      }
-      return {
+    setWorkingChapters(prev => {
+      const updated = {
         ...prev,
-        chapters: [
-          ...prev.chapters,
-          {
-            chapterId,
-            startTime: Date.now(),
-            isPaused: false,
-            accumulatedTime: 0,
-            workingEntries: [],
-          },
-        ],
+        [chapterId]: {
+          chapterId,
+          startTime: Date.now(),
+          accumulatedTime: 0,
+          entries: prev[chapterId]?.entries || [],
+        },
       };
+      saveWorkingChapters(updated);
+      return updated;
     });
   }, []);
 
   const pauseWorking = useCallback((chapterId: string) => {
-    setState(prev => {
-      const chapter = prev.chapters.find(ch => ch.chapterId === chapterId);
-      if (!chapter || chapter.isPaused) return prev;
+    setWorkingChapters(prev => {
+      const state = prev[chapterId];
+      if (!state || state.pausedAt) return prev;
 
-      const elapsed = Math.floor((Date.now() - chapter.startTime) / 1000);
-      return {
+      const now = Date.now();
+      const sessionTime = Math.floor((now - state.startTime) / 1000);
+      
+      const updated = {
         ...prev,
-        chapters: prev.chapters.map(ch =>
-          ch.chapterId === chapterId
-            ? {
-                ...ch,
-                isPaused: true,
-                pausedAt: Date.now(),
-                accumulatedTime: ch.accumulatedTime + elapsed,
-              }
-            : ch
-        ),
+        [chapterId]: {
+          ...state,
+          pausedAt: now,
+          accumulatedTime: state.accumulatedTime + sessionTime,
+        },
       };
+      saveWorkingChapters(updated);
+      return updated;
+    });
+  }, []);
+
+  const resumeWorking = useCallback((chapterId: string) => {
+    setWorkingChapters(prev => {
+      const state = prev[chapterId];
+      if (!state || !state.pausedAt) return prev;
+
+      const updated = {
+        ...prev,
+        [chapterId]: {
+          ...state,
+          startTime: Date.now(),
+          pausedAt: undefined,
+        },
+      };
+      saveWorkingChapters(updated);
+      return updated;
     });
   }, []);
 
   const stopWorking = useCallback((chapterId: string) => {
-    setState(prev => ({
-      ...prev,
-      chapters: prev.chapters.filter(ch => ch.chapterId !== chapterId),
-    }));
-  }, []);
+    setWorkingChapters(prev => {
+      const state = prev[chapterId];
+      if (!state) return prev;
 
-  const isWorking = useCallback((chapterId: string) => {
-    return state.chapters.some(ch => ch.chapterId === chapterId);
-  }, [state.chapters]);
-
-  const isPaused = useCallback((chapterId: string) => {
-    const chapter = state.chapters.find(ch => ch.chapterId === chapterId);
-    return chapter?.isPaused || false;
-  }, [state.chapters]);
-
-  const getElapsedTime = useCallback((chapterId: string): number => {
-    const chapter = state.chapters.find(ch => ch.chapterId === chapterId);
-    if (!chapter) return 0;
-    
-    if (chapter.isPaused) {
-      return chapter.accumulatedTime;
-    }
-    
-    const currentSessionTime = Math.floor((now - chapter.startTime) / 1000);
-    return chapter.accumulatedTime + currentSessionTime;
-  }, [state.chapters, now]);
-
-  const getActiveChapters = useCallback(() => {
-    return state.chapters.map(ch => {
-      let elapsedSeconds = ch.accumulatedTime;
-      if (!ch.isPaused) {
-        elapsedSeconds += Math.floor((now - ch.startTime) / 1000);
+      const now = Date.now();
+      let totalTime = state.accumulatedTime;
+      
+      if (!state.pausedAt) {
+        // If not paused, add current session time
+        totalTime += Math.floor((now - state.startTime) / 1000);
       }
-      return {
-        chapterId: ch.chapterId,
-        elapsedSeconds,
-        isPaused: ch.isPaused,
+
+      // Create a new entry with the total time
+      const newEntry: WorkingEntry = {
+        id: `entry-${Date.now()}`,
+        duration: totalTime,
+        timestamp: now,
       };
+
+      const updated = { ...prev };
+      delete updated[chapterId];
+      
+      // Keep entries but remove active state
+      if (totalTime > 0) {
+        updated[chapterId] = {
+          chapterId,
+          startTime: 0,
+          accumulatedTime: 0,
+          entries: [...(state.entries || []), newEntry],
+        };
+      }
+
+      saveWorkingChapters(updated);
+      return updated;
     });
-  }, [state.chapters, now]);
-
-  const addWorkingEntry = useCallback((chapterId: string, durationSeconds: number) => {
-    setState(prev => ({
-      ...prev,
-      chapters: prev.chapters.map(ch =>
-        ch.chapterId === chapterId
-          ? {
-              ...ch,
-              workingEntries: [
-                ...ch.workingEntries,
-                {
-                  id: `entry-${Date.now()}-${Math.random()}`,
-                  duration: durationSeconds,
-                  timestamp: Date.now(),
-                },
-              ],
-            }
-          : ch
-      ),
-    }));
-  }, []);
-
-  const updateWorkingEntry = useCallback((chapterId: string, entryId: string, durationSeconds: number) => {
-    setState(prev => ({
-      ...prev,
-      chapters: prev.chapters.map(ch =>
-        ch.chapterId === chapterId
-          ? {
-              ...ch,
-              workingEntries: ch.workingEntries.map(entry =>
-                entry.id === entryId ? { ...entry, duration: durationSeconds } : entry
-              ),
-            }
-          : ch
-      ),
-    }));
-  }, []);
-
-  const deleteWorkingEntry = useCallback((chapterId: string, entryId: string) => {
-    setState(prev => ({
-      ...prev,
-      chapters: prev.chapters.map(ch =>
-        ch.chapterId === chapterId
-          ? {
-              ...ch,
-              workingEntries: ch.workingEntries.filter(entry => entry.id !== entryId),
-            }
-          : ch
-      ),
-    }));
   }, []);
 
   const getWorkingEntries = useCallback((chapterId: string): WorkingEntry[] => {
-    const chapter = state.chapters.find(ch => ch.chapterId === chapterId);
-    return chapter?.workingEntries || [];
-  }, [state.chapters]);
+    return workingChapters[chapterId]?.entries || [];
+  }, [workingChapters]);
 
-  const getTotalRecordedTime = useCallback((chapterId: string): number => {
-    const entries = getWorkingEntries(chapterId);
-    return entries.reduce((sum, entry) => sum + entry.duration, 0);
-  }, [getWorkingEntries]);
+  const addWorkingEntry = useCallback((chapterId: string, duration: number) => {
+    setWorkingChapters(prev => {
+      const state = prev[chapterId] || {
+        chapterId,
+        startTime: 0,
+        accumulatedTime: 0,
+        entries: [],
+      };
+
+      const newEntry: WorkingEntry = {
+        id: `entry-${Date.now()}`,
+        duration,
+        timestamp: Date.now(),
+      };
+
+      const updated = {
+        ...prev,
+        [chapterId]: {
+          ...state,
+          entries: [...state.entries, newEntry],
+        },
+      };
+      saveWorkingChapters(updated);
+      return updated;
+    });
+  }, []);
+
+  const updateWorkingEntry = useCallback((chapterId: string, entryId: string, duration: number) => {
+    setWorkingChapters(prev => {
+      const state = prev[chapterId];
+      if (!state) return prev;
+
+      const updated = {
+        ...prev,
+        [chapterId]: {
+          ...state,
+          entries: state.entries.map(entry =>
+            entry.id === entryId ? { ...entry, duration } : entry
+          ),
+        },
+      };
+      saveWorkingChapters(updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteWorkingEntry = useCallback((chapterId: string, entryId: string) => {
+    setWorkingChapters(prev => {
+      const state = prev[chapterId];
+      if (!state) return prev;
+
+      const updated = {
+        ...prev,
+        [chapterId]: {
+          ...state,
+          entries: state.entries.filter(entry => entry.id !== entryId),
+        },
+      };
+      saveWorkingChapters(updated);
+      return updated;
+    });
+  }, []);
 
   return {
-    startWorking,
-    pauseWorking,
-    stopWorking,
     isWorking,
     isPaused,
     getElapsedTime,
     getActiveChapters,
+    startWorking,
+    pauseWorking,
+    resumeWorking,
+    stopWorking,
+    getWorkingEntries,
     addWorkingEntry,
     updateWorkingEntry,
     deleteWorkingEntry,
-    getWorkingEntries,
-    getTotalRecordedTime,
   };
 }

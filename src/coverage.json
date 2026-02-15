@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T21:19:05.269Z",
+  "generatedAt": "2026-02-15T22:59:01.032Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,34 +12,51 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
+        "summary": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced in the latest deployment(s) (e.g., versions 38–40).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ChapterDetailPanel.tsx"
+          "frontend/src/lib/appVersion.ts",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Customize.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ChapterDetailPanel.tsx"
+          "frontend/src/lib/appVersion.ts",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Customize.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
+        "summary": "If the system cannot uniquely identify or reproduce version 37 from available build/deployment metadata, add a safeguard that blocks rollback until an explicit target version identifier is provided/confirmed (e.g., v37, v38, v39, v40, or a commit hash), and ensure the rollback action uses that exact identifier.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ChapterDetailPanel.tsx"
+          "frontend/src/components/RollbackTargetSafeguard.tsx",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/lib/appVersion.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/ChapterDetailPanel.tsx"
+          "frontend/src/components/RollbackTargetSafeguard.tsx",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/lib/appVersion.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/ChapterDetailPanel.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/RollbackTargetSafeguard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/lib/appVersion.ts",
+    "frontend/src/pages/Customize.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

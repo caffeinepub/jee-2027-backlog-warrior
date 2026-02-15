@@ -3,30 +3,35 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Chapter details status selector (Completed/Incomplete/Tough) cannot be deselected/changed after selecting one; UI only advances forward with no option to revert."
-  ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-chapter-details-status-controls-completed-incomplete-tough-so-the-user-can-deselect-a-previously-selected-status-and-revert-the-chapter-status-back-to-not-started",
-      "title": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
+      "id": "feature-restore-the-application-frontend-and-backend-to-match-the-exact-behavior-and-code-that-was-deployed-as-version-37-undoing-all-changes-introduced-in-the-latest-deployment-s-e-g-versions-38-40",
+      "title": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced in the latest deployment(s) (e.g., versions 38–40).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-chapter-details-status-controls-so-the-user-can-switch-between-statuses-freely-completed-incomplete-tough-without-the-ui-disabling-the-currently-selected-option-in-a-way-that-prevents-re-selection-behavior-needed-for-toggle-to-clear",
-      "title": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
+      "id": "feature-if-the-system-cannot-uniquely-identify-or-reproduce-version-37-from-available-build-deployment-metadata-add-a-safeguard-that-blocks-rollback-until-an-explicit-target-version-identifier-is-provided-confirmed-e-g-v37-v38-v39-v40-or-a-commit-hash-and-ensure-the-rollback-action-uses-that-exact-identifier",
+      "title": "If the system cannot uniquely identify or reproduce version 37 from available build/deployment metadata, add a safeguard that blocks rollback until an explicit target version identifier is provided/confirmed (e.g., v37, v38, v39, v40, or a commit hash), and ensure the rollback action uses that exact identifier.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Allow chapter status selection to be changed or cleared in Chapter Details",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Rollback latest deployment changes and restore deployment to version 37",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Rollback deployment to version 37 (undo latest deployed changes)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

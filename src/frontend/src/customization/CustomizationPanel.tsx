@@ -65,21 +65,17 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
 
           {/* Daily Target Hours */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="daily-target">Daily Target Hours</Label>
-              <span className="text-sm font-semibold text-primary">{settings.dailyTargetHours}h</span>
-            </div>
+            <Label>Daily Target Hours: {settings.dailyTargetHours}h</Label>
             <Slider
-              id="daily-target"
+              value={[settings.dailyTargetHours]}
+              onValueChange={([value]) => updateSettings({ dailyTargetHours: value })}
               min={1}
               max={16}
               step={0.5}
-              value={[settings.dailyTargetHours]}
-              onValueChange={([value]) => updateSettings({ dailyTargetHours: value })}
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Used to calculate date-to-finish for chapters
+              Set your daily study goal
             </p>
           </div>
 
@@ -87,21 +83,17 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
 
           {/* Lecture Speed Factor */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="speed-factor">Lecture Speed Factor</Label>
-              <span className="text-sm font-semibold text-primary">{settings.lectureSpeedFactor}x</span>
-            </div>
+            <Label>Lecture Speed Factor: {settings.lectureSpeedFactor}x</Label>
             <Slider
-              id="speed-factor"
+              value={[settings.lectureSpeedFactor]}
+              onValueChange={([value]) => updateSettings({ lectureSpeedFactor: value })}
               min={1}
               max={2}
               step={0.1}
-              value={[settings.lectureSpeedFactor]}
-              onValueChange={([value]) => updateSettings({ lectureSpeedFactor: value })}
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Playback speed used for target hours calculation
+              Adjust playback speed for time calculations
             </p>
           </div>
 
@@ -109,9 +101,9 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
 
           {/* Sleep Window */}
           <div className="space-y-3">
-            <Label>Sleep Window (Local Time)</Label>
+            <Label>Sleep Window</Label>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div>
                 <Label htmlFor="sleep-start" className="text-xs text-muted-foreground">Start</Label>
                 <Input
                   id="sleep-start"
@@ -120,7 +112,7 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
                   onChange={(e) => updateSettings({ sleepWindowStart: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
+              <div>
                 <Label htmlFor="sleep-end" className="text-xs text-muted-foreground">End</Label>
                 <Input
                   id="sleep-end"
@@ -131,7 +123,7 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              You'll be warned if you log study time during this window
+              Get alerts when logging study time during sleep hours
             </p>
           </div>
 
@@ -139,10 +131,10 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
 
           {/* Notifications */}
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="notifications">Notifications</Label>
+            <div className="space-y-0.5">
+              <Label htmlFor="notifications">Enable Notifications</Label>
               <p className="text-xs text-muted-foreground">
-                Show in-app warnings and alerts
+                Show alerts for incomplete work
               </p>
             </div>
             <Switch
@@ -163,26 +155,26 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
               onValueChange={(value) => value && updateSettings({ chapterCardSize: value as 'compact' | 'detailed' })}
               className="justify-start"
             >
-              <ToggleGroupItem value="compact" aria-label="Compact view">
+              <ToggleGroupItem value="compact" aria-label="Compact">
                 Compact
               </ToggleGroupItem>
-              <ToggleGroupItem value="detailed" aria-label="Detailed view">
+              <ToggleGroupItem value="detailed" aria-label="Detailed">
                 Detailed
               </ToggleGroupItem>
             </ToggleGroup>
             <p className="text-xs text-muted-foreground">
-              Controls the density of chapter cards
+              Choose how much detail to show on chapter cards
             </p>
           </div>
 
           <Separator />
 
-          {/* Auto Recalculate Date to Finish */}
+          {/* Auto-recalculate Date to Finish */}
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="auto-recalc">Auto Recalculate Date</Label>
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-recalc">Auto-recalculate Date to Finish</Label>
               <p className="text-xs text-muted-foreground">
-                Automatically update date-to-finish based on settings
+                Automatically update completion dates
               </p>
             </div>
             <Switch
@@ -202,9 +194,9 @@ export function CustomizationPanel({ open, onOpenChange }: CustomizationPanelPro
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Reset to Defaults?</AlertDialogTitle>
+                <AlertDialogTitle>Reset to Defaults</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will restore all settings to their default values. This action cannot be undone.
+                  This will reset all customization settings to their default values. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

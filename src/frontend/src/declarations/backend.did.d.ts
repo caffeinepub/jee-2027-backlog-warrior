@@ -10,7 +10,25 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export interface Reminder {
+  'isCancelled' : boolean,
+  'isCompleted' : boolean,
+  'scheduledTime' : Time,
+  'name' : ReminderName,
+  'creationTime' : Time,
+}
+export type ReminderId = bigint;
+export type ReminderName = string;
+export type Time = bigint;
+export interface _SERVICE {
+  'cancelReminder' : ActorMethod<[ReminderId], boolean>,
+  'completeReminder' : ActorMethod<[ReminderId], boolean>,
+  'createReminder' : ActorMethod<[ReminderName, Time], ReminderId>,
+  'getActiveReminders' : ActorMethod<[], Array<Reminder>>,
+  'getCompletedReminders' : ActorMethod<[], Array<Reminder>>,
+  'getReminder' : ActorMethod<[ReminderId], [] | [Reminder]>,
+  'getTotalReminders' : ActorMethod<[], bigint>,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;
