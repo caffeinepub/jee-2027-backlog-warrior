@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Roll back the deployed application to the exact behavior and code of version 37, undoing changes from later deployments.
+**Goal:** Make “rollback to version 37” reliably restore a clean v37 baseline by deterministically clearing newer-version client state, running reconciliation before any UI rehydrates, and providing an in-app verification/retry path.
 
 **Planned changes:**
-- Restore frontend and backend to the exact deployed artifacts/code corresponding to version 37, removing any behavior introduced after version 37.
-- Ensure the deployed app reports and/or is labeled as version 37 (or an unambiguous equivalent identifier mapped to version 37).
-- If version 37 cannot be uniquely identified from deployment/build metadata, add a safeguard that blocks rollback until an explicit target identifier (e.g., v37 or a commit hash) is provided/confirmed, and log/record the exact restored identifier.
-- Avoid running new data migrations during rollback unless version 37 requires a different stable-state schema; if so, include only the necessary safe migration work to restore version 37 compatibility.
+- Update the rollback-to-v37 flow to remove all app-owned localStorage keys defined in `frontend/src/lib/appLocalStorage.ts`, while preserving required rollback/audit markers.
+- Ensure rollback reconciliation/reset executes before any routes/pages/components that read localStorage can render or re-persist state, so the first post-rollback UI reflects the restored baseline immediately.
+- Add a simple status panel on the Customize page showing rollback active/inactive and (when active) whether v37 reconciliation completed, plus a safe retry/force-restore action if reconciliation is incomplete (English UI text).
 
-**User-visible outcome:** The live app behaves exactly like version 37 and is identifiable as version 37; if the rollback target is ambiguous, the rollback is blocked until a specific version identifier is confirmed.
+**User-visible outcome:** After confirming rollback to v37, the app reloads directly into a fresh v37 baseline (no prior user data remains), continues to indicate “v37 (Rollback)”, and the Customize page clearly shows rollback/reconciliation status with a retry option if needed.

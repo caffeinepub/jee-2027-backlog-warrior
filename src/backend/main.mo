@@ -3,10 +3,10 @@ import Array "mo:core/Array";
 import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
 import Time "mo:core/Time";
-import Migration "migration";
+
 
 // Specify the data migration function in with-clause
-(with migration = Migration.run)
+
 actor {
   // Variables
   var nextReminderId = 0;

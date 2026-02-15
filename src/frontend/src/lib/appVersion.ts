@@ -33,7 +33,7 @@ export const ROLLBACK_TARGET_STORAGE_KEY = 'app-rollback-target-confirmed';
 export function storeConfirmedRollbackTarget(target: string): void {
   try {
     localStorage.setItem(ROLLBACK_TARGET_STORAGE_KEY, JSON.stringify({
-      target,
+      target: target.trim(),
       confirmedAt: new Date().toISOString(),
       currentVersion: APP_VERSION.number,
     }));

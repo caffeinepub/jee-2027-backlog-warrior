@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { type CustomizationSettings, DEFAULT_SETTINGS, validateSettings } from './settingsModel';
+import { APP_STORAGE_KEYS } from '../lib/appLocalStorage';
 
-// Export storage key for use in index.html early-load script
-export const STORAGE_KEY = 'jee-backlog-warrior-settings';
+// Use centralized storage key
+export const STORAGE_KEY = APP_STORAGE_KEYS.CUSTOMIZATION_SETTINGS;
 const STORAGE_VERSION = 1;
 
 interface StorageData {

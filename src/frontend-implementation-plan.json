@@ -1,57 +1,72 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Frontend rollback identification and safeguard (restore UX labeling to v37)",
+  "title": "Deterministic v37 rollback restore with pre-render reconciliation and user verification",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Ensure the UI clearly reports version 37 and does not surface post-v37 UI behavior.",
+      "summary": "Make rollback-to-v37 deterministically clear all app-owned localStorage keys (per appLocalStorage list) while preserving rollback/audit markers, ensuring a clean v37 seeded baseline after reload.",
       "acceptanceCriteria": [
-        "After deployment, the app reports and/or is labeled as version 37 (or an unambiguous equivalent identifier mapped to version 37).",
-        "The deployed frontend and backend behavior matches version 37 and does not include changes introduced after version 37.",
-        "No new data migrations run as part of this rollback unless version 37 requires a different stable state schema (in which case the rollback includes a safe, tested migration plan)."
+        "When a user confirms rollback to v37, all app-owned localStorage keys listed in frontend/src/lib/appLocalStorage.ts are removed as part of the rollback flow, except rollback/audit markers that must be preserved.",
+        "After rollback completes and the app reloads, subjects/chapters/todos/tests/notes/calendar/customization/presets/countdown/work sessions reflect the same seeded/default state as a fresh v37 install (no previously-entered user data remains).",
+        "The rollback operation is idempotent: reloading the app again does not reintroduce cleared data and does not repeatedly clear already-clean storage in a way that breaks normal usage."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/appVersion.ts",
-          "operation": "create",
-          "description": "Create a single source of truth for the frontend’s deployed version identifier (set to 37) and any optional mapping/metadata needed to display it consistently across the UI."
+          "path": "frontend/src/lib/appLocalStorage.ts",
+          "operation": "modify",
+          "description": "Extend app-localStorage clearing to support deterministic exclusion of specific keys (rollback/audit markers) while still removing every key in STORAGE_KEYS; keep STORAGE_KEYS as the authoritative list referenced by the rollback flow."
         },
         {
-          "path": "frontend/src/components/Layout.tsx",
+          "path": "frontend/src/lib/rollbackRestore.ts",
           "operation": "modify",
-          "description": "Display the app version label sourced from frontend/src/lib/appVersion.ts in the main (non-/customize) header so users can verify the deployment is version 37 at runtime."
-        },
-        {
-          "path": "frontend/src/pages/Customize.tsx",
-          "operation": "modify",
-          "description": "Add a read-only “App Version” section that displays the version identifier from frontend/src/lib/appVersion.ts to provide an unambiguous place to confirm the deployed version on the Customize page."
+          "description": "Update rollback activation/reconciliation logic to clear all app-owned keys deterministically while explicitly preserving rollback/audit markers (e.g., rollback active flag, reconciliation flag, and confirmed rollback target audit record), and ensure the flow is idempotent across reloads."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a fail-closed rollback-target confirmation UX when a rollback target cannot be determined unambiguously.",
+      "summary": "Ensure rollback reconciliation runs before any routed pages/components can read or persist newer-version localStorage state, so the first rendered UI after rollback reflects the restored v37 baseline.",
       "acceptanceCriteria": [
-        "When rollback target is ambiguous, the rollback process fails closed (does not deploy anything) and clearly indicates that an explicit target version identifier is required.",
-        "Once a valid explicit target identifier for version 37 is provided/confirmed, the system performs the restore using that exact identifier and records/logs which version was restored.",
-        "User-facing text for any prompts/confirmations is in English."
+        "With rollback active, reconciliation runs before child routes/pages that read localStorage render (so those pages only ever see post-reconciliation storage).",
+        "After triggering rollback, the header badge continues to show “v37 (Rollback)” and the UI behavior matches the post-reset baseline immediately after the first reload (no intermediate render with stale data)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/RollbackTargetSafeguard.tsx",
-          "operation": "create",
-          "description": "Create a small UI safeguard component that (when enabled via an explicit flag such as a router search param or build-time value) blocks the rollback-related UI flow until the user provides/confirms an explicit target identifier (e.g., “v37” or a commit hash) in English. Use shadcn-ui dialog/alert primitives already present in the repo to present the confirmation UI; verify the component's usage instructions before implementing."
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Invoke rollback reconciliation synchronously before RouterProvider mounts (e.g., during module initialization or at the top of the App component) to prevent any route/page from rendering with pre-reconciled localStorage."
         },
         {
           "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Wire RollbackTargetSafeguard into the app shell so it can activate when the rollback target is ambiguous (fail-closed) and only unblock once the explicit identifier is provided/confirmed. Ensure all user-facing prompt/confirmation text is in English. Use shadcn-ui components already available; verify the component's usage instructions before implementing."
+          "description": "Adjust Layout rollback handling so it does not rely on a post-render useEffect for initial reconciliation (avoiding an intermediate render that can read stale localStorage), while keeping the existing version badge behavior intact. Use existing composed shadcn-ui Badge where relevant; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/lib/appVersion.ts",
+          "path": "frontend/src/lib/rollbackRestore.ts",
           "operation": "modify",
-          "description": "Extend version utilities to support validating a provided explicit target identifier against the expected v37 identifier and to store the last confirmed rollback target locally (for display/audit in the UI), without introducing any new migrations."
+          "description": "Add a pre-render-safe reconciliation helper (used by App/Layout) that guarantees one-time restore semantics without render-time races, and avoids reload loops by using a stable reconciliation marker."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add a clear rollback verification panel on the Customize page showing rollback active status and reconciliation completion, with a safe retry action when reconciliation is incomplete.",
+      "acceptanceCriteria": [
+        "Customize page shows rollback status (active/inactive) and a clear indicator of whether reconciliation is complete when rollback is active.",
+        "If rollback is active and reconciliation is not complete, the UI offers an action to retry/force the restore flow that results in a fully restored baseline state after reload.",
+        "All user-facing text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/rollbackRestore.ts",
+          "operation": "modify",
+          "description": "Export rollback reconciliation status (read-only) and add a safe 'retry/force restore' function that re-runs the deterministic restore and reloads, preserving rollback/audit markers."
+        },
+        {
+          "path": "frontend/src/pages/Customize.tsx",
+          "operation": "modify",
+          "description": "Add a user-visible rollback verification section within the existing App Version card: show (1) rollback active/inactive, (2) reconciliation complete/incomplete when active, and (3) a retry/force-restore action when incomplete. Compose existing shadcn-ui primitives (Card, Badge, Button, AlertDialog, etc.) without editing frontend/src/components/ui/*; verify the component's usage instructions before implementing."
         }
       ]
     }

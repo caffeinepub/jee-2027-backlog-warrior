@@ -8,6 +8,10 @@ import { Tests } from './pages/Tests';
 import { CountdownTimer } from './pages/CountdownTimer';
 import { Layout } from './components/Layout';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import { reconcileRollbackBeforeRender } from './lib/rollbackRestore';
+
+// Perform rollback reconciliation before any components render
+reconcileRollbackBeforeRender();
 
 const rootRoute = createRootRoute({
   component: Layout,

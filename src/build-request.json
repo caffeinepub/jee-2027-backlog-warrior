@@ -1,66 +1,74 @@
 {
   "kind": "build_request",
-  "title": "Rollback deployment to version 37 (undo latest deployed changes)",
-  "priority": "high",
+  "title": "Ensure rollback fully restores Version 37 state and behavior",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced in the latest deployment(s) (e.g., versions 38–40).",
-      "target": "both",
+      "text": "Make the “rollback to version 37” operation fully restore the app to a clean v37 baseline state by clearing all app-owned localStorage data deterministically (while preserving rollback/audit markers) so that no newer-version client state can survive the rollback.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Undo latest deployment changes (restore to 37 version)"
+          "i want version 37 to be fully restored"
         ]
       },
       "acceptanceCriteria": [
-        "After deployment, the app reports and/or is labeled as version 37 (or an unambiguous equivalent identifier mapped to version 37).",
-        "The deployed frontend and backend behavior matches version 37 and does not include changes introduced after version 37.",
-        "No new data migrations run as part of this rollback unless version 37 requires a different stable state schema (in which case the rollback includes a safe, tested migration plan)."
+        "When a user confirms rollback to v37, all app-owned localStorage keys listed in frontend/src/lib/appLocalStorage.ts are removed as part of the rollback flow, except rollback/audit markers that must be preserved.",
+        "After rollback completes and the app reloads, subjects/chapters/todos/tests/notes/calendar/customization/presets/countdown/work sessions reflect the same seeded/default state as a fresh v37 install (no previously-entered user data remains).",
+        "The rollback operation is idempotent: reloading the app again does not reintroduce cleared data and does not repeatedly clear already-clean storage in a way that breaks normal usage."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "If the system cannot uniquely identify or reproduce version 37 from available build/deployment metadata, add a safeguard that blocks rollback until an explicit target version identifier is provided/confirmed (e.g., v37, v38, v39, v40, or a commit hash), and ensure the rollback action uses that exact identifier.",
-      "target": "both",
+      "text": "Ensure rollback reconciliation executes before any pages/components can rehydrate or re-persist newer-version state, so the first rendered UI after rollback reflects the restored v37 baseline.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Undo latest deployment changes (restore to 37 version)"
+          "i want version 37 to be fully restored"
         ]
       },
       "acceptanceCriteria": [
-        "When rollback target is ambiguous, the rollback process fails closed (does not deploy anything) and clearly indicates that an explicit target version identifier is required.",
-        "Once a valid explicit target identifier for version 37 is provided/confirmed, the system performs the restore using that exact identifier and records/logs which version was restored.",
-        "User-facing text for any prompts/confirmations is in English."
+        "With rollback active, reconciliation runs before child routes/pages that read localStorage render (so those pages only ever see post-reconciliation storage).",
+        "After triggering rollback, the header badge continues to show “v37 (Rollback)” and the UI behavior matches the post-reset baseline immediately after the first reload (no intermediate render with stale data)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a simple, user-visible verification path on the Customize page that clearly indicates whether rollback is active and whether v37 reconciliation has completed successfully, and provides a safe way to re-run the restore if reconciliation did not complete.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "i want version 37 to be fully restored"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Customize page shows rollback status (active/inactive) and a clear indicator of whether reconciliation is complete when rollback is active.",
+        "If rollback is active and reconciliation is not complete, the UI offers an action to retry/force the restore flow that results in a fully restored baseline state after reload.",
+        "All user-facing text is in English."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo changes if state upgrade/downgrade requires it per the conditional migration policy.",
-    "Do not edit files under frontend/src/components/ui or any frontend immutable paths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx)."
+    "Do not edit files under frontend/src/components/ui (read-only shadcn components); compose them instead.",
+    "Do not edit immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
+    "Keep all backend Motoko logic (if any changes are needed) within backend/main.mo and maintain the single-actor architecture."
   ],
   "nonGoals": [
-    "Adding new product features unrelated to restoring version 37.",
-    "Refactoring or redesigning UI beyond what is necessary to match version 37.",
-    "Introducing external databases, third-party auth providers, or additional backend services."
+    "Implementing new unrelated product features beyond making rollback to v37 fully restore state/behavior.",
+    "Adding external databases, third-party auth providers, or real-time communication features.",
+    "Changing or migrating backend canister state (the rollback issue is client-side localStorage restore unless explicitly proven otherwise)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

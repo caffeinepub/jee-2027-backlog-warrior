@@ -1,62 +1,49 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T22:59:01.029Z",
-  "summary": "Diff adds an app version source-of-truth set to v37, introduces a rollback-target confirmation UI component plus localStorage audit helpers, and adds a Motoko migration hook plus a new backend query helper. However, the diff does not provide evidence that the app was actually restored to the exact previously-deployed v37 code/behavior, nor that the safeguard is wired into an actual rollback/deploy mechanism that can fail closed when the target is ambiguous.",
+  "generatedAt": "2026-02-15T23:19:56.882Z",
+  "summary": "Rollback reconciliation and storage-clearing logic appears to have been added and invoked before rendering (App.tsx), with rollback markers preserved and a reconciliation-complete marker for idempotency. However, the diff summary is truncated for Customize.tsx and rollbackRestore.ts, so it’s not fully verifiable that the Customize page provides the required visible status + “retry restore” UX. The diff summary also indicates several unrelated UI/feature changes (dashboard redesign, bottom navigation changes, timers/CRUD enhancements) that were not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced after version 37.",
-      "reason": "The diff shows new files and new/modified code (e.g., versioning helpers, a rollback confirmation dialog, a new backend query, and a migration hook), but it does not show a comprehensive revert of post-v37 changes or evidence that the overall frontend/backend codebase now matches the exact v37 deployment.",
+      "id": "REQ-3",
+      "requirement": "Customize page must clearly indicate whether rollback is active and whether v37 reconciliation has completed successfully, and offer an action to retry/force restore if reconciliation is incomplete.",
+      "reason": "Customize.tsx is truncated in the diff, and while it imports rollback status helpers and retry functions, the provided snippet does not show the required user-visible status indicator(s) and retry/force-restore action being rendered. Therefore implementation cannot be confirmed from the available evidence.",
       "evidence": [
-        "frontend/src/lib/appVersion.ts",
-        "frontend/src/components/RollbackTargetSafeguard.tsx",
-        "backend/main.mo",
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Add a safeguard that blocks rollback when the target is ambiguous until an explicit target version identifier is provided/confirmed, and ensure the rollback action uses that exact identifier and records/logs which version was restored.",
-      "reason": "A safeguard UI component and localStorage recording utilities were added, but the diff does not show integration into any rollback/deployment workflow that actually prevents deployment (fail-closed) or ensures the restore/deploy uses the confirmed identifier. Also, the validator only accepts v37/37/version 37, not other explicit identifiers like commit hashes or v38–v40 as described in the requirement examples.",
-      "evidence": [
-        "frontend/src/components/RollbackTargetSafeguard.tsx",
-        "frontend/src/lib/appVersion.ts"
+        "frontend/src/pages/Customize.tsx (truncated)",
+        "frontend/src/lib/rollbackRestore.ts (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added backend query helper `getTotalReminders()`.",
-      "reason": "Not requested by REQ-1/REQ-2 (rollback to v37 + safeguard); this appears to be an additional feature/API surface change.",
+      "description": "Bottom navigation behavior changed to only render the SubjectsBar and remove main route navigation buttons.",
+      "reason": "Not requested by the BuildRequest (scope is rollback restore behavior and a verification path on Customize page).",
       "evidence": [
-        "backend/main.mo"
+        "frontend-file-summaries.txt (BottomNavigation summary)"
       ]
     },
     {
-      "description": "Introduced a Motoko migration hook and new `backend/migration.mo` with a trivial migration.",
-      "reason": "Migration changes were only allowed if required for state upgrade/downgrade, but the diff does not provide evidence that v37 rollback requires any schema migration; adding migration infrastructure may be unnecessary under the stated conditional migration policy.",
+      "description": "Dashboard UI and content significantly enhanced (theme changes, animated stats cards, notifications section, charts, quick note, etc.).",
+      "reason": "Not requested by the BuildRequest; considered unrelated product/UI feature changes beyond rollback restoration.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
+        "frontend-file-summaries.txt (Dashboard summary)"
       ]
     },
     {
-      "description": "Added a `deployedAt: new Date().toISOString()` field as part of version metadata.",
-      "reason": "Not explicitly requested; REQ-1 only requires reporting/labeling as version 37 (or equivalent). This adds new runtime-changing metadata.",
+      "description": "Subject page/chapter components expanded with live timer controls, CRUD operations, and additional panels/state management changes.",
+      "reason": "Not requested by the BuildRequest; appears to introduce/modify unrelated functionality beyond rollback restoration.",
       "evidence": [
-        "frontend/src/lib/appVersion.ts"
+        "frontend-file-summaries.txt (SubjectPage/ChapterCard/ChapterDetailPanel summaries)"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/components/Layout.tsx",
-    "frontend/src/components/RollbackTargetSafeguard.tsx",
-    "frontend/src/lib/appVersion.ts",
+    "frontend/src/lib/appLocalStorage.ts",
+    "frontend/src/lib/rollbackRestore.ts",
     "frontend/src/pages/Customize.tsx",
     "project_state.json"
   ]

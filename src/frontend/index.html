@@ -9,11 +9,12 @@
       // Sync dark mode preference from localStorage before React mounts
       (function() {
         try {
-          const STORAGE_KEY = 'study-planner-customization-settings';
+          const STORAGE_KEY = 'jee-customization-settings';
           const stored = localStorage.getItem(STORAGE_KEY);
           if (stored) {
             const parsed = JSON.parse(stored);
-            const override = parsed?.darkModeOverride;
+            const settings = parsed?.settings || parsed;
+            const override = settings?.darkModeOverride;
             
             if (override?.enabled) {
               // User has explicitly chosen a mode

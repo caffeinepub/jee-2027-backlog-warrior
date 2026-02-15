@@ -22,6 +22,7 @@ const STORAGE_KEYS = [
   'countdown-target-date',
   'countdown-timers-list',
   'countdown-selected-timer-id',
+  'jee-subject-details',
 ] as const;
 
 // Export storage keys as a structured object
@@ -43,18 +44,24 @@ export const APP_STORAGE_KEYS = {
   COUNTDOWN_TARGET_DATE: 'countdown-target-date',
   COUNTDOWN_TIMERS_LIST: 'countdown-timers-list',
   COUNTDOWN_SELECTED_TIMER_ID: 'countdown-selected-timer-id',
+  SUBJECT_DETAILS: 'jee-subject-details',
 } as const;
 
 /**
  * Clears only this app's LocalStorage entries, preserving unrelated storage.
  * This allows the app to reset to default seeded state without affecting other apps.
+ * 
+ * @param excludeKeys - Optional array of keys to preserve during clearing
  */
-export function clearAppLocalStorage(): void {
+export function clearAppLocalStorage(excludeKeys: string[] = []): void {
   try {
+    const excludeSet = new Set(excludeKeys);
     STORAGE_KEYS.forEach(key => {
-      localStorage.removeItem(key);
+      if (!excludeSet.has(key)) {
+        localStorage.removeItem(key);
+      }
     });
-    console.log('App LocalStorage cleared successfully');
+    console.log('App LocalStorage cleared successfully', excludeKeys.length > 0 ? `(preserved ${excludeKeys.length} keys)` : '');
   } catch (error) {
     console.error('Failed to clear app LocalStorage:', error);
   }

@@ -1,6 +1,5 @@
 import { Outlet, useNavigate } from '@tanstack/react-router';
 import { Button } from './ui/button';
-import { Settings, Menu } from 'lucide-react';
 import { CustomizationButton } from '../customization/CustomizationButton';
 import { CustomizationPanel } from '../customization/CustomizationPanel';
 import { CustomizationProvider } from '../customization/CustomizationProvider';
@@ -11,6 +10,7 @@ import { ShareAppLinkDialog } from './ShareAppLinkDialog';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { APP_VERSION } from '../lib/appVersion';
 import { Badge } from './ui/badge';
+import { isRollbackActive } from '../lib/rollbackRestore';
 
 export function Layout() {
   const navigate = useNavigate();
@@ -56,6 +56,7 @@ export function Layout() {
                   </span>
                   <Badge variant="outline" className="text-xs px-1.5 py-0 h-4">
                     {APP_VERSION.label}
+                    {isRollbackActive() && ' (Rollback)'}
                   </Badge>
                 </div>
               </button>

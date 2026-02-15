@@ -1,61 +1,67 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T22:59:01.032Z",
+  "generatedAt": "2026-02-15T23:19:56.885Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Restore the application (frontend and backend) to match the exact behavior and code that was deployed as version 37, undoing all changes introduced in the latest deployment(s) (e.g., versions 38–40).",
+        "summary": "Make the “rollback to version 37” operation fully restore the app to a clean v37 baseline state by clearing all app-owned localStorage data deterministically (while preserving rollback/audit markers) so that no newer-version client state can survive the rollback.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/lib/appVersion.ts",
-          "frontend/src/components/Layout.tsx",
-          "frontend/src/pages/Customize.tsx"
+          "frontend/src/lib/appLocalStorage.ts",
+          "frontend/src/lib/rollbackRestore.ts"
         ],
         "matchedFiles": [
-          "frontend/src/lib/appVersion.ts",
-          "frontend/src/components/Layout.tsx",
-          "frontend/src/pages/Customize.tsx"
+          "frontend/src/lib/appLocalStorage.ts",
+          "frontend/src/lib/rollbackRestore.ts"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "If the system cannot uniquely identify or reproduce version 37 from available build/deployment metadata, add a safeguard that blocks rollback until an explicit target version identifier is provided/confirmed (e.g., v37, v38, v39, v40, or a commit hash), and ensure the rollback action uses that exact identifier.",
+        "summary": "Ensure rollback reconciliation executes before any pages/components can rehydrate or re-persist newer-version state, so the first rendered UI after rollback reflects the restored v37 baseline.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/RollbackTargetSafeguard.tsx",
+          "frontend/src/App.tsx",
           "frontend/src/components/Layout.tsx",
-          "frontend/src/lib/appVersion.ts"
+          "frontend/src/lib/rollbackRestore.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/RollbackTargetSafeguard.tsx",
+          "frontend/src/App.tsx",
           "frontend/src/components/Layout.tsx",
-          "frontend/src/lib/appVersion.ts"
+          "frontend/src/lib/rollbackRestore.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add a simple, user-visible verification path on the Customize page that clearly indicates whether rollback is active and whether v37 reconciliation has completed successfully, and provides a safe way to re-run the restore if reconciliation did not complete.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/rollbackRestore.ts",
+          "frontend/src/pages/Customize.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/lib/rollbackRestore.ts",
+          "frontend/src/pages/Customize.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
+    "frontend/src/App.tsx",
     "frontend/src/components/Layout.tsx",
-    "frontend/src/components/RollbackTargetSafeguard.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/lib/appVersion.ts",
+    "frontend/src/lib/appLocalStorage.ts",
+    "frontend/src/lib/rollbackRestore.ts",
     "frontend/src/pages/Customize.tsx",
     "project_state.json",
     "scratch/component-selection.json",

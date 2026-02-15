@@ -8,7 +8,7 @@ import { useSubjects } from '../hooks/useSubjects';
 import { useCustomization } from '../customization/CustomizationProvider';
 import { useCustomizationPresets } from '../customization/useCustomizationPresets';
 import { useState, useCallback } from 'react';
-import { Trash2, Plus, Save, Check } from 'lucide-react';
+import { Trash2, Plus, Save, Check, RotateCcw, AlertCircle, RefreshCw } from 'lucide-react';
 import { SubjectDeleteButton } from '../components/SubjectDeleteButton';
 import { getSubjectIcon } from '../data/subjects';
 import { Slider } from '../components/ui/slider';
@@ -18,6 +18,10 @@ import { Sun, Moon } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
 import { APP_VERSION, getConfirmedRollbackTarget } from '../lib/appVersion';
 import { Badge } from '../components/ui/badge';
+import { RollbackTargetSafeguard } from '../components/RollbackTargetSafeguard';
+import { activateRollbackToV37, deactivateRollback, isRollbackActive, getRollbackStatus, retryRollbackReconciliation } from '../lib/rollbackRestore';
+import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 
 export function Customize() {
   const { subjects, addSubject, deleteSubject } = useSubjects();
@@ -26,6 +30,7 @@ export function Customize() {
 
   const [newSubjectName, setNewSubjectName] = useState('');
   const [newPresetName, setNewPresetName] = useState('');
+  const [showRollbackSafeguard, setShowRollbackSafeguard] = useState(false);
 
   const handleAddSubject = useCallback(() => {
     if (newSubjectName.trim()) {
@@ -41,7 +46,47 @@ export function Customize() {
     }
   }, [newPresetName, settings, savePreset]);
 
+  const handleRollbackRequest = useCallback(() => {
+    setShowRollbackSafeguard(true);
+  }, []);
+
+  const handleRollbackConfirmed = useCallback((confirmedTarget: string) => {
+    try {
+      activateRollbackToV37(confirmedTarget);
+    } catch (error) {
+      toast.error('Rollback failed', {
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+      });
+      setShowRollbackSafeguard(false);
+    }
+  }, []);
+
+  const handleRollbackCancel = useCallback(() => {
+    setShowRollbackSafeguard(false);
+  }, []);
+
+  const handleRestoreNormal = useCallback(() => {
+    try {
+      deactivateRollback();
+    } catch (error) {
+      toast.error('Restore failed', {
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+      });
+    }
+  }, []);
+
+  const handleRetryReconciliation = useCallback(() => {
+    try {
+      retryRollbackReconciliation();
+    } catch (error) {
+      toast.error('Retry failed', {
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+      });
+    }
+  }, []);
+
   const confirmedRollback = getConfirmedRollbackTarget();
+  const rollbackStatus = getRollbackStatus();
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-6">
@@ -120,13 +165,13 @@ export function Customize() {
         <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Study Settings</CardTitle>
+              <CardTitle>Study Configuration</CardTitle>
               <CardDescription>
-                Configure your study preferences and goals
+                Adjust your daily targets and study parameters
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label>Daily Target Hours: {settings.dailyTargetHours}h</Label>
                 <Slider
                   value={[settings.dailyTargetHours]}
@@ -138,9 +183,7 @@ export function Customize() {
                 />
               </div>
 
-              <Separator />
-
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label>Lecture Speed Factor: {settings.lectureSpeedFactor}x</Label>
                 <Slider
                   value={[settings.lectureSpeedFactor]}
@@ -154,26 +197,20 @@ export function Customize() {
 
               <Separator />
 
-              <div className="space-y-3">
-                <Label>Sleep Window</Label>
+              <div className="space-y-4">
+                <Label>Sleep Window (avoid study notifications)</Label>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="sleep-start" className="text-xs text-muted-foreground">
-                      Start
-                    </Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">Start Time</Label>
                     <Input
-                      id="sleep-start"
                       type="time"
                       value={settings.sleepWindowStart}
                       onChange={(e) => updateSettings({ sleepWindowStart: e.target.value })}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="sleep-end" className="text-xs text-muted-foreground">
-                      End
-                    </Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground">End Time</Label>
                     <Input
-                      id="sleep-end"
                       type="time"
                       value={settings.sleepWindowEnd}
                       onChange={(e) => updateSettings({ sleepWindowEnd: e.target.value })}
@@ -182,13 +219,11 @@ export function Customize() {
                 </div>
               </div>
 
-              <Separator />
-
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Enable Notifications</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Show alerts for incomplete work
+                  <p className="text-sm text-muted-foreground">
+                    Get reminders during study sessions
                   </p>
                 </div>
                 <Switch
@@ -197,31 +232,27 @@ export function Customize() {
                 />
               </div>
 
-              <Separator />
-
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Auto-recalculate Date to Finish</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Automatically update completion dates
+                  <p className="text-sm text-muted-foreground">
+                    Automatically update target dates based on progress
                   </p>
                 </div>
                 <Switch
                   checked={settings.autoRecalculateDateToFinish}
-                  onCheckedChange={(checked) =>
-                    updateSettings({ autoRecalculateDateToFinish: checked })
-                  }
+                  onCheckedChange={(checked) => updateSettings({ autoRecalculateDateToFinish: checked })}
                 />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Display Tab */}
+        {/* Display Settings Tab */}
         <TabsContent value="display" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Display Settings</CardTitle>
+              <CardTitle>Display Preferences</CardTitle>
               <CardDescription>
                 Customize the appearance of your study planner
               </CardDescription>
@@ -231,9 +262,16 @@ export function Customize() {
                 <Label>Theme</Label>
                 <ToggleGroup
                   type="single"
-                  value={settings.darkModeOverride.enabled ? settings.darkModeOverride.mode : 'dark'}
+                  value={settings.darkModeOverride.enabled ? settings.darkModeOverride.mode : 'system'}
                   onValueChange={(value) => {
-                    if (value) {
+                    if (value === 'system') {
+                      updateSettings({ 
+                        darkModeOverride: { 
+                          enabled: false, 
+                          mode: settings.darkModeOverride.mode 
+                        } 
+                      });
+                    } else {
                       updateSettings({
                         darkModeOverride: {
                           enabled: true,
@@ -244,13 +282,16 @@ export function Customize() {
                   }}
                   className="justify-start"
                 >
-                  <ToggleGroupItem value="light" aria-label="Light mode" className="gap-2">
-                    <Sun className="h-4 w-4" />
+                  <ToggleGroupItem value="light" aria-label="Light mode">
+                    <Sun className="h-4 w-4 mr-2" />
                     Light
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="dark" aria-label="Dark mode" className="gap-2">
-                    <Moon className="h-4 w-4" />
+                  <ToggleGroupItem value="dark" aria-label="Dark mode">
+                    <Moon className="h-4 w-4 mr-2" />
                     Dark
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="system" aria-label="System theme">
+                    System
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
@@ -263,9 +304,7 @@ export function Customize() {
                   type="single"
                   value={settings.chapterCardSize}
                   onValueChange={(value) => {
-                    if (value) {
-                      updateSettings({ chapterCardSize: value as 'compact' | 'detailed' });
-                    }
+                    if (value) updateSettings({ chapterCardSize: value as 'compact' | 'detailed' });
                   }}
                   className="justify-start"
                 >
@@ -276,37 +315,162 @@ export function Customize() {
             </CardContent>
           </Card>
 
-          {/* App Version Section */}
           <Card>
             <CardHeader>
               <CardTitle>App Version</CardTitle>
               <CardDescription>
-                Current application version information
+                Current version and rollback controls
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/50">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Version</p>
-                  <p className="text-2xl font-bold text-primary">{APP_VERSION.label}</p>
-                  <p className="text-xs text-muted-foreground">{APP_VERSION.description}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Current Version</p>
+                  <p className="text-sm text-muted-foreground">{APP_VERSION.label}</p>
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  <Check className="h-3 w-3 mr-1" />
-                  Active
+                <Badge variant={rollbackStatus.active ? 'destructive' : 'secondary'}>
+                  {rollbackStatus.active ? 'Rollback Active' : 'Normal Operation'}
                 </Badge>
               </div>
 
-              {confirmedRollback && (
-                <div className="p-4 rounded-lg border border-warning/50 bg-warning/10">
-                  <p className="text-sm font-medium text-warning mb-2">Last Rollback Confirmation</p>
-                  <div className="space-y-1 text-xs text-muted-foreground">
-                    <p>Target: {confirmedRollback.target}</p>
-                    <p>Confirmed: {new Date(confirmedRollback.confirmedAt).toLocaleString()}</p>
-                    <p>From Version: {confirmedRollback.currentVersion}</p>
+              {rollbackStatus.active && (
+                <>
+                  <Separator />
+                  
+                  {/* Rollback Verification Panel */}
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="h-5 w-5 text-warning mt-0.5" />
+                      <div className="flex-1 space-y-2">
+                        <p className="text-sm font-medium">Rollback Status</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Rollback Active:</span>
+                            <Badge variant="outline" className="text-xs">
+                              {rollbackStatus.active ? 'Yes' : 'No'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Reconciliation Complete:</span>
+                            <Badge variant={rollbackStatus.reconciled ? 'default' : 'destructive'} className="text-xs">
+                              {rollbackStatus.reconciled ? 'Yes' : 'No'}
+                            </Badge>
+                          </div>
+                          {confirmedRollback && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">Target Version:</span>
+                              <span className="text-xs font-mono">{confirmedRollback.target}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {rollbackStatus.needsReconciliation && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Reconciliation Incomplete</AlertTitle>
+                        <AlertDescription>
+                          The rollback restore process did not complete successfully. Click "Retry Restore" to force a clean v37 baseline.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+                    <div className="flex gap-2">
+                      {rollbackStatus.needsReconciliation && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="default" size="sm">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Retry Restore
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Retry Rollback Reconciliation?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will force a clean restore to v37 baseline state by clearing all app data and reloading. 
+                                Any unsaved changes will be lost.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleRetryReconciliation}>
+                                Retry Restore
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Restore Normal Operation
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Restore Normal Operation?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will deactivate rollback mode and return to the latest version. 
+                              The app will reload to apply changes.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleRestoreNormal}>
+                              Restore Normal
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
+
+              {!rollbackStatus.active && (
+                <>
+                  <Separator />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRollbackRequest}
+                    className="w-full"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Rollback to v37
+                  </Button>
+                </>
+              )}
+
+              <Separator />
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset All Settings
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset All Settings?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will reset all customization settings to their default values. 
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={resetToDefaults}>
+                      Reset Settings
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </TabsContent>
@@ -315,7 +479,7 @@ export function Customize() {
         <TabsContent value="presets" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Settings Presets</CardTitle>
+              <CardTitle>Customization Presets</CardTitle>
               <CardDescription>
                 Save and load your favorite settings configurations
               </CardDescription>
@@ -337,8 +501,8 @@ export function Customize() {
               <Separator />
 
               {presets.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No saved presets. Create one by entering a name and clicking "Save Current".
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No saved presets. Create one by saving your current settings.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -347,39 +511,41 @@ export function Customize() {
                       key={preset.name}
                       className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
                     >
-                      <span className="font-medium">{preset.name}</span>
+                      <div className="flex-1">
+                        <p className="font-medium">{preset.name}</p>
+                      </div>
                       <div className="flex gap-2">
                         <Button
+                          variant="ghost"
                           size="sm"
-                          variant="outline"
                           onClick={() => {
-                            const settings = applyPreset(preset.name);
-                            if (settings) {
-                              updateSettings(settings);
+                            const presetSettings = applyPreset(preset.name);
+                            if (presetSettings) {
+                              updateSettings(presetSettings);
+                              toast.success(`Preset "${preset.name}" applied successfully!`);
                             }
                           }}
                         >
+                          <Check className="h-4 w-4 mr-2" />
                           Apply
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
+                            <Button variant="ghost" size="sm">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Preset</AlertDialogTitle>
+                              <AlertDialogTitle>Delete Preset?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete the preset "{preset.name}"? This action cannot be undone.
+                                Are you sure you want to delete the preset "{preset.name}"? 
+                                This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deletePreset(preset.name)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
+                              <AlertDialogAction onClick={() => deletePreset(preset.name)}>
                                 Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -390,34 +556,17 @@ export function Customize() {
                   ))}
                 </div>
               )}
-
-              <Separator />
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    Reset to Defaults
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Reset to Default Settings</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will reset all customization settings to their default values. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={resetToDefaults}>
-                      Reset
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Rollback Safeguard Dialog */}
+      <RollbackTargetSafeguard
+        isActive={showRollbackSafeguard}
+        onConfirmed={handleRollbackConfirmed}
+        onCancel={handleRollbackCancel}
+      />
     </div>
   );
 }
