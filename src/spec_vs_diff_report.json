@@ -1,31 +1,51 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T21:00:39.973Z",
-  "summary": "Diff adds a new `useDashboardInside` hook that persists freeform text to a dedicated LocalStorage key (`dashboard-inside`) and wires it into `Dashboard.tsx` with editing state and a save handler. Placement/UI details for the actual \"Inside\" card (title text, Edit/Save/Cancel buttons, and responsive layout) are not fully verifiable from the truncated `Dashboard.tsx` diff, though `frontend-file-summaries.txt` asserts the section exists side-by-side with Quick Note on large screens.",
+  "generatedAt": "2026-02-15T21:19:05.266Z",
+  "summary": "REQ-1 and REQ-2 appear implemented in ChapterDetailPanel via toggle-to-clear handlers that set status back to \"Not Started\" when the active status is clicked, while still allowing switching to other statuses. However, the diff summary also indicates multiple unrelated UI/feature additions and redesign work not requested in the BuildRequest.",
   "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Versioned JSON storage format for the Inside content (storing `{version, content}`) rather than a plain string.",
-      "reason": "REQ-1 only requires LocalStorage persistence with a dedicated key; it does not request versioning or a structured payload.",
+      "description": "Added/mentioned a new \"countdown\" route and related navigation entry (Timer icon) and router/export changes in App setup.",
+      "reason": "BuildRequest is limited to Chapter Details status toggling/clearing behavior; no routing or countdown feature requested.",
       "evidence": [
-        "frontend/src/hooks/useDashboardInside.ts"
+        "frontend-file-summaries.txt (entries for frontend/src/App.tsx and frontend/src/components/BottomNavigation.tsx)"
       ]
     },
     {
-      "description": "Added `dashboard-inside` to a centralized LocalStorage key clearing utility list.",
-      "reason": "No requirement asked to update app-wide LocalStorage reset/registry utilities; only persistence for the new section was requested.",
+      "description": "Broad dashboard and subject page visual/theme redesigns and additional sections/charts/UX changes.",
+      "reason": "Non-goal explicitly says not to redesign unrelated Chapter Details fields beyond what is necessary; these changes are outside Chapter Detail status controls.",
       "evidence": [
-        "frontend/src/lib/appLocalStorage.ts"
+        "frontend-file-summaries.txt (entries for frontend/src/pages/Dashboard.tsx and frontend/src/pages/SubjectPage.tsx)"
+      ]
+    },
+    {
+      "description": "Added/mentioned ChapterCard visual polish and delete button with confirmation dialog.",
+      "reason": "Not requested; request is specifically about ChapterDetailPanel status controls.",
+      "evidence": [
+        "frontend-file-summaries.txt (entry for frontend/src/components/ChapterCard.tsx)"
+      ]
+    },
+    {
+      "description": "Added/mentioned in-place editing for total lectures and target hours override inside ChapterDetailPanel.",
+      "reason": "Not requested; BuildRequest focuses on status deselection/switching only, and notes avoiding unrelated Chapter Details field redesign beyond what’s necessary.",
+      "evidence": [
+        "frontend/src/components/ChapterDetailPanel.tsx (shows editing state/handlers for lectures/target hours)",
+        "frontend-file-summaries.txt (entry for frontend/src/components/ChapterDetailPanel.tsx)"
+      ]
+    },
+    {
+      "description": "Added/mentioned customization system enhancements (theme control, provider integration, dark mode override helpers, settings persistence/versioning).",
+      "reason": "Not requested; unrelated to Chapter Details status toggling/clearing.",
+      "evidence": [
+        "frontend-file-summaries.txt (entries for customization-related files)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/hooks/useDashboardInside.ts",
-    "frontend/src/lib/appLocalStorage.ts",
-    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/components/ChapterDetailPanel.tsx",
     "project_state.json"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T21:00:39.975Z",
+  "generatedAt": "2026-02-15T21:19:05.269Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,28 +12,24 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a new Dashboard (Home page) card/section titled \"Inside\" that lets the user view and edit a freeform text block, similar to the existing \"Quick Note\" pattern, and persist its content in localStorage.",
+        "summary": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useDashboardInside.ts",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/lib/appLocalStorage.ts"
+          "frontend/src/components/ChapterDetailPanel.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useDashboardInside.ts",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/lib/appLocalStorage.ts"
+          "frontend/src/components/ChapterDetailPanel.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Place the new \"Inside\" section in a sensible location on the Dashboard page layout so it feels like part of the existing Home page flow and works well on mobile and desktop.",
+        "summary": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Dashboard.tsx"
+          "frontend/src/components/ChapterDetailPanel.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Dashboard.tsx"
+          "frontend/src/components/ChapterDetailPanel.tsx"
         ]
       }
     ]
@@ -43,9 +39,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useDashboardInside.ts",
-    "frontend/src/lib/appLocalStorage.ts",
-    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/components/ChapterDetailPanel.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

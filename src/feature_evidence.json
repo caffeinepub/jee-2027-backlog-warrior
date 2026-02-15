@@ -2,12 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-dashboard-home-page-card-section-titled-inside-that-lets-the-user-view-and-edit-a-freeform-text-block-similar-to-the-existing-quick-note-pattern-and-persist-its-content-in-localstorage",
-      "featureTitle": "Add a new Dashboard (Home page) card/section titled \"Inside\" that lets the user view and edit a freeform text block, similar to the existing \"Quick Note\" pattern, and persist its content in localStorage.",
+      "featureId": "feature-update-the-chapter-details-status-controls-completed-incomplete-tough-so-the-user-can-deselect-a-previously-selected-status-and-revert-the-chapter-status-back-to-not-started",
+      "featureTitle": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
       "files": [
-        "frontend/src/hooks/useDashboardInside.ts",
-        "frontend/src/lib/appLocalStorage.ts",
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/components/ChapterDetailPanel.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,10 +20,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-place-the-new-inside-section-in-a-sensible-location-on-the-dashboard-page-layout-so-it-feels-like-part-of-the-existing-home-page-flow-and-works-well-on-mobile-and-desktop",
-      "featureTitle": "Place the new \"Inside\" section in a sensible location on the Dashboard page layout so it feels like part of the existing Home page flow and works well on mobile and desktop.",
+      "featureId": "feature-update-the-chapter-details-status-controls-so-the-user-can-switch-between-statuses-freely-completed-incomplete-tough-without-the-ui-disabling-the-currently-selected-option-in-a-way-that-prevents-re-selection-behavior-needed-for-toggle-to-clear",
+      "featureTitle": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
       "files": [
-        "frontend/src/pages/Dashboard.tsx"
+        "frontend/src/components/ChapterDetailPanel.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",

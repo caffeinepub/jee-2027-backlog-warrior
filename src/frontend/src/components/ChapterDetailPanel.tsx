@@ -50,18 +50,33 @@ export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetai
   };
 
   const handleComplete = () => {
-    updateChapterStatus(chapter.id, 'Completed');
-    toast.success('Chapter marked as completed!');
+    if (chapter.status === 'Completed') {
+      updateChapterStatus(chapter.id, 'Not Started');
+      toast.success('Chapter status cleared');
+    } else {
+      updateChapterStatus(chapter.id, 'Completed');
+      toast.success('Chapter marked as completed!');
+    }
   };
 
   const handleIncomplete = () => {
-    updateChapterStatus(chapter.id, 'Incomplete');
-    toast.success('Chapter marked as incomplete');
+    if (chapter.status === 'Incomplete') {
+      updateChapterStatus(chapter.id, 'Not Started');
+      toast.success('Chapter status cleared');
+    } else {
+      updateChapterStatus(chapter.id, 'Incomplete');
+      toast.success('Chapter marked as incomplete');
+    }
   };
 
   const handleTough = () => {
-    updateChapterStatus(chapter.id, 'Tough');
-    toast.success('Chapter marked as tough');
+    if (chapter.status === 'Tough') {
+      updateChapterStatus(chapter.id, 'Not Started');
+      toast.success('Chapter status cleared');
+    } else {
+      updateChapterStatus(chapter.id, 'Tough');
+      toast.success('Chapter marked as tough');
+    }
   };
 
   const handleSaveLectures = () => {
@@ -218,31 +233,40 @@ export function ChapterDetailPanel({ chapter, open, onOpenChange }: ChapterDetai
             <p className="font-semibold text-sm text-muted-foreground">Update Status</p>
             <div className="grid grid-cols-3 gap-2">
               <Button
-                variant="outline"
+                variant={chapter.status === 'Completed' ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleComplete}
-                disabled={chapter.status === 'Completed'}
-                className="flex-col h-auto py-3 hover:bg-success/10 hover:text-success hover:border-success transition-smooth icon-animated"
+                className={`flex-col h-auto py-3 transition-smooth icon-animated ${
+                  chapter.status === 'Completed' 
+                    ? 'bg-success hover:bg-success/90 text-white border-success' 
+                    : 'hover:bg-success/10 hover:text-success hover:border-success'
+                }`}
               >
                 <Check className="h-5 w-5 mb-1" />
                 <span className="text-xs">Complete</span>
               </Button>
               <Button
-                variant="outline"
+                variant={chapter.status === 'Incomplete' ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleIncomplete}
-                disabled={chapter.status === 'Incomplete'}
-                className="flex-col h-auto py-3 hover:bg-warning/10 hover:text-warning hover:border-warning transition-smooth icon-animated"
+                className={`flex-col h-auto py-3 transition-smooth icon-animated ${
+                  chapter.status === 'Incomplete' 
+                    ? 'bg-warning hover:bg-warning/90 text-white border-warning' 
+                    : 'hover:bg-warning/10 hover:text-warning hover:border-warning'
+                }`}
               >
                 <Clock className="h-5 w-5 mb-1" />
                 <span className="text-xs">Incomplete</span>
               </Button>
               <Button
-                variant="outline"
+                variant={chapter.status === 'Tough' ? 'default' : 'outline'}
                 size="sm"
                 onClick={handleTough}
-                disabled={chapter.status === 'Tough'}
-                className="flex-col h-auto py-3 hover:bg-destructive/10 hover:text-destructive hover:border-destructive transition-smooth icon-animated"
+                className={`flex-col h-auto py-3 transition-smooth icon-animated ${
+                  chapter.status === 'Tough' 
+                    ? 'bg-destructive hover:bg-destructive/90 text-white border-destructive' 
+                    : 'hover:bg-destructive/10 hover:text-destructive hover:border-destructive'
+                }`}
               >
                 <X className="h-5 w-5 mb-1" />
                 <span className="text-xs">Tough</span>

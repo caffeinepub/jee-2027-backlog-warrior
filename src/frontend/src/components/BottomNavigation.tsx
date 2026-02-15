@@ -1,5 +1,5 @@
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { Home, Calendar, BookOpen, FileText, ClipboardList } from 'lucide-react';
+import { Home, Calendar, BookOpen, FileText, ClipboardList, Timer } from 'lucide-react';
 import { useSubjects } from '../hooks/useSubjects';
 import { Button } from './ui/button';
 
@@ -15,6 +15,7 @@ export function BottomNavigation() {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/calendar', label: 'Calendar', icon: Calendar },
+    { path: '/countdown', label: 'Countdown', icon: Timer },
     { path: '/notes', label: 'Notes', icon: FileText },
     { path: '/tests', label: 'Tests', icon: ClipboardList },
     ...subjects.map(subject => ({

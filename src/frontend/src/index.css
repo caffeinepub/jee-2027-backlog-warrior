@@ -205,10 +205,113 @@
   input[type="number"]:focus-visible,
   input[type="time"]:focus-visible,
   input[type="date"]:focus-visible,
+  input[type="datetime-local"]:focus-visible,
   textarea:focus-visible {
     box-shadow: 0 0 8px 2px rgb(var(--ring-rgb) / 0.6);
     border-color: rgb(var(--ring-rgb));
   }
+}
+
+/* Countdown Timer Premium Dark Mode Styles */
+.countdown-page {
+  background: #0F172A;
+  color: #F8FAFC;
+  min-height: 100vh;
+}
+
+.countdown-title {
+  color: #F8FAFC;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.countdown-subtitle {
+  color: rgba(248, 250, 252, 0.7);
+}
+
+.countdown-card {
+  background: rgba(21, 25, 33, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.countdown-card .text-xl,
+.countdown-card label {
+  color: #F8FAFC;
+}
+
+.countdown-input {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #F8FAFC;
+}
+
+.countdown-input:focus {
+  border-color: #38BDF8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.countdown-help-text {
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.countdown-display-card {
+  background: rgba(21, 25, 33, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(16px);
+}
+
+.countdown-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.countdown-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #38BDF8;
+  text-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.6),
+    0 0 40px rgba(56, 189, 248, 0.4),
+    0 0 60px rgba(56, 189, 248, 0.2);
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .countdown-number {
+    font-size: 4rem;
+  }
+}
+
+.countdown-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(248, 250, 252, 0.7);
+}
+
+.countdown-expired {
+  color: #38BDF8;
+  text-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+}
+
+.countdown-empty-card {
+  background: rgba(21, 25, 33, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.countdown-empty-card svg {
+  color: rgba(56, 189, 248, 0.4);
+}
+
+.countdown-empty-text {
+  color: rgba(248, 250, 252, 0.6);
 }
 
 /* Horizontal scroll container for touch-enabled swipe gestures */

@@ -5,6 +5,7 @@ import { Customize } from './pages/Customize';
 import { CalendarDashboard } from './pages/CalendarDashboard';
 import { Notes } from './pages/Notes';
 import { Tests } from './pages/Tests';
+import { CountdownTimer } from './pages/CountdownTimer';
 import { Layout } from './components/Layout';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 
@@ -43,6 +44,12 @@ const testsRoute = createRoute({
   component: Tests,
 });
 
+const countdownRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/countdown',
+  component: CountdownTimer,
+});
+
 const customizeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/customize',
@@ -55,6 +62,7 @@ const routeTree = rootRoute.addChildren([
   calendarRoute,
   notesRoute,
   testsRoute,
+  countdownRoute,
   customizeRoute,
 ]);
 

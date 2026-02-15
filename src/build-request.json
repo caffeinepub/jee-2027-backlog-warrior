@@ -1,55 +1,66 @@
 {
   "kind": "build_request",
-  "title": "Add an editable \"Inside\" section to the Home (Dashboard) page",
+  "title": "Allow chapter status selection to be changed or cleared in Chapter Details",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a new Dashboard (Home page) card/section titled \"Inside\" that lets the user view and edit a freeform text block, similar to the existing \"Quick Note\" pattern, and persist its content in localStorage.",
+      "text": "Update the Chapter Details status controls (Completed / Incomplete / Tough) so the user can deselect a previously selected status and revert the chapter status back to \"Not Started\".",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "inside"
+          "when i open chapter detials then if i select completed or incomplete or tough options there is only going front but no renwing option if i select any one of the three the i can deselect any  three"
         ]
       },
       "acceptanceCriteria": [
-        "Dashboard shows a new card/section with the title \"Inside\".",
-        "The section supports toggling between read-only and edit mode (e.g., Edit/Save/Cancel) consistent with the existing \"Quick Note\" interactions.",
-        "The editable content persists across page reloads via localStorage using a new dedicated storage key (not reusing 'dashboard-note' or 'dashboard-title').",
-        "All user-facing text in this section is in English."
+        "In ChapterDetailPanel, if the chapter is currently \"Completed\", \"Incomplete\", or \"Tough\", the user can clear that selection and set the status back to \"Not Started\" without needing to refresh or leave the panel.",
+        "The status UI no longer blocks the user from undoing a status choice (i.e., there is an explicit way to reset/clear, or clicking the active selection toggles it off).",
+        "After clearing the status, the status badge in the Chapter Detail panel updates immediately to show \"Not Started\".",
+        "Status changes (including clearing to \"Not Started\") persist the same way as other chapter status updates (via the existing localStorage-backed chapter data)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Place the new \"Inside\" section in a sensible location on the Dashboard page layout so it feels like part of the existing Home page flow and works well on mobile and desktop.",
+      "text": "Update the Chapter Details status controls so the user can switch between statuses freely (Completed / Incomplete / Tough) without the UI disabling the currently selected option in a way that prevents re-selection behavior (needed for toggle-to-clear).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "inside"
+          "if i select any one of the three the i can deselect any  three"
         ]
       },
       "acceptanceCriteria": [
-        "The \"Inside\" section appears on the Dashboard without overlapping other sections (Stats, Currently Working, Notifications/Charts, Quick Note, Subjects).",
-        "The layout remains responsive (no horizontal scrolling or broken grid) on small screens and large screens."
+        "The status buttons in ChapterDetailPanel are not implemented in a way that prevents the user from clicking the currently-selected status when toggle-to-clear is supported.",
+        "A user can set status to Completed, then change to Incomplete, then change to Tough, and the badge reflects each change immediately.",
+        "A user can set any of the three statuses and then clear back to \"Not Started\" using the supported interaction."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (Shadcn components are read-only).",
-    "Keep backend as single-actor Motoko architecture; no backend changes are required for this request."
+    "Do not edit files under frontend/src/components/ui (shadcn components); compose them from feature components only.",
+    "Keep the existing chapter status enum values unchanged: \"Not Started\", \"Incomplete\", \"Tough\", \"Completed\"."
   ],
   "nonGoals": [
-    "Adding backend persistence for the \"Inside\" content (localStorage-only is sufficient).",
-    "Changing existing Dashboard sections or removing any current features."
+    "Do not add backend persistence for chapter status (keep the existing localStorage-based persistence).",
+    "Do not redesign unrelated Chapter Details fields (lectures, target hours, date-to-finish) beyond what is necessary to support status deselection."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

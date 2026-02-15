@@ -19,6 +19,7 @@ const APP_STORAGE_KEYS = [
   'jee-customization-presets',
   'jee-notes-data',
   'jee-study-log',
+  'countdown-target-date',
 ] as const;
 
 /**
