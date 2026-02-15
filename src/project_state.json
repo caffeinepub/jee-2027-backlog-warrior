@@ -1,0 +1,522 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 21,
+  "summary": "Build \"11\" — a responsive dark-mode React + Tailwind web app to track JEE study backlog across Math/Physics/Chem chapters with progress tracking, scheduling calculations, to-dos, resources, health alerts, an advanced in-app customization/settings panel, and a new per-chapter \"Currently Working\" mode with a running timer displayed/notified on the Home screen; persisted in LocalStorage with a July 31, 2026 deadline countdown.",
+  "architectural_notes": [
+    "Frontend: React.js + Tailwind CSS.",
+    "Persistence: LocalStorage for progress/user data.",
+    "UI: Mobile-first responsive dark mode.",
+    "Core calculations: 1.5x playback target hours; date-to-finish based on 7h/day budget; deadline countdown to July 31.",
+    "Add a global settings/customization panel; persist user-configurable parameters (daily hours, speed factor, sleep window, notification preference, UI toggles) in LocalStorage and have core calculations read from these settings.",
+    "Deadline/countdown target date is July 31, 2026 (not 2027).",
+    "Ensure CustomizationProvider wraps the app (or all routes/components) before any component calls useCustomization; avoid rendering settings-dependent components outside the provider.",
+    "Add a global 'Customize Anything' entry point that opens a dedicated customization interface (separate panel/screen) where the user can make changes and save/apply them across the app.",
+    "Support user-defined subjects and chapters (CRUD) in addition to the seeded JEE dataset; persist these additions/edits in LocalStorage and ensure all screens/calculations adapt dynamically.",
+    "Add a calendar/planner module with per-date notes/tasks persisted in LocalStorage."
+  ],
+  "known_issues": [
+    "Deployment/build process encountered an error (\"Unable to complete deployment\").",
+    "Runtime error: \"useCustomization must be used within CustomizationProvider\" (hook used outside provider / provider not mounted around component tree)."
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-the-core-data-model-and-seed-dataset-for-the-jee-backlog-tracker-with-three-subjects-mathematics-physics-chemistry-each-chapter-must-include-id-name-totallectures-lectureduration-default-average-90-minutes-status-not-started-incomplete-tough-completed-and-subject-prepopulate-the-chapter-lists-exactly-as-provided-by-the-user-math-24-physics-20-chemistry-22",
+      "title": "Create the core data model and seed dataset for the JEE backlog tracker with three subjects (Mathematics, Physics, Chemistry). Each chapter must include: id, name, totalLectures, lectureDuration (default average 90 minutes), status (Not Started | Incomplete | Tough | Completed), and subject. Prepopulate the chapter lists exactly as provided by the user (Math 24, Physics 20, Chemistry 22).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-all-user-progress-and-inputs-in-localstorage-including-chapter-statuses-to-do-checkbox-states-and-study-time-logs-used-for-the-dashboard-metrics-and-sleep-alert",
+      "title": "Persist all user progress and inputs in LocalStorage, including chapter statuses, to-do checkbox states, and study-time logs used for the dashboard metrics and sleep alert.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-responsive-dark-mode-ui-with-a-coherent-visual-theme-colors-typography-spacing-and-component-styling-applied-consistently-across-dashboard-navigation-chapter-lists-detail-views-and-sidebars-do-not-use-a-blue-purple-theme",
+      "title": "Implement a responsive dark-mode UI with a coherent visual theme (colors, typography, spacing, and component styling) applied consistently across dashboard, navigation, chapter lists, detail views, and sidebars. Do not use a blue/purple theme.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-the-dashboard-home-screen-with-1-a-hero-section-showing-a-days-remaining-countdown-to-july-31-2-a-circular-progress-ring-showing-overall-syllabus-completion-based-on-chapters-marked-completed-and-3-a-daily-grind-card-showing-hours-studied-today-from-the-study-time-log",
+      "title": "Create the Dashboard (Home) screen with: (1) a hero section showing a 'Days Remaining' countdown to July 31, (2) a circular progress ring showing 'Overall Syllabus Completion %' based on chapters marked Completed, and (3) a 'Daily Grind' card showing hours studied today from the study-time log.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-amazon-style-bottom-navigation-with-three-subject-tabs-math-physics-chemistry-each-tab-routes-to-a-subject-screen-that-lists-chapter-cards-for-that-subject-and-supports-mobile-first-interaction",
+      "title": "Add an Amazon-style bottom navigation with three subject tabs: Math, Physics, Chemistry. Each tab routes to a subject screen that lists chapter cards for that subject and supports mobile-first interaction.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-chapter-cards-and-a-chapter-detail-view-panel-that-shows-total-lectures-target-hours-calculated-assuming-1-5x-speed-and-date-to-finish-auto-calculated-using-a-7-hour-daily-backlog-budget-provide-per-chapter-actions-checkmark-sets-status-to-completed-cross-sets-status-to-incomplete-or-tough-user-chooses-which",
+      "title": "Implement chapter cards and a chapter detail view/panel that shows: Total Lectures, Target Hours (calculated assuming 1.5x speed), and 'Date to Finish' auto-calculated using a 7-hour daily backlog budget. Provide per-chapter actions: Checkmark sets status to Completed; Cross sets status to Incomplete or Tough (user chooses which).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-to-do-list-feature-grouped-by-subject-with-checkboxes-persisted-in-localstorage-provide-basic-to-do-crud-add-item-check-uncheck-delete-within-each-subject-group",
+      "title": "Add a To-Do List feature grouped by subject with checkboxes, persisted in LocalStorage. Provide basic to-do CRUD (add item, check/uncheck, delete) within each subject group.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-resource-sidebar-or-resources-section-that-lists-the-reference-books-provided-by-the-user-at-minimum-include-cengage-hcv-n-awasthi-and-is-organized-by-subject-resources-must-be-editable-by-the-user-and-persisted-in-localstorage",
+      "title": "Add a Resource Sidebar (or resources section) that lists the reference books provided by the user (at minimum include: Cengage, HCV, N. Awasthi) and is organized by subject. Resources must be editable by the user and persisted in LocalStorage.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-study-time-logging-and-a-sleep-tracker-health-alert-when-the-user-logs-study-time-during-the-sleep-window-3-30-am-7-30-am-local-time-show-a-warning-notification-in-the-ui-the-warning-must-trigger-based-on-the-timestamp-of-the-log-entry",
+      "title": "Implement study-time logging and a Sleep Tracker health alert: when the user logs study time during the sleep window 3:30 AM–7:30 AM (local time), show a warning/notification in the UI. The warning must trigger based on the timestamp of the log entry.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-global-customization-button-in-the-top-right-of-the-app-ui-that-is-available-across-the-dashboard-and-all-subject-chapter-screens-clicking-it-must-open-a-settings-panel-drawer-or-modal-that-can-be-closed-via-close-button-and-by-clicking-outside-esc-on-desktop",
+      "title": "Add a global \"Customization\" button in the top-right of the app UI that is available across the Dashboard and all subject/chapter screens. Clicking it must open a settings panel (drawer or modal) that can be closed via close button and by clicking outside/ESC on desktop.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-advanced-settings-panel-with-the-following-user-adjustable-options-using-appropriate-controls-switches-sliders-time-pickers-segmented-controls-and-clear-english-labels-and-helper-text-1-daily-target-hours-default-7-2-lecture-speed-factor-default-1-5x-3-sleep-window-start-end-times-for-the-sleep-alert-default-3-30-am-7-30-am-local-time-4-notifications-enabled-disabled-toggle-for-in-app-warnings-notifications-5-chapter-card-size-compact-vs-detailed-6-toggle-auto-date-to-finish-recalculation-7-toggle-dark-mode-override",
+      "title": "Implement an advanced settings panel with the following user-adjustable options, using appropriate controls (switches, sliders, time pickers, segmented controls) and clear English labels and helper text: (1) Daily target hours (default 7), (2) Lecture speed factor (default 1.5x), (3) Sleep-window start/end times for the sleep alert (default 3:30 AM–7:30 AM local time), (4) Notifications enabled/disabled toggle (for in-app warnings/notifications), (5) Chapter-card size (compact vs detailed), (6) Toggle auto \"date-to-finish\" recalculation, (7) Toggle dark mode override.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-all-customization-settings-to-localstorage-and-load-apply-them-on-app-startup-settings-changes-must-take-effect-immediately-across-the-ui-and-calculations-that-depend-on-them-daily-backlog-budget-target-hours-calculation-sleep-window-alert-evaluation-chapter-card-rendering-density-dark-mode-override-behavior-and-whether-in-app-warnings-notifications-are-shown",
+      "title": "Persist all customization settings to LocalStorage and load/apply them on app startup. Settings changes must take effect immediately across the UI and calculations that depend on them (daily backlog budget, target-hours calculation, sleep-window alert evaluation, chapter-card rendering density, dark-mode override behavior, and whether in-app warnings/notifications are shown).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-reset-to-defaults-action-within-the-customization-settings-panel-that-restores-all-settings-to-their-default-values-and-updates-localstorage-accordingly",
+      "title": "Add a \"Reset to defaults\" action within the customization/settings panel that restores all settings to their default values and updates LocalStorage accordingly.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-dashboard-days-remaining-countdown-target-date-to-july-31-2026-not-2027-and-ensure-any-user-facing-date-text-in-the-dashboard-matches-the-2026-deadline",
+      "title": "Update the Dashboard days-remaining countdown target date to July 31, 2026 (not 2027) and ensure any user-facing date text in the Dashboard matches the 2026 deadline.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-app-run-in-dark-mode-by-default-on-first-load-no-settings-stored-the-ui-renders-in-dark-mode-and-existing-users-are-also-placed-into-dark-mode-unless-they-have-explicitly-chosen-light-mode-via-the-dark-mode-override-setting-in-the-customization-panel",
+      "title": "Make the app run in dark mode by default: on first load (no settings stored) the UI renders in dark mode, and existing users are also placed into dark mode unless they have explicitly chosen light mode via the dark-mode override setting in the customization panel.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-runtime-crash-usecustomization-must-be-used-within-customizationprovider-by-ensuring-the-react-component-tree-that-renders-the-customization-ui-customizationpanel-and-any-other-components-calling-usecustomization-is-always-wrapped-in-customizationprovider",
+      "title": "Fix the runtime crash \"useCustomization must be used within CustomizationProvider\" by ensuring the React component tree that renders the Customization UI (CustomizationPanel and any other components calling useCustomization) is always wrapped in CustomizationProvider.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-global-customize-option-that-is-accessible-from-anywhere-in-the-app-and-opens-a-dedicated-full-screen-customization-interface-separate-from-the-existing-right-side-settings-sheet-where-the-user-can-make-customization-changes-only-within-that-interface-and-then-explicitly-save-apply-them",
+      "title": "Add a new global \"Customize\" option that is accessible from anywhere in the app and opens a dedicated, full-screen customization interface (separate from the existing right-side settings sheet) where the user can make customization changes only within that interface and then explicitly save/apply them.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-saveable-customization-interfaces-as-named-presets-allow-the-user-to-save-the-current-customization-settings-as-a-named-preset-view-a-list-of-saved-presets-apply-a-preset-and-delete-a-preset-presets-must-persist-in-localstorage-and-applying-a-preset-must-immediately-update-the-app-behavior-and-ui-the-same-way-as-changing-settings-directly",
+      "title": "Implement \"saveable customization interfaces\" as named presets: allow the user to save the current customization settings as a named preset, view a list of saved presets, apply a preset, and delete a preset. Presets must persist in LocalStorage and applying a preset must immediately update the app behavior and UI the same way as changing settings directly.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-mobile-navigation-experience-so-the-new-customize-option-is-clearly-available-in-mobile-view-and-add-a-mobile-preview-mode-within-the-dedicated-customization-interface-that-shows-the-app-ui-constrained-to-a-typical-phone-width-for-previewing-changes",
+      "title": "Update the mobile navigation experience so the new \"Customize\" option is clearly available in mobile view, and add a mobile-preview mode within the dedicated customization interface that shows the app UI constrained to a typical phone width for previewing changes.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-user-managed-subjects-data-model-that-supports-adding-new-subjects-and-persists-them-in-localstorage-while-keeping-the-three-default-subjects-mathematics-physics-chemistry-available-on-first-load",
+      "title": "Implement a user-managed Subjects data model that supports adding new subjects and persists them in LocalStorage, while keeping the three default subjects (Mathematics, Physics, Chemistry) available on first load.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-the-chapters-data-model-and-chapter-persistence-logic-to-associate-each-chapter-with-a-subject-identifier-from-the-user-managed-subjects-model-and-add-an-add-chapter-flow-to-create-new-chapters-under-any-subject",
+      "title": "Refactor the Chapters data model and chapter persistence logic to associate each chapter with a subject identifier from the user-managed Subjects model, and add an 'Add Chapter' flow to create new chapters under any subject.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-routing-and-bottom-navigation-to-support-dynamic-subjects-created-by-the-user-while-keeping-existing-paths-math-physics-chemistry-working-for-the-default-subjects",
+      "title": "Update routing and bottom navigation to support dynamic subjects created by the user, while keeping existing paths (/math, /physics, /chemistry) working for the default subjects.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-to-dos-and-resources-features-work-for-newly-created-subjects-by-updating-their-storage-and-lookup-keys-to-use-the-subject-identifier-and-preserve-backward-compatibility-with-any-previously-stored-data-keyed-by-the-old-subject-name-union",
+      "title": "Ensure To-Dos and Resources features work for newly created subjects by updating their storage and lookup keys to use the subject identifier, and preserve backward compatibility with any previously stored data keyed by the old subject-name union.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-clear-ui-entry-point-to-create-new-subjects-that-is-accessible-in-app-without-requiring-developer-edits-using-english-labels-and-consistent-styling-with-the-existing-dark-mode-theme",
+      "title": "Add a clear UI entry point to create new subjects that is accessible in-app (without requiring developer edits), using English labels and consistent styling with the existing dark-mode theme.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-clear-home-navigation-option-that-routes-to-the-dashboard-the-existing-route-and-is-accessible-from-anywhere-in-the-app-on-mobile-and-desktop",
+      "title": "Add a clear \"Home\" navigation option that routes to the Dashboard (the existing '/' route) and is accessible from anywhere in the app on mobile and desktop.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-dashboard-countdown-area-to-include-a-live-real-time-countdown-timer-to-july-31-2026-and-always-display-the-upcoming-day-s-day-of-week-and-date-tomorrow-prominently-on-the-dashboard",
+      "title": "Enhance the Dashboard countdown area to include a live (real-time) countdown timer to July 31, 2026 and always display the upcoming day’s day-of-week and date (\"Tomorrow\") prominently on the Dashboard.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-calendar-dashboard-page-where-the-user-can-select-a-date-and-create-edit-and-delete-work-to-do-entries-associated-with-that-date-with-the-selected-date-s-entries-displayed-in-a-right-side-panel-on-desktop-and-a-clear-equivalent-layout-on-mobile",
+      "title": "Create a new Calendar dashboard page where the user can select a date and create, edit, and delete work-to-do entries associated with that date, with the selected date’s entries displayed in a right-side panel on desktop (and a clear equivalent layout on mobile).",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-persist-calendar-dashboard-data-in-localstorage-so-that-per-date-work-to-do-entries-are-restored-on-app-reload",
+      "title": "Persist Calendar dashboard data in LocalStorage so that per-date work-to-do entries are restored on app reload.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-user-signature-text-p-umesh-pavan-goud-in-the-top-right-corner-of-the-app-header-on-all-non-customize-pages-without-removing-the-existing-customization-settings-control",
+      "title": "Display the user signature text \"~P UMESH PAVAN GOUD~\" in the top-right corner of the app header on all non-/customize pages, without removing the existing customization/settings control.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-per-chapter-action-labeled-currently-working-under-every-chapter-card-in-the-subject-chapters-grid-clicking-it-must-mark-that-chapter-as-currently-being-worked-on-and-start-or-resume-a-timer-for-that-chapter-without-opening-the-chapter-detail-panel",
+      "title": "Add a per-chapter action labeled \"Currently Working\" under every chapter card in the Subject chapters grid; clicking it must mark that chapter as currently being worked on and start (or resume) a timer for that chapter without opening the chapter detail panel.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-currently-working-section-on-the-dashboard-home-route-below-the-existing-primary-cards-that-lists-all-chapters-currently-marked-as-currently-working-and-shows-a-live-updating-elapsed-timer-for-each-listed-chapter",
+      "title": "Implement a \"Currently Working\" section on the Dashboard (Home, route '/') below the existing primary cards that lists all chapters currently marked as \"Currently Working\" and shows a live-updating elapsed timer for each listed chapter.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-running-currently-working-timer-status-is-visibly-notified-in-the-ui-beyond-the-dashboard-list-by-adding-an-in-place-indicator-on-chapter-cards-for-currently-working-chapters-that-shows-the-chapter-is-active-and-displays-the-elapsed-timer-in-a-compact-form",
+      "title": "Ensure the running \"Currently Working\" timer status is visibly notified in the UI beyond the Dashboard list by adding an in-place indicator on chapter cards (for currently-working chapters) that shows the chapter is active and displays the elapsed timer in a compact form.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rename-the-dashboard-hero-heading-text-your-jee-journey-to-friday",
+      "title": "Rename the Dashboard hero heading text \"Your JEE Journey\" to \"Friday\".",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-change-the-app-name-from-jee-2027-backlog-warrior-to-11-anywhere-it-appears-as-the-application-title-in-the-ui-header-and-in-the-browser-tab-page-title",
+      "title": "Change the app name from \"JEE 2027 Backlog Warrior\" to \"11\" anywhere it appears as the application title in the UI header and in the browser tab/page title.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-top-left-header-hamburger-menu-on-all-non-customize-pages-that-opens-a-left-side-drawer-containing-the-user-s-tasks-to-do-list-for-quick-access",
+      "title": "Add a top-left (header) hamburger menu on all non-/customize pages that opens a left-side drawer containing the user’s Tasks/To-Do list for quick access.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-dashboard-hero-quote-text-stay-focused-stay-consistent-and-replace-that-hero-subtext-area-with-an-inline-user-customizable-note-area-editable-directly-on-the-dashboard",
+      "title": "Remove the Dashboard hero quote text \"Stay focused, stay consistent\" and replace that hero subtext area with an inline, user-customizable note area editable directly on the Dashboard.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-calendar-page-to-work-like-google-calendar-provide-a-month-style-grid-view-with-navigation-and-per-day-task-indicators-while-keeping-the-existing-per-date-work-item-crud-and-localstorage-persistence",
+      "title": "Redesign the Calendar page to work like Google Calendar: provide a month-style grid view with navigation and per-day task indicators, while keeping the existing per-date work-item CRUD and localStorage persistence.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-hardcoded-dashboard-hero-heading-text-friday-with-an-in-place-user-editable-title-on-the-dashboard-page-and-persist-the-title-in-localstorage-so-it-is-restored-on-reload",
+      "title": "Replace the hardcoded Dashboard hero heading text \"Friday\" with an in-place, user-editable title on the Dashboard page, and persist the title in LocalStorage so it is restored on reload.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-notes-option-accessible-from-the-app-menu-the-left-side-hamburger-drawer-that-opens-a-dedicated-notes-page-implementing-a-basic-phone-notes-style-experience-create-view-edit-delete-notes-persist-all-notes-in-localstorage",
+      "title": "Add a new \"Notes\" option accessible from the app menu (the left-side hamburger drawer) that opens a dedicated Notes page implementing a basic phone-notes style experience: create, view, edit, delete notes; persist all notes in LocalStorage.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-tests-area-as-a-dedicated-dashboard-page-where-the-user-can-manage-unlimited-tests-create-tests-with-a-customizable-label-name-configurable-total-marks-and-record-scored-marks-entries-persist-all-test-data-in-localstorage",
+      "title": "Add a new \"Tests\" area as a dedicated dashboard page where the user can manage unlimited tests: create tests with a customizable label/name, configurable total marks, and record scored marks entries; persist all test data in LocalStorage.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-for-each-test-on-the-tests-page-display-a-customizable-graph-similar-to-common-nta-style-test-progress-charts-with-user-controls-to-adjust-the-graph-appearance-at-minimum-chart-type-line-vs-bar-and-an-accent-color",
+      "title": "For each test on the Tests page, display a customizable graph similar to common NTA-style test progress charts, with user controls to adjust the graph appearance (at minimum: chart type line vs bar, and an accent color).",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-navigation-so-tests-is-easily-accessible-on-mobile-and-desktop-add-a-clear-entry-point-in-the-bottom-navigation-and-in-the-hamburger-drawer-consistent-with-existing-styling",
+      "title": "Update navigation so \"Tests\" is easily accessible on mobile and desktop: add a clear entry point in the bottom navigation and in the hamburger drawer, consistent with existing styling.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create JSON data model for Math/Physics/Chem with chapter fields (id, name, totalLectures, lectureDuration=90m avg, status, subject) and predefined chapter lists",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Dashboard (Home) with days-remaining countdown to July 31, overall completion progress ring, and \"Daily Grind\" hours-studied-today card",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Subject pages (Math/Phys/Chem) with Amazon-style bottom navigation and chapter card lists",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Chapter card detail showing total lectures, target hours (1.5x speed), and auto-calculated date-to-finish based on 7h/day budget; checkmark/cross moves chapter to Completed vs Incomplete/Tough",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "To-Do list grouped by subject with checkboxes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Resource sidebar listing reference books per subject (e.g., Cengage, HCV, N. Awasthi)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Sleep tracker/health alert: warn if user logs study time during sleep window (3:30 AM–7:30 AM)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Persist progress and user data in LocalStorage; ensure mobile-responsive dark mode UI (van-friendly)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Advanced in-app Customization/Settings panel (global button) to adjust key study logic and UI toggles (daily target hours, lecture speed factor, sleep-window, notifications on/off, chapter-card size, auto date-to-finish recalculation toggle, dark mode override), persisted in LocalStorage",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add a global 'Customize Anything' option: from anywhere in the app, user taps the option to open a dedicated customization interface (edit mode) where they can customize elements/settings, then save and have changes apply across the app",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add UI to create/manage custom Subjects and Chapters (add new subjects and add new chapters to subjects) with persistence in LocalStorage",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add an explicit Home option/route in navigation to quickly return to the Dashboard/Home screen",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add a live/updating countdown timer to July 31, 2026 (real-time timer, not just static days remaining)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Show the upcoming day's day-of-week and date prominently on the Dashboard (e.g., \"Tomorrow: Mon, 15 Feb\")",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add a Calendar dashboard where the user can select/mark dates and write/track work-to-do items for each date (notes/tasks shown on the right side)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Display user name/signature \"~P UMESH PAVAN GOUD~\" in the top-right corner of the app UI (header)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add a per-chapter \"Currently Working\" option/button under every chapter; selecting it marks that chapter as currently being worked on",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Show selected \"Currently Working\" chapter(s) on the Home screen in a new section below with heading \"Currently Working\"",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Start a timer when a chapter is set to \"Currently Working\" and display/notify the running timer status in the UI (including on the Home \"Currently Working\" display)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Change the app name from \"JEE 2027 Backlog Warrior\" to \"11\"",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Add a top-left corner menu (hamburger) that opens a panel/drawer containing the Tasks/To-Do list for quick access",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Remove the Dashboard quote text \"Stay focused, stay consistent\" and leave that area as a user-customizable space",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Revamp the Calendar to work like Google Calendar (calendar-style interactions/UX rather than a simple date-notes list)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Make the Dashboard hero heading text user-customizable in-place (remove fixed \"FRIDAY\" label and allow editing/custom label directly there)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add a \"Notes\" option in the app menu that works like a basic phone notes app (create/edit/delete notes) with persistence",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Add a Dashboard section/page called \"Tests\" where the user can create unlimited test entries with customizable test label/name, total marks, and scored marks; show a per-test customizable graph similar to NTA test apps",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "11",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

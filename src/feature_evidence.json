@@ -1,0 +1,104 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-replace-the-hardcoded-dashboard-hero-heading-text-friday-with-an-in-place-user-editable-title-on-the-dashboard-page-and-persist-the-title-in-localstorage-so-it-is-restored-on-reload",
+      "featureTitle": "Replace the hardcoded Dashboard hero heading text \"Friday\" with an in-place, user-editable title on the Dashboard page, and persist the title in LocalStorage so it is restored on reload.",
+      "files": [
+        "frontend/src/hooks/useDashboardTitle.ts",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-38"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-new-notes-option-accessible-from-the-app-menu-the-left-side-hamburger-drawer-that-opens-a-dedicated-notes-page-implementing-a-basic-phone-notes-style-experience-create-view-edit-delete-notes-persist-all-notes-in-localstorage",
+      "featureTitle": "Add a new \"Notes\" option accessible from the app menu (the left-side hamburger drawer) that opens a dedicated Notes page implementing a basic phone-notes style experience: create, view, edit, delete notes; persist all notes in LocalStorage.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/TasksDrawer.tsx",
+        "frontend/src/hooks/useNotes.ts",
+        "frontend/src/pages/Notes.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-39"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-new-tests-area-as-a-dedicated-dashboard-page-where-the-user-can-manage-unlimited-tests-create-tests-with-a-customizable-label-name-configurable-total-marks-and-record-scored-marks-entries-persist-all-test-data-in-localstorage",
+      "featureTitle": "Add a new \"Tests\" area as a dedicated dashboard page where the user can manage unlimited tests: create tests with a customizable label/name, configurable total marks, and record scored marks entries; persist all test data in LocalStorage.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useTests.ts",
+        "frontend/src/pages/Tests.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-40"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-for-each-test-on-the-tests-page-display-a-customizable-graph-similar-to-common-nta-style-test-progress-charts-with-user-controls-to-adjust-the-graph-appearance-at-minimum-chart-type-line-vs-bar-and-an-accent-color",
+      "featureTitle": "For each test on the Tests page, display a customizable graph similar to common NTA-style test progress charts, with user controls to adjust the graph appearance (at minimum: chart type line vs bar, and an accent color).",
+      "files": [
+        "frontend/src/components/TestScoreChart.tsx",
+        "frontend/src/hooks/useTests.ts",
+        "frontend/src/pages/Tests.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-41"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-navigation-so-tests-is-easily-accessible-on-mobile-and-desktop-add-a-clear-entry-point-in-the-bottom-navigation-and-in-the-hamburger-drawer-consistent-with-existing-styling",
+      "featureTitle": "Update navigation so \"Tests\" is easily accessible on mobile and desktop: add a clear entry point in the bottom navigation and in the hamburger drawer, consistent with existing styling.",
+      "files": [
+        "frontend/src/components/BottomNavigation.tsx",
+        "frontend/src/components/TasksDrawer.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-42"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
