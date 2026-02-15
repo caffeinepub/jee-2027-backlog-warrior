@@ -1,71 +1,462 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Per-subject completion graph with animated chapter fill + fix React error #185",
+  "title": "Study planner UI polish: dark-blue theme, animated icons/graphics, notifications, overlay fixes, improved graphs, and persistence hardening",
   "requirements": [
     {
-      "id": "REQ-57",
-      "summary": "Add a per-subject completion graph on each Subject page that visualizes chapter-level completion and animates newly completed chapters with a slow fill.",
+      "id": "REQ-1",
+      "summary": "Apply a cohesive, accessible dark-blue look across all main dashboards using theme tokens (no conflicting hard-coded backgrounds).",
       "acceptanceCriteria": [
-        "On each Subject page, a Subject Completion Graph is displayed above the chapter grid (or another clearly visible location on the page).",
-        "The graph represents all chapters for the current subject and clearly distinguishes Completed vs Not Completed chapters (chapter-level granularity, not only an overall %).",
-        "When a chapter status changes to Completed, the corresponding segment animates from unfilled to filled with a visibly slow fill effect (not an instant jump).",
-        "The graph updates immediately when chapter status changes and reflects persisted LocalStorage state after a reload.",
-        "The graph works for default subjects and user-created subjects (subjectId-based).",
-        "All user-facing labels related to the graph are in English."
+        "Home/Dashboard, Calendar, Subjects, Notes, and Tests pages visually share a consistent dark-blue background style and harmonized component colors (cards/headers/buttons/badges).",
+        "Contrast is readable (no low-contrast text on dark backgrounds) and colors for success/warning/destructive remain distinguishable.",
+        "No hard-coded page backgrounds conflict with theme variables; styling is driven primarily by existing CSS variables/Tailwind tokens."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/SubjectCompletionGraph.tsx",
-          "operation": "create",
-          "description": "Create a SubjectCompletionGraph component that renders a chapter-by-chapter completion visualization for a given subjectId using current chapter data, with per-segment filled/unfilled styling and a slow fill animation when a chapter transitions to Completed (detect transitions via previous-status tracking). Verify the component's usage instructions before implementing."
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Refine dark-theme CSS variables/tokens for a dark-blue dashboard palette (background/surfaces/borders/text/accents) and ensure semantic colors (success/warning/destructive) remain distinct and accessible; avoid introducing page-specific hard-coded backgrounds."
         },
         {
-          "path": "frontend/src/pages/SubjectPage.tsx",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Wire SubjectCompletionGraph into the Subject page UI above the chapter grid (within the Chapters tab), passing subjectId and the subject-scoped chapters so the graph updates immediately on status changes and reflects LocalStorage-backed state after reload. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-58",
-      "summary": "Reproduce and eliminate the production crash (“Minified React error #185”) by capturing the full dev error/stack, fixing the root cause, and ensuring normal navigation/interactions remain stable.",
-      "acceptanceCriteria": [
-        "The app no longer throws “Minified React error #185” in production build during normal navigation and interactions.",
-        "No new React runtime errors are introduced in the browser console related to the fix.",
-        "Subject pages, Dashboard, Customize page, and chapter interactions (including Currently Working controls) remain functional after the fix.",
-        "If the fix requires changing component rendering logic, verify that it does not break LocalStorage persistence behavior for chapters/subjects/settings."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/AppErrorBoundary.tsx",
-          "operation": "create",
-          "description": "Add a lightweight React error boundary component to capture runtime crashes and surface a readable fallback in dev/production, preserving the error stack/logging to help reproduce and verify the fix for React error #185. Verify the component's usage instructions before implementing."
+          "description": "Adjust/extend Tailwind theme mappings (if needed) to better align utilities (bg-background, bg-card, border-border, text-foreground, primary/accent) with the updated dark-blue palette."
         },
         {
-          "path": "frontend/src/main.tsx",
+          "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Wrap the app root with AppErrorBoundary so the full, non-minified error details can be observed in dev (and crashes are contained), supporting reproduction/verification while implementing the underlying fix. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Refactor route component definitions to avoid patterns that can trigger hook order/identity issues under minification (e.g., ensure any hooks used by route components are called in stable, named components rather than ad-hoc inline closures), and implement the identified root-cause fix so error #185 no longer occurs during navigation. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/SubjectPage.tsx",
-          "operation": "modify",
-          "description": "Audit and adjust SubjectPage rendering/state patterns implicated by the reproduced stack trace (e.g., ensure stable keys, avoid any conditional hook invocation paths, and keep chapter interaction flows intact) as part of the root-cause fix for React error #185. Verify the component's usage instructions before implementing."
+          "description": "Ensure the global layout/root container consistently uses theme-driven background classes and a single, shared background treatment across routed pages (no per-page background overrides)."
         },
         {
           "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Apply the root-cause fix indicated by the reproduced dev stack trace to Dashboard (commonly: remove any conditional hook invocation, stabilize derived state/memoization inputs, and ensure list rendering uses stable keys) and confirm LocalStorage-backed behavior remains unchanged. Verify the component's usage instructions before implementing."
+          "description": "Normalize any local card/section styling to the updated dark-blue theme tokens (cards/borders/headers/buttons) to match other dashboards; keep all user-facing text in English."
+        },
+        {
+          "path": "frontend/src/pages/CalendarDashboard.tsx",
+          "operation": "modify",
+          "description": "Align Calendar dashboard surfaces (cards/panels/day cells) to the shared dark-blue theme tokens and remove any conflicting hard-coded background styling."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Align Subject page header/tabs/cards to the shared dark-blue theme tokens and remove any conflicting hard-coded background styling."
+        },
+        {
+          "path": "frontend/src/pages/Notes.tsx",
+          "operation": "modify",
+          "description": "Align Notes page panels/cards to the shared dark-blue theme tokens and ensure readable contrast on dark backgrounds."
+        },
+        {
+          "path": "frontend/src/pages/Tests.tsx",
+          "operation": "modify",
+          "description": "Align Tests page charts/cards to the shared dark-blue theme tokens and ensure readable contrast on dark backgrounds."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add subtle, consistent icon animations (hover/tap/active + state changes) across the UI with prefers-reduced-motion support.",
+      "acceptanceCriteria": [
+        "Primary interactive icons (bottom navigation icons, common action icons like edit/save/delete/plus) animate on hover/tap (e.g., scale/tilt/fade) without jank.",
+        "Animations are disabled/reduced when the user has prefers-reduced-motion enabled.",
+        "Animations do not block clicks/taps and do not cause layout shift."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add reusable icon animation utility classes (hover/tap/active/state-change) and guard them with prefers-reduced-motion to reduce/disable motion; ensure animations do not cause layout shift."
+        },
+        {
+          "path": "frontend/src/components/AnimatedIcon.tsx",
+          "operation": "create",
+          "description": "Create a small wrapper component for Lucide icons that applies the shared animation classes consistently (hover/tap/active + optional 'active' state styling)."
+        },
+        {
+          "path": "frontend/src/components/BottomNavigation.tsx",
+          "operation": "modify",
+          "description": "Use the new AnimatedIcon wrapper (or shared animation classes) for bottom navigation icons; ensure animations are subtle and do not interfere with taps/clicks. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Apply icon animations to common action icons (edit/save/cancel/add/play/pause/stop) using the shared animation utility/wrapper; ensure reduced-motion behavior is respected."
         },
         {
           "path": "frontend/src/pages/Customize.tsx",
           "operation": "modify",
-          "description": "Apply the root-cause fix indicated by the reproduced dev stack trace to Customize (commonly: remove any conditional hook invocation and stabilize component rendering logic) and confirm settings/subjects persistence remains unchanged. Verify the component's usage instructions before implementing."
+          "description": "Apply icon animations to common action icons (back/save/discard/add/delete/preview mode icons) using the shared animation utility/wrapper; ensure reduced-motion behavior is respected."
+        },
+        {
+          "path": "frontend/src/components/ChapterCard.tsx",
+          "operation": "modify",
+          "description": "Apply the shared icon animations to chapter action icons (start/pause/stop/edit/delete/confirm) and any completion indicators without changing layout."
+        },
+        {
+          "path": "frontend/src/components/ChapterDetailPanel.tsx",
+          "operation": "modify",
+          "description": "Apply the shared icon animations to edit/save/cancel/status-change icons within the chapter detail sheet while keeping interactions responsive and accessible."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Introduce subtle background and opening-interaction graphics/illustrations that enhance the dark-blue theme without obscuring content.",
+      "acceptanceCriteria": [
+        "At least two generated background assets are added under frontend/public/assets/generated and are used by the app background (no backend routing).",
+        "Major panels/screens (e.g., dashboard hero area, subject page header, chapter detail panel header) include small decorative illustration accents that do not overlap text.",
+        "Graphics remain subtle (low opacity / behind content) and do not reduce readability."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/app-bg-mesh-blue.dim_1920x1080.png",
+          "operation": "create",
+          "description": "Add the generated background asset to the required public assets location so it can be used as a static UI background (no backend routing)."
+        },
+        {
+          "path": "frontend/public/assets/generated/app-bg-noise-blue.dim_2048x2048.png",
+          "operation": "create",
+          "description": "Add the generated texture asset to the required public assets location so it can be layered subtly behind content."
+        },
+        {
+          "path": "frontend/public/assets/generated/study-illustration-line.dim_1200x400.png",
+          "operation": "create",
+          "description": "Add the generated study illustration to the required public assets location for use as a subtle decorative accent in headers/hero areas."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Implement a theme-friendly background layering approach using the generated assets (frontend/public/assets/generated/app-bg-mesh-blue.dim_1920x1080.png and frontend/public/assets/generated/app-bg-noise-blue.dim_2048x2048.png) with low opacity and behind-content positioning to preserve readability."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Wire the generated background assets into the app layout so all dashboards share the same subtle background treatment (e.g., via a dedicated background layer element that sits behind content)."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add a subtle decorative header/hero accent using frontend/public/assets/generated/study-illustration-line.dim_1200x400.png without overlapping text or reducing contrast."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Add a subtle decorative header accent using frontend/public/assets/generated/study-illustration-line.dim_1200x400.png (or a small cropped usage) that does not obscure the subject title or controls."
+        },
+        {
+          "path": "frontend/src/components/ChapterDetailPanel.tsx",
+          "operation": "modify",
+          "description": "Add a subtle decorative accent in the sheet header area (e.g., faint line-art placement) ensuring it stays behind text and remains readable; keep assets lightweight."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add in-place subject-level editing for lectures, target hours, and finish date with validation and persistence.",
+      "acceptanceCriteria": [
+        "From the subject context (Subject page), users can edit the subject-level values in-place without navigating away.",
+        "Edits are validated (no negative/NaN values) and are persisted after refresh/reopen.",
+        "If the app uses computed finish dates (auto-recalculate), the UI clearly supports either overriding the date or disabling auto-calc (using existing customization setting) so the user can set a finish date explicitly."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useSubjectDetails.ts",
+          "operation": "create",
+          "description": "Create a localStorage-backed hook to load/update per-subject detail fields (subject-level lecture count, target hours, finish date + optional override) with validation and versioned migration to ensure persistence across reloads."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Add an in-place editable subject details area in the subject header (or just below it) for number of lectures, target hours, and finish date; validate inputs and persist updates via the new useSubjectDetails hook; integrate with existing auto-recalculate setting (allow explicit override when auto-calc is disabled or clearly mark override behavior)."
+        },
+        {
+          "path": "frontend/src/customization/integration.ts",
+          "operation": "modify",
+          "description": "Centralize/align any subject-level date-to-finish calculations and override rules (as applicable) so the Subject page can clearly support explicit finish date entry vs auto-calculated behavior using the existing customization setting."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Expose delete actions for every chapter and every subject wherever they appear, with confirmations and consistent destructive styling.",
+      "acceptanceCriteria": [
+        "Every chapter card/list entry exposes a delete action with confirmation, and deleting removes it immediately and persists after reload.",
+        "Every subject list entry (where subjects are managed) exposes a delete action with confirmation, and deleting a subject also removes its associated chapters.",
+        "Delete actions are visually consistent and use destructive color styling."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SubjectDeleteButton.tsx",
+          "operation": "create",
+          "description": "Create a reusable subject delete control that shows a confirmation prompt (using existing shadcn AlertDialog by composition) and applies consistent destructive styling; reuse wherever subjects appear. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/SubjectPage.tsx",
+          "operation": "modify",
+          "description": "Add a subject-level delete action in the subject header using SubjectDeleteButton; ensure it deletes the subject and associated chapters and navigates away cleanly after deletion."
+        },
+        {
+          "path": "frontend/src/components/BottomNavigation.tsx",
+          "operation": "modify",
+          "description": "Where feasible without adding new routes, provide access to subject deletion from the UI locations where subjects appear (e.g., long-press/context menu or an overflow menu pattern) while preserving simple navigation; keep destructive action confirmed and styled consistently."
+        },
+        {
+          "path": "frontend/src/components/AllChaptersBySubjectSection.tsx",
+          "operation": "modify",
+          "description": "Ensure every chapter list entry rendered in grouped/summary sections exposes a delete action with confirmation (either directly via ChapterCard or a consistent delete control)."
+        },
+        {
+          "path": "frontend/src/components/ChapterCard.tsx",
+          "operation": "modify",
+          "description": "Confirm chapter delete is available in all display modes (compact/detailed) with a confirmation prompt and consistent destructive styling; ensure deletion updates state immediately and persists."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "If subjects are listed/previewed on the Dashboard (e.g., via grouped sections), ensure subject deletion is accessible via SubjectDeleteButton wherever a subject entry is shown, not only in Customize."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Unify completion vs incompletion colors/indicators across lists, detail panels, and charts using consistent semantic mapping.",
+      "acceptanceCriteria": [
+        "Completed vs Incomplete states are always visually distinguishable via badge color and/or iconography in all relevant components.",
+        "Charts/graphs use the same semantic color mapping as the rest of the UI.",
+        "Color mapping is consistent across pages (no conflicting meanings)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Define a consistent semantic mapping for completion states (e.g., completed/success, incomplete/warning, tough/destructive or distinct accent) using CSS variables and utility classes; ensure high contrast on dark-blue backgrounds."
+        },
+        {
+          "path": "frontend/src/components/ChapterCard.tsx",
+          "operation": "modify",
+          "description": "Align chapter status badges/icons and any progress indicators to the unified semantic colors/indicators for Completed vs Incomplete (and Tough if applicable)."
+        },
+        {
+          "path": "frontend/src/components/AllChaptersBySubjectSection.tsx",
+          "operation": "modify",
+          "description": "Ensure grouped chapter lists show consistent completion indicators (badge color/iconography) matching the unified semantic mapping."
+        },
+        {
+          "path": "frontend/src/components/SubjectCompletionGraph.tsx",
+          "operation": "modify",
+          "description": "Update the graph color usage to match the same completion semantic mapping used elsewhere (completed vs incomplete) and ensure visibility on the dark-blue theme."
+        },
+        {
+          "path": "frontend/src/pages/Tests.tsx",
+          "operation": "modify",
+          "description": "Align any test-related completion/performance indicator colors to avoid conflicting meanings with the completion semantic mapping used for chapters/todos."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add a Notifications section on the Dashboard showing incomplete work and due-today work in two separate lists sourced from persisted data.",
+      "acceptanceCriteria": [
+        "Dashboard contains a clearly labeled Notifications area/section.",
+        "Notifications section shows two groups: Incomplete items and Due today items, each with counts and empty-state messaging.",
+        "Items shown come from existing persisted app data (e.g., incomplete chapters and incomplete todos; due-today derived from existing date fields such as calendar entries and/or finish-date fields) and update immediately when the underlying data changes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NotificationsSection.tsx",
+          "operation": "create",
+          "description": "Create a Dashboard Notifications section component that computes and renders two lists: (1) all incomplete items (e.g., chapters/todos) and (2) items due today (derived from persisted calendar entries and/or stored finish-date fields), with counts and empty states; keep all user-facing text in English."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Wire NotificationsSection into the Home/Dashboard page in a clearly labeled area and ensure it reacts immediately to changes in chapters/todos/calendar/subject details."
+        },
+        {
+          "path": "frontend/src/hooks/useTodos.ts",
+          "operation": "modify",
+          "description": "Expose (or add) a convenient way to retrieve incomplete todos for all subjects (not only per-subject) so Notifications can list incomplete work consistently from persisted data."
+        },
+        {
+          "path": "frontend/src/hooks/useCalendarEntries.ts",
+          "operation": "modify",
+          "description": "Expose (or add) a convenient way to retrieve entries due today (or entries matching a given date) so Notifications can list due-today work derived from persisted calendar data."
+        },
+        {
+          "path": "frontend/src/hooks/useSubjectDetails.ts",
+          "operation": "modify",
+          "description": "Ensure subject finish-date (and override) values are accessible for due-today derivations when applicable; keep computations consistent with customization auto-recalculate behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Fix overlapping/mixed UI layers by standardizing modal/sheet overlays with backdrop blur and correct z-index/scroll behavior.",
+      "acceptanceCriteria": [
+        "Opening the Chapter detail panel results in a clear modal/sheet experience with an overlay/backdrop blur behind it; the panel content is fully visible and scrollable.",
+        "No other panels (dialogs/sheets/drawers) appear underneath/overlap in a way that mixes content; only one primary overlay layer is visually active at a time.",
+        "Clicking/tapping outside the panel (when appropriate) dismisses it without leaving the UI in a mixed state."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global styling for Radix/shadcn overlay layers to enforce a consistent backdrop blur/dim, correct stacking context (z-index), and prevent underlying content from visually mixing with open sheets/dialogs; do this without modifying files under frontend/src/components/ui."
+        },
+        {
+          "path": "frontend/src/components/ChapterDetailPanel.tsx",
+          "operation": "modify",
+          "description": "Ensure the Chapter detail sheet uses a fully readable, scrollable content area with correct z-index layering and that dismiss interactions (outside click/tap) leave no mixed/overlapping state."
+        },
+        {
+          "path": "frontend/src/components/TasksDrawer.tsx",
+          "operation": "modify",
+          "description": "Align the drawer/sheet overlay behavior with the standardized overlay layering so it does not overlap/mix with other panels; ensure only one primary overlay is visually active at a time where appropriate."
+        },
+        {
+          "path": "frontend/src/customization/CustomizationPanel.tsx",
+          "operation": "modify",
+          "description": "Align customization side panel overlay behavior with the standardized overlay layering (backdrop blur, z-index, dismissal) without editing shadcn ui components. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Add a user-facing Light/Dark mode toggle in Settings/Customize that persists and respects existing theme infrastructure.",
+      "acceptanceCriteria": [
+        "Settings/Customize provides a clear two-way mode control: Light and Dark.",
+        "The selected mode is applied immediately and persists after refresh/reopen.",
+        "The toggle respects existing theme infrastructure (CSS variables and existing customization provider) and does not require editing immutable auth/actor hooks."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Customize.tsx",
+          "operation": "modify",
+          "description": "Ensure the Light/Dark control is clearly presented as a two-way mode selector (Light vs Dark) and that saving settings applies immediately via the existing customization provider; keep labels in English."
+        },
+        {
+          "path": "frontend/src/customization/CustomizationProvider.tsx",
+          "operation": "modify",
+          "description": "Confirm the provider applies the selected light/dark mode immediately and consistently on load and on changes using the existing theme infrastructure (CSS variables + existing override logic)."
+        },
+        {
+          "path": "frontend/src/customization/applyDarkModeOverride.ts",
+          "operation": "modify",
+          "description": "Harden the document root mode application so it reliably switches between light/dark and persists through reloads while coexisting cleanly with the dark-blue dashboard styling."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Remove/adjust any boot-time script that force-enables dark mode unconditionally so it instead respects the persisted preference from customization settings; do not clear user data during initialization."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Make bottom navigation horizontally scrollable on small screens with visible overflow affordance and smooth touch/trackpad support.",
+      "acceptanceCriteria": [
+        "On narrow widths, bottom navigation allows horizontal swipe/scroll to access all items (including subject-driven entries if present).",
+        "Scrolling works on mobile touch (momentum scrolling) and desktop trackpad/mousewheel horizontal scroll.",
+        "No vertical jitter or content clipping occurs in the bottom bar."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BottomNavigation.tsx",
+          "operation": "modify",
+          "description": "Implement robust horizontal scrolling for the bottom nav items (including dynamically generated subject entries) with appropriate overflow-x behavior and optional visual affordance when overflow exists (e.g., edge fade/gradient indicator). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add or refine CSS utilities for the bottom nav horizontal scroll behavior (momentum scrolling on iOS, stable height to prevent vertical jitter, optional scrollbars/edge fades) and ensure it does not clip content."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Add at least one new dashboard-relevant visualization and improve chart animations/transitions with prefers-reduced-motion support.",
+      "acceptanceCriteria": [
+        "At least one additional dashboard-relevant visualization is added (beyond current completion progress bar), using existing data sources.",
+        "Existing SVG/chart components animate transitions smoothly on data change (e.g., line draw, point fade/scale) without hurting performance.",
+        "All graph animations are disabled/reduced under prefers-reduced-motion."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+          "operation": "create",
+          "description": "Create a lightweight SVG-based dashboard visualization (e.g., per-subject completion distribution or completion trend) driven by existing persisted chapter/todo/test data; include smooth transitions and a prefers-reduced-motion fallback."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add the new dashboard visualization component in a natural location (near stats/notifications) and ensure it updates smoothly when underlying data changes."
+        },
+        {
+          "path": "frontend/src/components/SubjectCompletionGraph.tsx",
+          "operation": "modify",
+          "description": "Improve existing graph transitions/animations on data change while respecting prefers-reduced-motion (reduce/disable motion when enabled)."
+        },
+        {
+          "path": "frontend/src/components/OverallPerformanceTrendChart.tsx",
+          "operation": "modify",
+          "description": "Enhance SVG chart animations/transitions (e.g., line draw/point transitions) and guard them with prefers-reduced-motion to reduce/disable motion."
+        },
+        {
+          "path": "frontend/src/components/TestScoreChart.tsx",
+          "operation": "modify",
+          "description": "Enhance SVG chart animations/transitions on data changes and ensure prefers-reduced-motion reduces/disables motion without breaking layout or readability."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add shared chart animation CSS (and prefers-reduced-motion overrides) to keep chart motion subtle, consistent, and performant across the app."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Harden local persistence so edits/completions/deletes/settings never reset on refresh/reopen unless the user confirms a destructive reset action.",
+      "acceptanceCriteria": [
+        "All edits/completions/deletes/settings remain after a full page refresh and after closing/reopening the browser tab.",
+        "No automatic code path clears localStorage or re-seeds INITIAL_* data on load when valid stored data exists.",
+        "The only way to clear data remains an explicit user-confirmed action (e.g., the existing 'Reset local data' confirmation in the error boundary), and normal 'Reload' does not clear data."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useChapterData.ts",
+          "operation": "modify",
+          "description": "Audit and harden chapter load/migration logic to ensure it never overwrites valid stored data with initial seeded data, and that deletes/edits/completions persist reliably across refreshes and reopen."
+        },
+        {
+          "path": "frontend/src/hooks/useSubjects.ts",
+          "operation": "modify",
+          "description": "Audit and harden subject persistence/migration to ensure subjects are not re-seeded when stored data exists; ensure deletes persist and remain consistent with associated chapter cleanup."
+        },
+        {
+          "path": "frontend/src/hooks/useTodos.ts",
+          "operation": "modify",
+          "description": "Harden todo persistence/migration to ensure toggles/deletes persist across refresh/reopen and are not reset by legacy migration paths when valid stored data exists."
+        },
+        {
+          "path": "frontend/src/hooks/useCalendarEntries.ts",
+          "operation": "modify",
+          "description": "Harden calendar entry persistence to ensure adds/edits/deletes persist across refresh/reopen and are not reset by any initialization logic."
+        },
+        {
+          "path": "frontend/src/hooks/useCustomizationSettings.ts",
+          "operation": "modify",
+          "description": "Ensure customization settings persistence is stable (no unintended resets), and that mode preference and other settings persist across refresh/reopen."
+        },
+        {
+          "path": "frontend/src/lib/appLocalStorage.ts",
+          "operation": "modify",
+          "description": "Confirm appLocalStorage utilities only clear keys when explicitly invoked by a user-confirmed reset action; avoid any automatic clear paths during normal startup."
+        },
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Remove/adjust any startup behavior that could inadvertently reset app state (e.g., unconditional theme forcing that overwrites stored preferences) and ensure normal reload does not clear data."
         }
       ]
     }

@@ -1,10 +1,12 @@
 import React, { Component, ReactNode } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Home, RefreshCw } from 'lucide-react';
+import { clearAppLocalStorage } from '../lib/appLocalStorage';
 
 interface Props {
   children: ReactNode;
+  router?: any;
 }
 
 interface State {
@@ -32,9 +34,27 @@ export class AppErrorBoundary extends Component<Props, State> {
     this.setState({ errorInfo });
   }
 
-  handleReset = () => {
+  handleReturnHome = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.href = '/';
+    
+    // Use router navigation if available, otherwise fallback to location
+    if (this.props.router) {
+      try {
+        this.props.router.navigate({ to: '/' });
+      } catch (err) {
+        console.error('Router navigation failed, using location fallback:', err);
+        window.location.href = '/';
+      }
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  handleResetLocalData = () => {
+    if (confirm('This will clear all your local data and reset the app to defaults. Continue?')) {
+      clearAppLocalStorage();
+      window.location.reload();
+    }
   };
 
   render() {
@@ -71,16 +91,28 @@ export class AppErrorBoundary extends Component<Props, State> {
                   </pre>
                 </details>
               )}
-              <div className="flex gap-2">
-                <Button onClick={this.handleReset} className="flex-1">
-                  Return to Home
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button onClick={this.handleReturnHome} className="flex-1 gap-2">
+                    <Home className="h-4 w-4" />
+                    Return to Home
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.location.reload()}
+                    className="flex-1 gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Reload Page
+                  </Button>
+                </div>
                 <Button
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  className="flex-1"
+                  variant="destructive"
+                  onClick={this.handleResetLocalData}
+                  className="w-full gap-2"
                 >
-                  Reload Page
+                  <RotateCcw className="h-4 w-4" />
+                  Reset local data
                 </Button>
               </div>
             </CardContent>

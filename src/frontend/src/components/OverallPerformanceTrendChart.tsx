@@ -1,283 +1,258 @@
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-
-interface TestScore {
-  id: string;
-  score: number;
-  timestamp: number;
-}
-
-interface Test {
-  id: string;
-  label: string;
-  totalMarks: number;
-  scores: TestScore[];
-}
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Test } from '../hooks/useTests';
 
 interface OverallPerformanceTrendChartProps {
   tests: Test[];
 }
 
-interface AggregatedScore {
-  timestamp: number;
-  percentage: number;
-  testLabel: string;
-}
-
 export function OverallPerformanceTrendChart({ tests }: OverallPerformanceTrendChartProps) {
-  const aggregatedData = useMemo(() => {
-    const allScores: AggregatedScore[] = [];
+  const allScores = useMemo(() => {
+    const scores: Array<{ score: number; maxScore: number; percentage: number; date: number; testLabel: string }> = [];
     
     tests.forEach(test => {
       test.scores.forEach(score => {
-        allScores.push({
-          timestamp: score.timestamp,
+        scores.push({
+          score: score.score,
+          maxScore: test.totalMarks,
           percentage: (score.score / test.totalMarks) * 100,
-          testLabel: test.label,
+          date: score.timestamp,
+          testLabel: test.label
         });
       });
     });
     
-    // Sort by timestamp
-    return allScores.sort((a, b) => a.timestamp - b.timestamp);
+    return scores.sort((a, b) => a.date - b.date);
   }, [tests]);
 
-  const trendAnalysis = useMemo(() => {
-    if (aggregatedData.length < 2) {
-      return { trend: 'flat', label: 'Not Enough Data', color: 'text-muted-foreground' };
+  const stats = useMemo(() => {
+    if (allScores.length === 0) {
+      return { avgPercentage: 0, trend: 'Stable' as const, recentScores: [] };
     }
 
-    // Calculate linear regression slope
-    const n = aggregatedData.length;
-    const sumX = aggregatedData.reduce((sum, _, i) => sum + i, 0);
-    const sumY = aggregatedData.reduce((sum, d) => sum + d.percentage, 0);
-    const sumXY = aggregatedData.reduce((sum, d, i) => sum + i * d.percentage, 0);
-    const sumX2 = aggregatedData.reduce((sum, _, i) => sum + i * i, 0);
+    const avgPercentage = allScores.reduce((sum, s) => sum + s.percentage, 0) / allScores.length;
+    
+    // Simple linear regression for trend
+    const n = allScores.length;
+    const sumX = allScores.reduce((sum, _, i) => sum + i, 0);
+    const sumY = allScores.reduce((sum, s) => sum + s.percentage, 0);
+    const sumXY = allScores.reduce((sum, s, i) => sum + i * s.percentage, 0);
+    const sumX2 = allScores.reduce((sum, _, i) => sum + i * i, 0);
     
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     
-    // Determine trend based on slope
-    if (slope > 1) {
-      return { trend: 'improving', label: 'Trend: Improving', color: 'text-green-600 dark:text-green-400' };
-    } else if (slope < -1) {
-      return { trend: 'declining', label: 'Trend: Declining', color: 'text-red-600 dark:text-red-400' };
-    } else {
-      return { trend: 'flat', label: 'Trend: Stable', color: 'text-blue-600 dark:text-blue-400' };
-    }
-  }, [aggregatedData]);
+    let trend: 'Improving' | 'Declining' | 'Stable' = 'Stable';
+    if (slope > 1) trend = 'Improving';
+    else if (slope < -1) trend = 'Declining';
+    
+    const recentScores = allScores.slice(-3);
+    
+    return { avgPercentage, trend, recentScores };
+  }, [allScores]);
 
-  const averagePercentage = useMemo(() => {
-    if (aggregatedData.length === 0) return 0;
-    const sum = aggregatedData.reduce((acc, d) => acc + d.percentage, 0);
-    return sum / aggregatedData.length;
-  }, [aggregatedData]);
-
-  if (aggregatedData.length === 0) {
+  if (allScores.length === 0) {
     return (
-      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-transparent">
+      <Card className="mb-6 bg-card/80 backdrop-blur-sm border-border/50">
         <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
-            Overall Performance Trend
-          </CardTitle>
+          <CardTitle className="text-lg">Overall Performance Trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <TrendingUp className="h-16 w-16 mx-auto mb-4 opacity-30" />
-            <p className="text-base font-medium">No test scores recorded yet.</p>
-            <p className="text-sm mt-2">Add scores to see your performance trend.</p>
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            No test scores recorded yet
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  // Calculate chart dimensions
+  // Chart dimensions
   const width = 900;
-  const height = 450;
-  const padding = { top: 50, right: 50, bottom: 90, left: 90 };
+  const height = 350;
+  const padding = { top: 40, right: 40, bottom: 80, left: 80 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
 
   // Scale functions
   const xScale = (index: number) => {
-    return (index / (aggregatedData.length - 1)) * chartWidth;
+    return (index / Math.max(allScores.length - 1, 1)) * chartWidth;
   };
 
   const yScale = (percentage: number) => {
     return chartHeight - (percentage / 100) * chartHeight;
   };
 
-  // Generate path for line chart
-  const linePath = aggregatedData
-    .map((d, i) => {
+  // Generate path
+  const linePath = allScores
+    .map((s, i) => {
       const x = xScale(i);
-      const y = yScale(d.percentage);
+      const y = yScale(s.percentage);
       return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
     })
     .join(' ');
 
-  const TrendIcon = trendAnalysis.trend === 'improving' ? TrendingUp : trendAnalysis.trend === 'declining' ? TrendingDown : Minus;
+  const trendColor = stats.trend === 'Improving' 
+    ? 'oklch(65% 0.18 150)' 
+    : stats.trend === 'Declining' 
+    ? 'oklch(58% 0.22 25)' 
+    : 'oklch(68% 0.16 195)';
+
+  const TrendIcon = stats.trend === 'Improving' 
+    ? TrendingUp 
+    : stats.trend === 'Declining' 
+    ? TrendingDown 
+    : Minus;
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-transparent">
+    <Card className="mb-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth shadow-elevated">
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <CardTitle className="text-xl flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
             Overall Performance Trend
           </CardTitle>
-          <div className={`flex items-center gap-2 font-semibold text-base ${trendAnalysis.color}`}>
-            <TrendIcon className="h-5 w-5" />
-            {trendAnalysis.label}
+          <div className="flex items-center gap-2">
+            <TrendIcon className="h-5 w-5" style={{ color: trendColor }} />
+            <span className="text-sm font-semibold" style={{ color: trendColor }}>
+              {stats.trend}
+            </span>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-muted/50 rounded-lg p-4 text-center border">
-            <div className="text-3xl font-bold text-primary">{aggregatedData.length}</div>
-            <div className="text-sm text-muted-foreground mt-1">Total Attempts</div>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-4 text-center border">
-            <div className="text-3xl font-bold text-primary">{averagePercentage.toFixed(1)}%</div>
-            <div className="text-sm text-muted-foreground mt-1">Average Score</div>
-          </div>
-        </div>
-
-        {/* SVG Chart */}
+      <CardContent className="space-y-4">
+        {/* Chart */}
         <div className="w-full overflow-x-auto">
           <svg
             viewBox={`0 0 ${width} ${height}`}
-            className="w-full"
-            style={{ minWidth: '320px', maxHeight: '450px' }}
+            className="w-full transition-smooth"
+            style={{ minWidth: '320px', maxHeight: '350px' }}
           >
-            {/* Grid lines and Y-axis labels */}
-            {[0, 25, 50, 75, 100].map(tick => (
-              <g key={tick}>
-                <line
-                  x1={padding.left}
-                  y1={padding.top + yScale(tick)}
-                  x2={padding.left + chartWidth}
-                  y2={padding.top + yScale(tick)}
-                  className="stroke-border/50"
-                  strokeWidth="1"
-                  strokeDasharray="4,4"
-                />
-                <text
-                  x={padding.left - 15}
-                  y={padding.top + yScale(tick)}
-                  textAnchor="end"
-                  className="text-[14px] fill-muted-foreground font-medium"
-                  dominantBaseline="middle"
-                >
-                  {tick}%
-                </text>
-              </g>
-            ))}
+            {/* Grid lines */}
+            {[0, 25, 50, 75, 100].map((tick) => {
+              const y = chartHeight * (1 - tick / 100);
+              return (
+                <g key={tick} className="transition-smooth">
+                  <line
+                    x1={padding.left}
+                    y1={padding.top + y}
+                    x2={padding.left + chartWidth}
+                    y2={padding.top + y}
+                    className="stroke-border/30 transition-smooth"
+                    strokeWidth="1"
+                    strokeDasharray="4,4"
+                  />
+                  <text
+                    x={padding.left - 10}
+                    y={padding.top + y}
+                    textAnchor="end"
+                    className="text-[14px] fill-muted-foreground font-medium"
+                    dominantBaseline="middle"
+                  >
+                    {tick}%
+                  </text>
+                </g>
+              );
+            })}
 
-            {/* Line path with gradient */}
-            <defs>
-              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" className="stop-color-primary" stopOpacity="0.8" />
-                <stop offset="100%" className="stop-color-primary" stopOpacity="1" />
-              </linearGradient>
-            </defs>
+            {/* Chart content */}
+            <g transform={`translate(${padding.left}, ${padding.top})`}>
+              {/* Line path with glow */}
+              <path
+                d={linePath}
+                fill="none"
+                stroke={trendColor}
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-smooth"
+                style={{
+                  filter: 'drop-shadow(0 0 6px currentColor)',
+                  opacity: 0.9
+                }}
+              />
+              {/* Data points */}
+              {allScores.map((s, i) => (
+                <g key={i} className="transition-smooth hover:scale-110">
+                  <circle
+                    cx={xScale(i)}
+                    cy={yScale(s.percentage)}
+                    r="5"
+                    fill={trendColor}
+                    className="stroke-background transition-smooth"
+                    strokeWidth="2"
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                    }}
+                  >
+                    <title>{`${s.testLabel}: ${s.percentage.toFixed(1)}%`}</title>
+                  </circle>
+                </g>
+              ))}
+            </g>
 
-            <path
-              d={linePath}
-              fill="none"
-              className="stroke-primary"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              transform={`translate(${padding.left}, ${padding.top})`}
-            />
-
-            {/* Data points */}
-            {aggregatedData.map((d, i) => (
-              <g key={i} transform={`translate(${padding.left + xScale(i)}, ${padding.top + yScale(d.percentage)})`}>
-                <circle
-                  r="6"
-                  className="fill-primary stroke-background"
-                  strokeWidth="3"
-                />
-                <title>{`${d.testLabel}: ${d.percentage.toFixed(1)}% (${new Date(d.timestamp).toLocaleDateString()})`}</title>
-              </g>
-            ))}
-
-            {/* X-axis */}
+            {/* Axes */}
             <line
               x1={padding.left}
               y1={padding.top + chartHeight}
               x2={padding.left + chartWidth}
               y2={padding.top + chartHeight}
-              className="stroke-border"
+              className="stroke-border/50"
               strokeWidth="2"
             />
-
-            {/* Y-axis */}
             <line
               x1={padding.left}
               y1={padding.top}
               x2={padding.left}
               y2={padding.top + chartHeight}
-              className="stroke-border"
+              className="stroke-border/50"
               strokeWidth="2"
             />
 
-            {/* X-axis tick labels */}
-            {aggregatedData.map((d, i) => {
-              if (aggregatedData.length > 15 && i % 2 !== 0) return null;
-              return (
-                <text
-                  key={i}
-                  x={padding.left + xScale(i)}
-                  y={padding.top + chartHeight + 25}
-                  textAnchor="middle"
-                  className="text-[14px] fill-muted-foreground font-medium"
-                >
-                  {i + 1}
-                </text>
-              );
-            })}
-
-            {/* X-axis label */}
+            {/* Axis labels */}
             <text
               x={padding.left + chartWidth / 2}
-              y={height - 25}
+              y={height - 20}
               textAnchor="middle"
               className="text-[16px] fill-foreground font-semibold"
             >
-              Attempt Number
+              Test Attempts (Chronological)
             </text>
-
-            {/* Y-axis label */}
             <text
-              x={30}
+              x={25}
               y={padding.top + chartHeight / 2}
               textAnchor="middle"
               className="text-[16px] fill-foreground font-semibold"
-              transform={`rotate(-90, 30, ${padding.top + chartHeight / 2})`}
+              transform={`rotate(-90, 25, ${padding.top + chartHeight / 2})`}
             >
-              Score Percentage
+              Percentage (%)
             </text>
           </svg>
         </div>
 
-        {/* Recent scores summary */}
-        <div className="pt-4 border-t">
-          <p className="text-sm font-medium text-muted-foreground mb-3">Recent Scores:</p>
-          <div className="flex flex-wrap gap-2">
-            {aggregatedData.slice(-5).reverse().map((d, i) => (
-              <div key={i} className="bg-muted/50 rounded-lg px-3 py-2 text-sm border">
-                <span className="font-semibold text-primary">{d.percentage.toFixed(1)}%</span>
-                <span className="text-muted-foreground ml-2">
-                  ({new Date(d.timestamp).toLocaleDateString()})
-                </span>
-              </div>
-            ))}
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-border/50">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-primary drop-shadow-sm">
+              {stats.avgPercentage.toFixed(1)}%
+            </div>
+            <div className="text-xs text-muted-foreground">Average</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-foreground">{allScores.length}</div>
+            <div className="text-xs text-muted-foreground">Total Attempts</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold" style={{ color: trendColor }}>
+              {stats.trend}
+            </div>
+            <div className="text-xs text-muted-foreground">Trend</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-success drop-shadow-sm">
+              {stats.recentScores.length > 0 
+                ? stats.recentScores[stats.recentScores.length - 1].percentage.toFixed(1) 
+                : '0'}%
+            </div>
+            <div className="text-xs text-muted-foreground">Latest</div>
           </div>
         </div>
       </CardContent>

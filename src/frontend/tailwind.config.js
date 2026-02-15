@@ -25,6 +25,12 @@ export default {
                     'Roboto',
                     'sans-serif'
                 ],
+                display: [
+                    'Space Grotesk',
+                    'Inter',
+                    'system-ui',
+                    'sans-serif'
+                ],
             },
             colors: {
                 border: 'oklch(var(--border))',
@@ -50,7 +56,12 @@ export default {
                 },
                 accent: {
                     DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
-                    foreground: 'oklch(var(--accent-foreground))'
+                    foreground: 'oklch(var(--accent-foreground))',
+                    cyan: 'oklch(var(--accent-cyan) / <alpha-value>)',
+                    lime: 'oklch(var(--accent-lime) / <alpha-value>)',
+                    amber: 'oklch(var(--accent-amber) / <alpha-value>)',
+                    pink: 'oklch(var(--accent-pink) / <alpha-value>)',
+                    purple: 'oklch(var(--accent-purple) / <alpha-value>)',
                 },
                 popover: {
                     DEFAULT: 'oklch(var(--popover))',
@@ -60,21 +71,35 @@ export default {
                     DEFAULT: 'oklch(var(--card))',
                     foreground: 'oklch(var(--card-foreground))'
                 },
+                success: {
+                    DEFAULT: 'oklch(var(--success) / <alpha-value>)',
+                    foreground: 'oklch(var(--success-foreground))'
+                },
+                warning: {
+                    DEFAULT: 'oklch(var(--warning) / <alpha-value>)',
+                    foreground: 'oklch(var(--warning-foreground))'
+                },
                 chart: {
-                    1: 'oklch(var(--chart-1))',
-                    2: 'oklch(var(--chart-2))',
-                    3: 'oklch(var(--chart-3))',
-                    4: 'oklch(var(--chart-4))',
-                    5: 'oklch(var(--chart-5))'
+                    1: 'oklch(var(--accent-cyan))',
+                    2: 'oklch(var(--accent-lime))',
+                    3: 'oklch(var(--accent-amber))',
+                    4: 'oklch(var(--accent-pink))',
+                    5: 'oklch(var(--destructive))'
                 }
             },
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
-                sm: 'calc(var(--radius) - 4px)'
+                sm: 'calc(var(--radius) - 4px)',
+                xl: 'calc(var(--radius) + 4px)',
+                '2xl': 'calc(var(--radius) + 8px)',
             },
             boxShadow: {
-                xs: '0 1px 2px 0 rgba(0,0,0,0.05)'
+                xs: '0 1px 2px 0 oklch(0% 0 0 / 0.05)',
+                'glow-sm': '0 0 12px oklch(var(--primary) / 0.35)',
+                'glow-md': '0 0 24px oklch(var(--primary) / 0.45)',
+                'glow-lg': '0 0 36px oklch(var(--primary) / 0.55)',
+                'elevated': '0 4px 6px -1px oklch(0% 0 0 / 0.15), 0 2px 4px -1px oklch(0% 0 0 / 0.1), inset 0 1px 0 0 oklch(100% 0 0 / 0.05)',
             },
             keyframes: {
                 'accordion-down': {
@@ -84,11 +109,46 @@ export default {
                 'accordion-up': {
                     from: { height: 'var(--radix-accordion-content-height)' },
                     to: { height: '0' }
+                },
+                'fade-in-up': {
+                    from: { opacity: '0', transform: 'translateY(20px)' },
+                    to: { opacity: '1', transform: 'translateY(0)' }
+                },
+                'fade-in': {
+                    from: { opacity: '0' },
+                    to: { opacity: '1' }
+                },
+                'slide-in-right': {
+                    from: { opacity: '0', transform: 'translateX(-20px)' },
+                    to: { opacity: '1', transform: 'translateX(0)' }
+                },
+                'slide-in-left': {
+                    from: { opacity: '0', transform: 'translateX(-100%)' },
+                    to: { opacity: '1', transform: 'translateX(0)' }
+                },
+                'scale-in': {
+                    from: { opacity: '0', transform: 'scale(0.9)' },
+                    to: { opacity: '1', transform: 'scale(1)' }
+                },
+                'pulse-glow': {
+                    '0%, 100%': { boxShadow: '0 0 20px oklch(var(--primary) / 0.3)' },
+                    '50%': { boxShadow: '0 0 35px oklch(var(--primary) / 0.5)' }
+                },
+                'shimmer': {
+                    '0%': { backgroundPosition: '-1000px 0' },
+                    '100%': { backgroundPosition: '1000px 0' }
                 }
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
-                'accordion-up': 'accordion-up 0.2s ease-out'
+                'accordion-up': 'accordion-up 0.2s ease-out',
+                'fade-in-up': 'fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                'fade-in': 'fade-in 0.5s ease-out',
+                'slide-in-right': 'slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                'slide-in-left': 'slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                'scale-in': 'scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                'pulse-glow': 'pulse-glow 2.5s ease-in-out infinite',
+                'shimmer': 'shimmer 3s infinite'
             }
         }
     },

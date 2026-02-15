@@ -4,6 +4,7 @@ import { CustomizationButton } from '../customization/CustomizationButton';
 import { CustomizationPanel } from '../customization/CustomizationPanel';
 import { CustomizationProvider } from '../customization/CustomizationProvider';
 import { TasksDrawer } from './TasksDrawer';
+import { PageTransition } from './PageTransition';
 import { useState } from 'react';
 
 export function Layout() {
@@ -13,13 +14,15 @@ export function Layout() {
 
   return (
     <CustomizationProvider>
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <div className="min-h-screen bg-background text-foreground flex flex-col relative">
         {!isCustomizePage && (
-          <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-14 items-center justify-between px-4">
-              <div className="flex items-center gap-2">
+          <header className="sticky top-0 z-30 w-full border-b border-border/60 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 transition-smooth shadow-lg">
+            <div className="container flex h-16 items-center justify-between px-4">
+              <div className="flex items-center gap-3">
                 <TasksDrawer />
-                <h1 className="text-lg font-bold">11</h1>
+                <h1 className="text-xl font-bold font-display bg-gradient-to-r from-primary via-accent-cyan to-accent-lime bg-clip-text text-transparent">
+                  11
+                </h1>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-muted-foreground hidden sm:inline">
@@ -35,7 +38,9 @@ export function Layout() {
         )}
         
         <main className={isCustomizePage ? 'flex-1' : 'flex-1 pb-20'}>
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </main>
         
         {!isCustomizePage && <BottomNavigation />}

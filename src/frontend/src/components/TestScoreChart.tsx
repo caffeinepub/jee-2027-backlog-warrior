@@ -14,7 +14,7 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
   }
 
   const chartType = test.chartType || 'line';
-  const accentColor = test.chartColor || '#8b5cf6';
+  const accentColor = test.chartColor || 'oklch(68% 0.16 195)';
 
   // Calculate dimensions with better mobile support
   const width = 800;
@@ -49,7 +49,7 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
     <div className="w-full overflow-x-auto">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full"
+        className="w-full transition-smooth"
         style={{ minWidth: '320px', maxHeight: '400px' }}
       >
         {/* Grid lines */}
@@ -57,13 +57,13 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
           const y = chartHeight * (1 - tick);
           const scoreValue = maxScore * tick;
           return (
-            <g key={tick}>
+            <g key={tick} className="transition-smooth">
               <line
                 x1={padding.left}
                 y1={padding.top + y}
                 x2={padding.left + chartWidth}
                 y2={padding.top + y}
-                className="stroke-border/50"
+                className="stroke-border/30 transition-smooth"
                 strokeWidth="1"
                 strokeDasharray="4,4"
               />
@@ -84,7 +84,7 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
         <g transform={`translate(${padding.left}, ${padding.top})`}>
           {chartType === 'line' ? (
             <>
-              {/* Line path */}
+              {/* Line path with glow */}
               <path
                 d={linePath}
                 fill="none"
@@ -92,20 +92,29 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="transition-smooth"
+                style={{
+                  filter: 'drop-shadow(0 0 4px currentColor)',
+                  opacity: 0.9
+                }}
               />
               {/* Data points */}
               {scores.map((s, i) => (
-                <circle
-                  key={s.id}
-                  cx={xScale(i)}
-                  cy={yScale(s.score)}
-                  r="6"
-                  fill={accentColor}
-                  className="stroke-background"
-                  strokeWidth="2"
-                >
-                  <title>{`Attempt ${i + 1}: ${s.score}/${maxScore} (${((s.score / maxScore) * 100).toFixed(1)}%)`}</title>
-                </circle>
+                <g key={s.id} className="transition-smooth hover:scale-110">
+                  <circle
+                    cx={xScale(i)}
+                    cy={yScale(s.score)}
+                    r="6"
+                    fill={accentColor}
+                    className="stroke-background transition-smooth"
+                    strokeWidth="2"
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                    }}
+                  >
+                    <title>{`Attempt ${i + 1}: ${s.score}/${maxScore} (${((s.score / maxScore) * 100).toFixed(1)}%)`}</title>
+                  </circle>
+                </g>
               ))}
             </>
           ) : (
@@ -124,7 +133,11 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
                   height={barHeight}
                   fill={accentColor}
                   opacity="0.85"
-                  rx="4"
+                  rx="6"
+                  className="transition-smooth hover:opacity-100"
+                  style={{
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                  }}
                 >
                   <title>{`Attempt ${i + 1}: ${s.score}/${maxScore} (${((s.score / maxScore) * 100).toFixed(1)}%)`}</title>
                 </rect>
@@ -139,7 +152,7 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
           y1={padding.top + chartHeight}
           x2={padding.left + chartWidth}
           y2={padding.top + chartHeight}
-          className="stroke-border"
+          className="stroke-border/50"
           strokeWidth="2"
         />
 
@@ -149,7 +162,7 @@ export function TestScoreChart({ test }: TestScoreChartProps) {
           y1={padding.top}
           x2={padding.left}
           y2={padding.top + chartHeight}
-          className="stroke-border"
+          className="stroke-border/50"
           strokeWidth="2"
         />
 

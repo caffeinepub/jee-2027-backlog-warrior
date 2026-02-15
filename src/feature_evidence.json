@@ -2,31 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-subject-completion-graph-to-every-subject-page-mathematics-physics-chemistry-and-any-user-created-subjects-that-visualizes-chapter-by-chapter-completion-for-that-subject-and-animate-each-chapter-s-segment-to-fill-slowly-when-the-chapter-becomes-completed",
-      "featureTitle": "Add a Subject Completion Graph to every Subject page (Mathematics/Physics/Chemistry and any user-created subjects) that visualizes chapter-by-chapter completion for that subject, and animate each chapter’s segment to fill slowly when the chapter becomes Completed.",
+      "featureId": "feature-apply-a-dark-blue-dashboard-background-look-across-all-main-dashboards-home-dashboard-calendar-subjects-notes-tests-using-a-cohesive-accessible-color-palette-for-cards-text-borders-and-accents-keep-user-facing-text-in-english",
+      "featureTitle": "Apply a dark-blue dashboard/background look across all main dashboards (Home/Dashboard, Calendar, Subjects, Notes, Tests) using a cohesive, accessible color palette for cards, text, borders, and accents; keep user-facing text in English.",
       "files": [
-        "frontend/src/components/SubjectCompletionGraph.tsx",
-        "frontend/src/pages/SubjectPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-57"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-production-runtime-crash-showing-minified-react-error-185-by-reproducing-it-in-a-non-minified-dev-environment-to-obtain-the-full-error-message-stack-identifying-the-root-cause-and-implementing-a-code-fix-so-the-error-no-longer-occurs-during-normal-app-usage-including-navigating-between-pages-and-interacting-with-chapters-settings",
-      "featureTitle": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage (including navigating between pages and interacting with chapters/settings).",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AppErrorBoundary.tsx",
-        "frontend/src/pages/Customize.tsx",
+        "frontend/src/index.css",
         "frontend/src/pages/Dashboard.tsx",
         "frontend/src/pages/SubjectPage.tsx"
       ],
@@ -38,7 +17,225 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-58"
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-subtle-consistent-icon-animations-throughout-the-ui-hover-tap-active-state-change-that-work-on-both-desktop-and-mobile-and-respect-prefers-reduced-motion",
+      "featureTitle": "Add subtle, consistent icon animations throughout the UI (hover/tap/active + state-change) that work on both desktop and mobile, and respect prefers-reduced-motion.",
+      "files": [
+        "frontend/src/components/AnimatedIcon.tsx",
+        "frontend/src/components/BottomNavigation.tsx",
+        "frontend/src/components/ChapterDetailPanel.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-introduce-background-and-opening-interaction-graphics-illustrations-lightweight-svg-png-assets-that-enhance-the-dark-blue-theme-including-subtle-background-visuals-and-small-decorative-graphics-when-opening-panels-screens-without-obscuring-content",
+      "featureTitle": "Introduce background and opening-interaction graphics/illustrations (lightweight SVG/PNG assets) that enhance the dark-blue theme, including subtle background visuals and small decorative graphics when opening panels/screens, without obscuring content.",
+      "files": [
+        "frontend/src/components/ChapterDetailPanel.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/pages/SubjectPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-every-subject-detail-area-provides-an-in-place-edit-option-to-update-a-number-of-lectures-b-target-hours-and-c-date-to-finish-where-applicable-with-immediate-persistence",
+      "featureTitle": "Ensure every subject detail area provides an in-place edit option to update: (a) number of lectures, (b) target hours, and (c) date to finish (where applicable), with immediate persistence.",
+      "files": [
+        "frontend/src/hooks/useSubjectDetails.ts",
+        "frontend/src/pages/SubjectPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-delete-actions-for-every-chapter-and-every-subject-anywhere-they-appear-in-the-ui-not-only-in-customization-including-confirmation-prompts-and-consistent-destructive-styling",
+      "featureTitle": "Add delete actions for every chapter and every subject anywhere they appear in the UI (not only in customization), including confirmation prompts and consistent destructive styling.",
+      "files": [
+        "frontend/src/components/AllChaptersBySubjectSection.tsx",
+        "frontend/src/components/BottomNavigation.tsx",
+        "frontend/src/components/SubjectDeleteButton.tsx",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/pages/SubjectPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-use-clear-consistent-colors-indicators-for-completion-vs-incompletion-across-chapters-todos-graphs-and-ensure-these-indicators-are-visible-in-lists-detail-panels-and-charts",
+      "featureTitle": "Use clear, consistent colors/indicators for completion vs incompletion across chapters/todos/graphs, and ensure these indicators are visible in lists, detail panels, and charts.",
+      "files": [
+        "frontend/src/components/AllChaptersBySubjectSection.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-notifications-section-on-the-home-dashboard-page-that-when-opened-viewed-shows-1-all-incomplete-work-items-and-2-work-due-today-displayed-in-two-clearly-separated-lists",
+      "featureTitle": "Add a Notifications section on the Home/Dashboard page that, when opened/viewed, shows (1) all incomplete work items and (2) work due today, displayed in two clearly separated lists.",
+      "files": [
+        "frontend/src/components/NotificationsSection.tsx",
+        "frontend/src/hooks/useSubjectDetails.ts",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-overlapping-mixed-ui-layers-by-ensuring-any-opened-panel-drawer-sheet-is-fully-readable-and-does-not-visually-overlap-the-main-content-incorrectly-use-a-backdrop-blur-overlay-and-correct-z-index-layering-for-panels-like-the-chapter-detail-sheet",
+      "featureTitle": "Fix overlapping/mixed UI layers by ensuring any opened panel/drawer/sheet is fully readable and does not visually overlap the main content incorrectly; use a backdrop blur overlay and correct z-index layering for panels like the Chapter detail sheet.",
+      "files": [
+        "frontend/src/components/ChapterDetailPanel.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-user-facing-light-dark-mode-toggle-in-settings-customize-that-switches-between-light-mode-and-dark-mode-and-persists-the-preference-across-reloads",
+      "featureTitle": "Implement a user-facing Light/Dark mode toggle in Settings/Customize that switches between light mode and dark mode and persists the preference across reloads.",
+      "files": [
+        "frontend/index.html"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-bottom-navigation-icons-area-scrolls-horizontally-on-small-screens-so-all-icons-are-reachable-via-swipe-scroll-with-visible-affordance-when-overflow-exists",
+      "featureTitle": "Ensure the bottom navigation icons area scrolls horizontally on small screens so all icons are reachable via swipe/scroll, with visible affordance when overflow exists.",
+      "files": [
+        "frontend/src/components/BottomNavigation.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-improve-and-expand-graph-usage-and-animations-add-graphs-where-they-are-naturally-required-e-g-completion-trends-subject-completion-distribution-and-enhance-existing-chart-animations-transitions-while-respecting-prefers-reduced-motion",
+      "featureTitle": "Improve and expand graph usage and animations: add graphs where they are naturally required (e.g., completion trends, subject completion distribution) and enhance existing chart animations/transitions while respecting prefers-reduced-motion.",
+      "files": [
+        "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-guarantee-that-user-changes-edits-completion-marks-deletes-settings-persist-across-app-close-reopen-and-refresh-do-not-reset-data-unless-the-user-explicitly-confirms-a-destructive-reset-action",
+      "featureTitle": "Guarantee that user changes (edits, completion marks, deletes, settings) persist across app close/reopen and refresh; do not reset data unless the user explicitly confirms a destructive reset action.",
+      "files": [
+        "frontend/index.html",
+        "frontend/src/hooks/useChapterData.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
       ],
       "confidence": "high"
     }

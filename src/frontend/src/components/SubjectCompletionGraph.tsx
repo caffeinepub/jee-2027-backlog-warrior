@@ -50,7 +50,7 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
     if (newlyCompleted.size > 0) {
       const timer = setTimeout(() => {
         prevCompletionRef.current = currentCompleted;
-      }, 2000);
+      }, 1200);
       return () => clearTimeout(timer);
     } else {
       prevCompletionRef.current = currentCompleted;
@@ -62,9 +62,11 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
   }
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth shadow-elevated">
       <CardHeader>
-        <CardTitle className="text-lg">Subject Completion</CardTitle>
+        <CardTitle className="text-lg bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+          Subject Completion
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Progress Bar */}
@@ -75,19 +77,22 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
               {stats.completed} / {stats.total} chapters
             </span>
           </div>
-          <div className="relative h-8 bg-muted rounded-full overflow-hidden">
+          <div className="relative h-10 bg-muted/30 rounded-xl overflow-hidden border border-border/30">
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 to-green-600 transition-all duration-1000 ease-out flex items-center justify-center"
-              style={{ width: `${stats.completionPercentage}%` }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-success via-primary to-success transition-all duration-1000 ease-out flex items-center justify-center animate-shimmer"
+              style={{ 
+                width: `${stats.completionPercentage}%`,
+                backgroundSize: '200% 100%'
+              }}
             >
               {stats.completionPercentage > 10 && (
-                <span className="text-xs font-bold text-white">
+                <span className="text-sm font-bold text-white drop-shadow-lg">
                   {Math.round(stats.completionPercentage)}%
                 </span>
               )}
             </div>
             {stats.completionPercentage <= 10 && stats.completionPercentage > 0 && (
-              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+              <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">
                 {Math.round(stats.completionPercentage)}%
               </span>
             )}
@@ -111,21 +116,22 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
                   {isCompleted ? (
                     <div
                       className={`
-                        w-full aspect-square rounded-lg bg-gradient-to-br from-green-500 to-green-600 
-                        flex items-center justify-center shadow-sm
+                        w-full aspect-square rounded-xl bg-gradient-to-br from-success to-primary
+                        flex items-center justify-center shadow-glow-sm
+                        transition-smooth hover:scale-110 hover:shadow-glow-md
                         ${isNewlyCompleted ? 'animate-fill-slow' : ''}
                       `}
                     >
-                      <CheckCircle2 className="h-4 w-4 text-white" />
+                      <CheckCircle2 className="h-4 w-4 text-white drop-shadow-lg" />
                     </div>
                   ) : (
-                    <div className="w-full aspect-square rounded-lg border-2 border-muted-foreground/30 flex items-center justify-center bg-muted/30">
-                      <Circle className="h-4 w-4 text-muted-foreground/50" />
+                    <div className="w-full aspect-square rounded-xl border-2 border-muted-foreground/20 flex items-center justify-center bg-muted/20 transition-smooth hover:border-primary/40 hover:bg-muted/30">
+                      <Circle className="h-4 w-4 text-muted-foreground/40" />
                     </div>
                   )}
                   
                   {/* Tooltip on hover */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-popover/95 backdrop-blur-sm text-popover-foreground text-xs rounded-lg shadow-elevated opacity-0 group-hover:opacity-100 transition-smooth pointer-events-none whitespace-nowrap z-10 border border-border/50">
                     {chapter.name}
                   </div>
                 </div>
@@ -135,9 +141,9 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
         </div>
 
         {/* Summary Stats */}
-        <div className="flex justify-around pt-2 border-t">
+        <div className="flex justify-around pt-3 border-t border-border/50">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            <div className="text-2xl font-bold text-success drop-shadow-sm">{stats.completed}</div>
             <div className="text-xs text-muted-foreground">Completed</div>
           </div>
           <div className="text-center">
@@ -145,7 +151,7 @@ export function SubjectCompletionGraph({ subjectId, chapters }: SubjectCompletio
             <div className="text-xs text-muted-foreground">Remaining</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-primary">{Math.round(stats.completionPercentage)}%</div>
+            <div className="text-2xl font-bold text-primary drop-shadow-sm">{Math.round(stats.completionPercentage)}%</div>
             <div className="text-xs text-muted-foreground">Complete</div>
           </div>
         </div>

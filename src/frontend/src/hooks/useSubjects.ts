@@ -56,6 +56,16 @@ export function useSubjects() {
     return true;
   };
 
+  const deleteSubject = (subjectId: string): boolean => {
+    try {
+      setSubjects(prev => prev.filter(s => s.id !== subjectId));
+      return true;
+    } catch (error) {
+      console.error('Failed to delete subject:', error);
+      return false;
+    }
+  };
+
   const getSubjectById = (id: string): Subject | undefined => {
     return subjects.find(s => s.id === id);
   };
@@ -67,6 +77,7 @@ export function useSubjects() {
   return {
     subjects,
     addSubject,
+    deleteSubject,
     getSubjectById,
     getSubjectByName,
   };

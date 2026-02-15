@@ -24,13 +24,15 @@ export function Customize() {
   const { settings: globalSettings, updateSettings } = useCustomization();
   const { chapters } = useChapterData();
   const { presets, savePreset, applyPreset, deletePreset } = useCustomizationPresets();
-  const { subjects, addSubject } = useSubjects();
+  const { subjects, addSubject, deleteSubject } = useSubjects();
+  const { deleteChaptersBySubjectId } = useChapterData();
   
   const [draftSettings, setDraftSettings] = useState<CustomizationSettings>(globalSettings);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [presetName, setPresetName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [subjectToDelete, setSubjectToDelete] = useState<string | null>(null);
 
   const sampleChapters = useMemo(() => chapters.slice(0, 3), [chapters]);
 
@@ -42,24 +44,31 @@ export function Customize() {
   const handleSave = useCallback(() => {
     updateSettings(draftSettings);
     setHasUnsavedChanges(false);
+    toast.success('Settings saved successfully!');
   }, [draftSettings, updateSettings]);
 
   const handleDiscard = useCallback(() => {
     setDraftSettings(globalSettings);
     setHasUnsavedChanges(false);
+    toast.info('Changes discarded');
   }, [globalSettings]);
 
   const handleSavePreset = useCallback(() => {
     if (presetName.trim()) {
       savePreset(presetName.trim(), draftSettings);
       setPresetName('');
+      toast.success('Preset saved!');
     }
   }, [presetName, draftSettings, savePreset]);
 
-  const handleApplyPreset = useCallback((preset: CustomizationSettings) => {
-    setDraftSettings(preset);
-    setHasUnsavedChanges(true);
-  }, []);
+  const handleApplyPreset = useCallback((presetName: string) => {
+    const settings = applyPreset(presetName);
+    if (settings) {
+      setDraftSettings(settings);
+      setHasUnsavedChanges(true);
+      toast.success('Preset applied!');
+    }
+  }, [applyPreset]);
 
   const handleAddSubject = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +82,17 @@ export function Customize() {
       }
     }
   }, [newSubjectName, addSubject]);
+
+  const handleDeleteSubject = useCallback((subjectId: string) => {
+    const success = deleteSubject(subjectId);
+    if (success) {
+      deleteChaptersBySubjectId(subjectId);
+      toast.success('Subject and associated chapters deleted successfully!');
+      setSubjectToDelete(null);
+    } else {
+      toast.error('Failed to delete subject.');
+    }
+  }, [deleteSubject, deleteChaptersBySubjectId]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,6 +153,35 @@ export function Customize() {
                         className="flex items-center justify-between p-3 border border-border rounded-lg"
                       >
                         <span className="font-medium">{subject.name}</span>
+                        <AlertDialog open={subjectToDelete === subject.id} onOpenChange={(open) => !open && setSubjectToDelete(null)}>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setSubjectToDelete(subject.id)}
+                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Subject</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{subject.name}"? This will also delete all chapters associated with this subject. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteSubject(subject.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     ))}
                   </div>
@@ -171,19 +220,43 @@ export function Customize() {
                 <Separator />
 
                 <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="notifications">Enable Notifications</Label>
+                    <Switch
+                      id="notifications"
+                      checked={draftSettings.notificationsEnabled}
+                      onCheckedChange={(checked) => handleDraftChange({ notificationsEnabled: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="auto-recalc">Auto-recalculate Date to Finish</Label>
+                    <Switch
+                      id="auto-recalc"
+                      checked={draftSettings.autoRecalculateDateToFinish}
+                      onCheckedChange={(checked) => handleDraftChange({ autoRecalculateDateToFinish: checked })}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
                   <Label>Sleep Window</Label>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">Start</Label>
+                    <div>
+                      <Label htmlFor="sleep-start" className="text-xs text-muted-foreground">Start</Label>
                       <Input
+                        id="sleep-start"
                         type="time"
                         value={draftSettings.sleepWindowStart}
                         onChange={(e) => handleDraftChange({ sleepWindowStart: e.target.value })}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">End</Label>
+                    <div>
+                      <Label htmlFor="sleep-end" className="text-xs text-muted-foreground">End</Label>
                       <Input
+                        id="sleep-end"
                         type="time"
                         value={draftSettings.sleepWindowEnd}
                         onChange={(e) => handleDraftChange({ sleepWindowEnd: e.target.value })}
@@ -197,18 +270,16 @@ export function Customize() {
             <Card>
               <CardHeader>
                 <CardTitle>Display Settings</CardTitle>
-                <CardDescription>Customize how information is displayed</CardDescription>
+                <CardDescription>Customize the appearance of your dashboard</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Chapter Card Size</Label>
-                    <p className="text-sm text-muted-foreground">Choose compact or detailed view</p>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Chapter Card Size</Label>
                   <ToggleGroup
                     type="single"
                     value={draftSettings.chapterCardSize}
                     onValueChange={(value) => value && handleDraftChange({ chapterCardSize: value as 'compact' | 'detailed' })}
+                    className="justify-start"
                   >
                     <ToggleGroupItem value="compact" aria-label="Compact">
                       Compact
@@ -221,62 +292,44 @@ export function Customize() {
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Dark Mode</Label>
-                    <p className="text-sm text-muted-foreground">Override system theme</p>
-                  </div>
-                  <div className="flex items-center gap-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="dark-mode-override">Dark Mode Override</Label>
                     <Switch
+                      id="dark-mode-override"
                       checked={draftSettings.darkModeOverride.enabled}
-                      onCheckedChange={(checked) =>
-                        handleDraftChange({
-                          darkModeOverride: { ...draftSettings.darkModeOverride, enabled: checked },
+                      onCheckedChange={(checked) => 
+                        handleDraftChange({ 
+                          darkModeOverride: { 
+                            ...draftSettings.darkModeOverride, 
+                            enabled: checked 
+                          } 
                         })
                       }
                     />
-                    {draftSettings.darkModeOverride.enabled && (
-                      <ToggleGroup
-                        type="single"
-                        value={draftSettings.darkModeOverride.mode}
-                        onValueChange={(value) =>
-                          value &&
-                          handleDraftChange({
-                            darkModeOverride: { ...draftSettings.darkModeOverride, mode: value as 'light' | 'dark' },
-                          })
-                        }
-                      >
-                        <ToggleGroupItem value="light" aria-label="Light">
-                          Light
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="dark" aria-label="Dark">
-                          Dark
-                        </ToggleGroupItem>
-                      </ToggleGroup>
-                    )}
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Auto-recalculate Date to Finish</Label>
-                    <p className="text-sm text-muted-foreground">Update finish dates automatically</p>
-                  </div>
-                  <Switch
-                    checked={draftSettings.autoRecalculateDateToFinish}
-                    onCheckedChange={(checked) => handleDraftChange({ autoRecalculateDateToFinish: checked })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Enable study reminders</p>
-                  </div>
-                  <Switch
-                    checked={draftSettings.notificationsEnabled}
-                    onCheckedChange={(checked) => handleDraftChange({ notificationsEnabled: checked })}
-                  />
+                  {draftSettings.darkModeOverride.enabled && (
+                    <ToggleGroup
+                      type="single"
+                      value={draftSettings.darkModeOverride.mode}
+                      onValueChange={(value) => 
+                        value && handleDraftChange({ 
+                          darkModeOverride: { 
+                            ...draftSettings.darkModeOverride, 
+                            mode: value as 'light' | 'dark' 
+                          } 
+                        })
+                      }
+                      className="justify-start"
+                    >
+                      <ToggleGroupItem value="light" aria-label="Light mode">
+                        Light
+                      </ToggleGroupItem>
+                      <ToggleGroupItem value="dark" aria-label="Dark mode">
+                        Dark
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -289,110 +342,90 @@ export function Customize() {
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Preset name"
+                    placeholder="Preset name..."
                     value={presetName}
                     onChange={(e) => setPresetName(e.target.value)}
                   />
                   <Button onClick={handleSavePreset} disabled={!presetName.trim()}>
-                    Save Preset
+                    Save
                   </Button>
                 </div>
 
                 <Separator />
 
-                {presets.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No saved presets. Create one to quickly switch between configurations.
-                  </p>
-                ) : (
-                  <ScrollArea className="h-48">
-                    <div className="space-y-2">
-                      {presets.map((preset) => (
-                        <div
-                          key={preset.name}
-                          className="flex items-center justify-between p-3 border border-border rounded-lg"
-                        >
-                          <span className="font-medium">{preset.name}</span>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleApplyPreset(preset.settings)}
-                            >
-                              Apply
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Preset</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete "{preset.name}"? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => deletePreset(preset.name)}>
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
+                <ScrollArea className="h-32">
+                  <div className="space-y-2">
+                    {presets.map((preset) => (
+                      <div
+                        key={preset.name}
+                        className="flex items-center justify-between p-2 border border-border rounded-lg"
+                      >
+                        <span className="text-sm font-medium">{preset.name}</span>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleApplyPreset(preset.name)}
+                          >
+                            Apply
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              deletePreset(preset.name);
+                              toast.success('Preset deleted');
+                            }}
+                            className="hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
 
           {/* Preview Panel */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Live Preview</CardTitle>
+                  <CardTitle>Preview</CardTitle>
                   <ToggleGroup
                     type="single"
                     value={previewMode}
                     onValueChange={(value) => value && setPreviewMode(value as 'desktop' | 'mobile')}
                   >
-                    <ToggleGroupItem value="desktop" aria-label="Desktop">
+                    <ToggleGroupItem value="desktop" aria-label="Desktop preview">
                       <Monitor className="h-4 w-4" />
                     </ToggleGroupItem>
-                    <ToggleGroupItem value="mobile" aria-label="Mobile">
+                    <ToggleGroupItem value="mobile" aria-label="Mobile preview">
                       <Smartphone className="h-4 w-4" />
                     </ToggleGroupItem>
                   </ToggleGroup>
                 </div>
-                <CardDescription>See how your changes look in real-time</CardDescription>
+                <CardDescription>See how your changes will look</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={`${previewMode === 'mobile' ? 'max-w-[375px] mx-auto' : ''}`}>
-                  <div className="border border-border rounded-lg p-4 bg-background min-h-[400px]">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Sample Chapters</h3>
-                      <div className="grid gap-4">
-                        {sampleChapters.map((chapter) => (
-                          <div key={chapter.id} className="pointer-events-none">
-                            <ChapterCard
-                              chapter={chapter}
-                              onClick={() => {}}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="pt-4 border-t border-border">
-                        <p className="text-sm text-muted-foreground">
-                          Preview reflects: {draftSettings.chapterCardSize} cards, {draftSettings.lectureSpeedFactor}x speed, {draftSettings.dailyTargetHours}h daily target
-                        </p>
-                      </div>
+                <div
+                  className={`border border-border rounded-lg p-4 bg-background ${
+                    previewMode === 'mobile' ? 'max-w-sm mx-auto' : ''
+                  }`}
+                >
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold mb-4">Sample Chapters</h3>
+                    <div className={`grid gap-4 ${previewMode === 'desktop' ? 'sm:grid-cols-2' : ''}`}>
+                      {sampleChapters.map((chapter) => (
+                        <ChapterCard
+                          key={chapter.id}
+                          chapter={chapter}
+                          onClick={() => {}}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>

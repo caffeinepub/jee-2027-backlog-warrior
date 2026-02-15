@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, StickyNote } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
@@ -24,6 +24,13 @@ export function TasksDrawer() {
   const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedSubjectId);
   const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
 
+  // Update selected subject if it becomes invalid (use effect to avoid state update during render)
+  useEffect(() => {
+    if (selectedSubjectId && !selectedSubject && subjects.length > 0) {
+      setSelectedSubjectId(subjects[0].id);
+    }
+  }, [selectedSubjectId, selectedSubject, subjects]);
+
   const handleAddTodo = (e: React.FormEvent) => {
     e.preventDefault();
     if (newTodo.trim()) {
@@ -32,30 +39,20 @@ export function TasksDrawer() {
     }
   };
 
-  // Update selected subject if it becomes invalid
-  if (selectedSubjectId && !selectedSubject && subjects.length > 0) {
-    setSelectedSubjectId(subjects[0].id);
-  }
-
   const handleNavigateToNotes = () => {
     setIsOpen(false);
     navigate({ to: '/notes' });
   };
 
-  const handleNavigateToTests = () => {
-    setIsOpen(false);
-    navigate({ to: '/tests' });
-  };
-
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
+        <Button variant="ghost" size="icon" className="h-9 w-9 transition-smooth-fast hover:bg-primary/10 hover:text-primary">
           <Menu className="h-5 w-5" />
           <span className="sr-only">Open menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[90vw] sm:w-[400px] flex flex-col">
+      <SheetContent side="left" className="w-[90vw] sm:w-[400px] flex flex-col bg-card/95 backdrop-blur-xl border-border/60 animate-slide-in-left">
         <SheetHeader>
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
@@ -65,7 +62,7 @@ export function TasksDrawer() {
           <div className="space-y-2">
             <Button
               variant="outline"
-              className="w-full justify-start"
+              className="w-full justify-start transition-smooth-fast hover:bg-primary/10 hover:text-primary hover:border-primary/50"
               onClick={handleNavigateToNotes}
             >
               <StickyNote className="h-4 w-4 mr-2" />
@@ -73,13 +70,13 @@ export function TasksDrawer() {
             </Button>
           </div>
 
-          <Separator />
+          <Separator className="bg-border/60" />
 
           {/* Tasks Section */}
           <div className="space-y-2">
             <h3 className="text-sm font-medium">Tasks</h3>
             <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
-              <SelectTrigger>
+              <SelectTrigger className="transition-smooth-fast focus:border-primary/50">
                 <SelectValue placeholder="Choose a subject" />
               </SelectTrigger>
               <SelectContent>
@@ -100,9 +97,9 @@ export function TasksDrawer() {
                   placeholder="Add a new task..."
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 transition-smooth-fast focus:border-primary/50"
                 />
-                <Button type="submit" size="icon">
+                <Button type="submit" size="icon" className="transition-smooth-fast hover:scale-105">
                   <Plus className="h-4 w-4" />
                 </Button>
               </form>
@@ -119,7 +116,7 @@ export function TasksDrawer() {
                     todos.map((todo) => (
                       <div
                         key={todo.id}
-                        className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                        className="flex items-center gap-3 p-3 border border-border/60 rounded-lg hover:bg-muted/50 transition-smooth-fast hover:border-primary/30 animate-scale-in"
                       >
                         <Checkbox
                           checked={todo.completed}
@@ -135,7 +132,7 @@ export function TasksDrawer() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 transition-smooth-fast hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => deleteTodo(todo.id)}
                         >
                           <Trash2 className="h-4 w-4" />

@@ -1,46 +1,222 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T17:55:59.536Z",
+  "generatedAt": "2026-02-15T20:16:58.470Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 12,
+    "implemented": 12,
     "items": [
       {
-        "id": "REQ-57",
-        "summary": "Add a Subject Completion Graph to every Subject page (Mathematics/Physics/Chemistry and any user-created subjects) that visualizes chapter-by-chapter completion for that subject, and animate each chapter’s segment to fill slowly when the chapter becomes Completed.",
+        "id": "REQ-1",
+        "summary": "Apply a dark-blue dashboard/background look across all main dashboards (Home/Dashboard, Calendar, Subjects, Notes, Tests) using a cohesive, accessible color palette for cards, text, borders, and accents; keep user-facing text in English.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/SubjectCompletionGraph.tsx",
-          "frontend/src/pages/SubjectPage.tsx"
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/CalendarDashboard.tsx",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/pages/Notes.tsx",
+          "frontend/src/pages/Tests.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/SubjectCompletionGraph.tsx",
+          "frontend/src/index.css",
+          "frontend/src/pages/Dashboard.tsx",
           "frontend/src/pages/SubjectPage.tsx"
         ]
       },
       {
-        "id": "REQ-58",
-        "summary": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage (including navigating between pages and interacting with chapters/settings).",
+        "id": "REQ-10",
+        "summary": "Ensure the bottom navigation icons area scrolls horizontally on small screens so all icons are reachable via swipe/scroll, with visible affordance when overflow exists.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AppErrorBoundary.tsx",
-          "frontend/src/main.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/SubjectPage.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/Customize.tsx"
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/components/AppErrorBoundary.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Improve and expand graph usage and animations: add graphs where they are naturally required (e.g., completion trends, subject completion distribution) and enhance existing chart animations/transitions while respecting prefers-reduced-motion.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/DashboardCompletionDistributionChart.tsx",
           "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/Customize.tsx"
+          "frontend/src/components/SubjectCompletionGraph.tsx",
+          "frontend/src/components/OverallPerformanceTrendChart.tsx",
+          "frontend/src/components/TestScoreChart.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Guarantee that user changes (edits, completion marks, deletes, settings) persist across app close/reopen and refresh; do not reset data unless the user explicitly confirms a destructive reset action.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useChapterData.ts",
+          "frontend/src/hooks/useSubjects.ts",
+          "frontend/src/hooks/useTodos.ts",
+          "frontend/src/hooks/useCalendarEntries.ts",
+          "frontend/src/hooks/useCustomizationSettings.ts",
+          "frontend/src/lib/appLocalStorage.ts",
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useChapterData.ts",
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Add subtle, consistent icon animations throughout the UI (hover/tap/active + state-change) that work on both desktop and mobile, and respect prefers-reduced-motion.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/AnimatedIcon.tsx",
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Customize.tsx",
+          "frontend/src/components/ChapterCard.tsx",
+          "frontend/src/components/ChapterDetailPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/AnimatedIcon.tsx",
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/components/ChapterDetailPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Introduce background and opening-interaction graphics/illustrations (lightweight SVG/PNG assets) that enhance the dark-blue theme, including subtle background visuals and small decorative graphics when opening panels/screens, without obscuring content.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/assets/generated/app-bg-mesh-blue.dim_1920x1080.png",
+          "frontend/public/assets/generated/app-bg-noise-blue.dim_2048x2048.png",
+          "frontend/public/assets/generated/study-illustration-line.dim_1200x400.png",
+          "frontend/src/index.css",
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/components/ChapterDetailPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/public/assets/generated/app-bg-mesh-blue.dim_1920x1080.png",
+          "frontend/public/assets/generated/study-illustration-line.dim_1200x400.png",
+          "frontend/src/index.css",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/components/ChapterDetailPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Ensure every subject detail area provides an in-place edit option to update: (a) number of lectures, (b) target hours, and (c) date to finish (where applicable), with immediate persistence.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useSubjectDetails.ts",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/customization/integration.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useSubjectDetails.ts",
+          "frontend/src/pages/SubjectPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add delete actions for every chapter and every subject anywhere they appear in the UI (not only in customization), including confirmation prompts and consistent destructive styling.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SubjectDeleteButton.tsx",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/components/AllChaptersBySubjectSection.tsx",
+          "frontend/src/components/ChapterCard.tsx",
+          "frontend/src/pages/Dashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SubjectDeleteButton.tsx",
+          "frontend/src/pages/SubjectPage.tsx",
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/components/AllChaptersBySubjectSection.tsx",
+          "frontend/src/pages/Dashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Use clear, consistent colors/indicators for completion vs incompletion across chapters/todos/graphs, and ensure these indicators are visible in lists, detail panels, and charts.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/ChapterCard.tsx",
+          "frontend/src/components/AllChaptersBySubjectSection.tsx",
+          "frontend/src/components/SubjectCompletionGraph.tsx",
+          "frontend/src/pages/Tests.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/AllChaptersBySubjectSection.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Add a Notifications section on the Home/Dashboard page that, when opened/viewed, shows (1) all incomplete work items and (2) work due today, displayed in two clearly separated lists.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NotificationsSection.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/hooks/useTodos.ts",
+          "frontend/src/hooks/useCalendarEntries.ts",
+          "frontend/src/hooks/useSubjectDetails.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NotificationsSection.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/hooks/useSubjectDetails.ts"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Fix overlapping/mixed UI layers by ensuring any opened panel/drawer/sheet is fully readable and does not visually overlap the main content incorrectly; use a backdrop blur overlay and correct z-index layering for panels like the Chapter detail sheet.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/ChapterDetailPanel.tsx",
+          "frontend/src/components/TasksDrawer.tsx",
+          "frontend/src/customization/CustomizationPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/ChapterDetailPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Implement a user-facing Light/Dark mode toggle in Settings/Customize that switches between light mode and dark mode and persists the preference across reloads.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Customize.tsx",
+          "frontend/src/customization/CustomizationProvider.tsx",
+          "frontend/src/customization/applyDarkModeOverride.ts",
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
         ]
       }
     ]
@@ -50,11 +226,21 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/index.html",
+    "frontend/public/assets/generated/app-bg-mesh-blue.dim_1920x1080.png",
+    "frontend/public/assets/generated/study-illustration-line.dim_1200x400.png",
     "frontend/src/App.tsx",
-    "frontend/src/components/AppErrorBoundary.tsx",
-    "frontend/src/components/SubjectCompletionGraph.tsx",
+    "frontend/src/components/AllChaptersBySubjectSection.tsx",
+    "frontend/src/components/AnimatedIcon.tsx",
+    "frontend/src/components/BottomNavigation.tsx",
+    "frontend/src/components/ChapterDetailPanel.tsx",
+    "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+    "frontend/src/components/NotificationsSection.tsx",
+    "frontend/src/components/SubjectDeleteButton.tsx",
+    "frontend/src/hooks/useChapterData.ts",
+    "frontend/src/hooks/useSubjectDetails.ts",
+    "frontend/src/hooks/useTodosAll.ts",
     "frontend/src/index.css",
-    "frontend/src/pages/Customize.tsx",
     "frontend/src/pages/Dashboard.tsx",
     "frontend/src/pages/SubjectPage.tsx",
     "project_state.json",

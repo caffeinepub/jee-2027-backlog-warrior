@@ -1,368 +1,277 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Progress } from '../components/ui/progress';
 import { Button } from '../components/ui/button';
-import { Calendar, Clock, TrendingUp, Plus, Timer, Square, Edit2, Check, X, Pause, Play } from 'lucide-react';
+import { Badge } from '../components/ui/badge';
+import { Textarea } from '../components/ui/textarea';
+import { BookOpen, Clock, Target, TrendingUp, Edit2, Save, X } from 'lucide-react';
 import { useChapterData } from '../hooks/useChapterData';
-import { useStudyLog } from '../hooks/useStudyLog';
 import { useSubjects } from '../hooks/useSubjects';
-import { useCurrentlyWorkingChapters } from '../hooks/useCurrentlyWorkingChapters';
 import { useDashboardNote } from '../hooks/useDashboardNote';
 import { useDashboardTitle } from '../hooks/useDashboardTitle';
-import { AllChaptersBySubjectSection } from '../components/AllChaptersBySubjectSection';
-import { useMemo, useState, useEffect, useCallback } from 'react';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { toast } from 'sonner';
-
-function formatElapsedTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m ${secs}s`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${secs}s`;
-  } else {
-    return `${secs}s`;
-  }
-}
+import { useCurrentlyWorkingChapters } from '../hooks/useCurrentlyWorkingChapters';
+import { useCustomization } from '../customization/CustomizationProvider';
+import { useState, useEffect, useMemo } from 'react';
+import { NotificationsSection } from '../components/NotificationsSection';
+import { DashboardCompletionDistributionChart } from '../components/DashboardCompletionDistributionChart';
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { chapters } = useChapterData();
-  const { getTodayHours } = useStudyLog();
-  const { subjects, addSubject } = useSubjects();
-  const { getActiveChapters, stopWorking, pauseWorking, startWorking } = useCurrentlyWorkingChapters();
+  const { subjects } = useSubjects();
   const { note, setNote } = useDashboardNote();
   const { title, setTitle } = useDashboardTitle();
-  const [newSubjectName, setNewSubjectName] = useState('');
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const { getActiveChapters } = useCurrentlyWorkingChapters();
+  const { settings } = useCustomization();
+  
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(title);
+  const [editTitleValue, setEditTitleValue] = useState(title);
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [editNoteValue, setEditNoteValue] = useState(note);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update time every second for live countdown
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(interval);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  // Sync editedTitle when title changes externally
-  useEffect(() => {
-    setEditedTitle(title);
-  }, [title]);
-
-  const stats = useMemo(() => {
-    const total = chapters.length;
-    const completed = chapters.filter(ch => ch.status === 'Completed').length;
-    const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
-    const targetDate = new Date('2026-07-31T23:59:59');
-    const today = new Date();
-    const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Calculate time remaining for live countdown to July 31, 2026
-    const timeRemaining = targetDate.getTime() - currentTime.getTime();
-    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-    
-    // Calculate today's day name and date
-    const todayDayName = currentTime.toLocaleDateString('en-US', { weekday: 'long' });
-    const todayDate = currentTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    
-    // Calculate time remaining until midnight (daily timer)
-    const midnight = new Date(currentTime);
-    midnight.setHours(24, 0, 0, 0);
-    const timeUntilMidnight = midnight.getTime() - currentTime.getTime();
-    const dailyHours = Math.floor(timeUntilMidnight / (1000 * 60 * 60));
-    const dailyMinutes = Math.floor((timeUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
-    const dailySeconds = Math.floor((timeUntilMidnight % (1000 * 60)) / 1000);
-    
-    const todayHours = getTodayHours();
-    
-    return { 
-      completionPercentage, 
-      daysRemaining, 
-      todayHours, 
-      completed, 
-      total,
-      countdown: { days, hours, minutes, seconds },
-      today: { dayName: todayDayName, date: todayDate },
-      dailyTimer: { hours: dailyHours, minutes: dailyMinutes, seconds: dailySeconds }
-    };
-  }, [chapters, getTodayHours, currentTime]);
-
-  const activeChapters = getActiveChapters();
-  const activeChaptersWithNames = useMemo(() => {
-    return activeChapters.map(ac => {
-      const chapter = chapters.find(ch => ch.id === ac.chapterId);
+  const currentlyWorking = useMemo(() => {
+    const activeChapters = getActiveChapters();
+    return activeChapters.map(active => {
+      const chapter = chapters.find(ch => ch.id === active.chapterId);
+      const subject = chapter ? subjects.find(s => s.id === chapter.subjectId) : undefined;
       return {
-        ...ac,
+        chapterId: active.chapterId,
         chapterName: chapter?.name || 'Unknown Chapter',
+        subjectName: subject?.name || 'Unknown Subject',
+        isPaused: active.isPaused,
       };
     });
-  }, [activeChapters, chapters]);
+  }, [getActiveChapters, chapters, subjects]);
 
-  const handleAddSubject = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (newSubjectName.trim()) {
-      const success = addSubject(newSubjectName.trim());
-      if (success) {
-        toast.success(`Subject "${newSubjectName.trim()}" added successfully!`);
-        setNewSubjectName('');
-      } else {
-        toast.error('Failed to add subject. It may already exist.');
-      }
-    }
-  }, [newSubjectName, addSubject]);
+  const stats = useMemo(() => {
+    const totalChapters = chapters.length;
+    const completedChapters = chapters.filter(ch => ch.status === 'Completed').length;
+    const inProgressChapters = chapters.filter(ch => ch.status === 'Incomplete' || ch.status === 'Tough').length;
+    const completionPercentage = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
 
-  const handleSaveTitle = useCallback(() => {
-    if (editedTitle.trim()) {
-      setTitle(editedTitle.trim());
-      setIsEditingTitle(false);
-    } else {
-      setEditedTitle(title);
-      setIsEditingTitle(false);
-    }
-  }, [editedTitle, title, setTitle]);
+    const totalTargetHours = chapters.reduce((sum, ch) => {
+      const computedHours = (ch.totalLectures * ch.lectureDuration) / (settings.lectureSpeedFactor * 60);
+      return sum + (ch.targetHoursOverride ?? computedHours);
+    }, 0);
 
-  const handleCancelEdit = useCallback(() => {
-    setEditedTitle(title);
+    return {
+      totalChapters,
+      completedChapters,
+      inProgressChapters,
+      completionPercentage,
+      totalTargetHours,
+    };
+  }, [chapters, settings.lectureSpeedFactor]);
+
+  const handleSaveTitle = () => {
+    setTitle(editTitleValue);
     setIsEditingTitle(false);
-  }, [title]);
+  };
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveTitle();
-    } else if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
-  }, [handleSaveTitle, handleCancelEdit]);
+  const handleSaveNote = () => {
+    setNote(editNoteValue);
+    setIsEditingNote(false);
+  };
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8 space-y-8">
-      {/* Hero Section */}
-      <section className="text-center space-y-4">
-        {isEditingTitle ? (
-          <div className="flex items-center justify-center gap-2">
-            <Input
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="text-3xl sm:text-4xl font-bold text-center max-w-md"
-              autoFocus
-            />
-            <Button size="icon" variant="ghost" onClick={handleSaveTitle}>
-              <Check className="h-5 w-5 text-green-600" />
-            </Button>
-            <Button size="icon" variant="ghost" onClick={handleCancelEdit}>
-              <X className="h-5 w-5 text-red-600" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center gap-2 group">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{title}</h2>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsEditingTitle(true)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <Edit2 className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
-        <Textarea
-          placeholder="Add your personal note here..."
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          className="text-center resize-none min-h-[60px] text-base sm:text-lg"
+    <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
+      {/* Hero Section with decorative illustration */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-sm border border-border/50 p-8 animate-fade-in-up shadow-elevated">
+        <div 
+          className="absolute top-0 right-0 w-1/2 h-full opacity-10 bg-no-repeat bg-right bg-contain pointer-events-none"
+          style={{ backgroundImage: 'url(/assets/generated/study-illustration-line.dim_1200x400.png)' }}
         />
-      </section>
-
-      {/* Days Remaining Card with Live Countdown */}
-      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
-            <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            Days Remaining
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="text-center">
-            <div className="text-5xl sm:text-6xl font-bold text-primary mb-2">{stats.daysRemaining}</div>
-            <p className="text-sm sm:text-base text-muted-foreground">Until July 31, 2026</p>
-          </div>
-          
-          {/* Live Countdown to July 31, 2026 */}
-          <div>
-            <p className="text-xs text-muted-foreground text-center mb-2">Time Remaining Until Exam</p>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.days}</div>
-                <div className="text-xs text-muted-foreground">Days</div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.hours}</div>
-                <div className="text-xs text-muted-foreground">Hours</div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.minutes}</div>
-                <div className="text-xs text-muted-foreground">Mins</div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{stats.countdown.seconds}</div>
-                <div className="text-xs text-muted-foreground">Secs</div>
-              </div>
+        <div className="relative z-10">
+          {isEditingTitle ? (
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="text"
+                value={editTitleValue}
+                onChange={(e) => setEditTitleValue(e.target.value)}
+                className="text-4xl font-bold font-display bg-transparent border-b-2 border-primary focus:outline-none flex-1"
+                autoFocus
+              />
+              <Button size="icon" variant="ghost" onClick={handleSaveTitle} className="icon-animated">
+                <Save className="h-5 w-5" />
+              </Button>
+              <Button size="icon" variant="ghost" onClick={() => setIsEditingTitle(false)} className="icon-animated">
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-          </div>
-
-          {/* Today's Date */}
-          <div className="text-center pt-2 border-t">
-            <p className="text-sm text-muted-foreground">Today</p>
-            <p className="text-base font-semibold">{stats.today.dayName}</p>
-            <p className="text-xs text-muted-foreground">{stats.today.date}</p>
-          </div>
-
-          {/* Daily 24-Hour Timer */}
-          <div className="pt-2 border-t">
-            <p className="text-xs text-muted-foreground text-center mb-2">Time Remaining Today</p>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.hours).padStart(2, '0')}</div>
-                <div className="text-xs text-muted-foreground">Hours</div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.minutes).padStart(2, '0')}</div>
-                <div className="text-xs text-muted-foreground">Minutes</div>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <div className="text-xl sm:text-2xl font-bold">{String(stats.dailyTimer.seconds).padStart(2, '0')}</div>
-                <div className="text-xs text-muted-foreground">Seconds</div>
-              </div>
+          ) : (
+            <div className="flex items-center gap-3 mb-4">
+              <h1 className="text-4xl font-bold font-display bg-gradient-to-r from-primary via-accent-cyan to-accent-lime bg-clip-text text-transparent">
+                {title}
+              </h1>
+              <Button size="icon" variant="ghost" onClick={() => setIsEditingTitle(true)} className="icon-animated">
+                <Edit2 className="h-4 w-4" />
+              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+          <p className="text-muted-foreground text-lg">
+            {currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth hover-lift animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Chapters</CardTitle>
+            <BookOpen className="h-5 w-5 text-primary icon-animated" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats.totalChapters}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-success/30 transition-smooth hover-lift animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+            <Target className="h-5 w-5 text-success icon-animated" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-success">{stats.completedChapters}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.completionPercentage.toFixed(1)}% complete
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-warning/30 transition-smooth hover-lift animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+            <TrendingUp className="h-5 w-5 text-warning icon-animated" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-warning">{stats.inProgressChapters}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-accent-cyan/30 transition-smooth hover-lift animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Target Hours</CardTitle>
+            <Clock className="h-5 w-5 text-accent-cyan icon-animated" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-accent-cyan">{stats.totalTargetHours.toFixed(1)}h</div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Currently Working Section */}
-      {activeChaptersWithNames.length > 0 && (
-        <Card>
+      {currentlyWorking.length > 0 && (
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/40 shadow-glow-md animate-fade-in-up" style={{ animationDelay: '500ms' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Timer className="h-5 w-5 text-primary" />
+              <Clock className="h-5 w-5 text-primary icon-animated icon-active" />
               Currently Working
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {activeChaptersWithNames.map((ac) => (
-              <div
-                key={ac.chapterId}
-                className="flex items-center justify-between p-3 border border-border rounded-lg bg-muted/30"
-              >
-                <div className="flex-1">
-                  <p className="font-medium">{ac.chapterName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatElapsedTime(ac.elapsedSeconds)}
-                    {ac.isPaused && <span className="ml-2 text-yellow-600">(Paused)</span>}
-                  </p>
+          <CardContent>
+            <div className="space-y-2">
+              {currentlyWorking.map((item) => (
+                <div key={item.chapterId} className="flex items-center justify-between p-3 bg-card/50 rounded-lg backdrop-blur-sm">
+                  <div>
+                    <p className="font-medium">{item.chapterName}</p>
+                    <p className="text-sm text-muted-foreground">{item.subjectName}</p>
+                  </div>
+                  <Badge className={`${item.isPaused ? 'bg-warning/20 text-warning border-warning/30' : 'bg-primary/20 text-primary border-primary/30'}`}>
+                    {item.isPaused ? 'Paused' : 'Active'}
+                  </Badge>
                 </div>
-                <div className="flex gap-2">
-                  {ac.isPaused ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => startWorking(ac.chapterId)}
-                    >
-                      <Play className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => pauseWorking(ac.chapterId)}
-                    >
-                      <Pause className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => stopWorking(ac.chapterId)}
-                  >
-                    <Square className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Completion Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Overall Progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Chapters Completed</span>
-              <span className="font-semibold">{stats.completed} / {stats.total}</span>
-            </div>
-            <Progress value={stats.completionPercentage} className="h-3" />
-            <p className="text-center text-2xl font-bold text-primary">{stats.completionPercentage}%</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Notifications and Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
+          <NotificationsSection />
+        </div>
+        <div className="animate-fade-in-up" style={{ animationDelay: '700ms' }}>
+          <DashboardCompletionDistributionChart />
+        </div>
+      </div>
 
-      {/* Daily Grind */}
-      <Card>
+      {/* Quick Note */}
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-smooth animate-fade-in-up" style={{ animationDelay: '800ms' }}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary" />
-            Daily Grind
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Quick Note</CardTitle>
+            {!isEditingNote ? (
+              <Button size="icon" variant="ghost" onClick={() => { setIsEditingNote(true); setEditNoteValue(note); }} className="icon-animated">
+                <Edit2 className="h-4 w-4" />
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" onClick={handleSaveNote} className="icon-animated">
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsEditingNote(false)} className="icon-animated">
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center">
-            <div className="text-4xl font-bold text-primary mb-2">{stats.todayHours.toFixed(1)}h</div>
-            <p className="text-sm text-muted-foreground">Hours studied today</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Add Subject */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-primary" />
-            Quick Add Subject
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAddSubject} className="flex gap-2">
-            <Input
-              placeholder="Enter subject name..."
-              value={newSubjectName}
-              onChange={(e) => setNewSubjectName(e.target.value)}
-              className="flex-1"
+          {isEditingNote ? (
+            <Textarea
+              value={editNoteValue}
+              onChange={(e) => setEditNoteValue(e.target.value)}
+              placeholder="Write your notes here..."
+              className="min-h-[120px] resize-none"
+              autoFocus
             />
-            <Button type="submit">Add</Button>
-          </form>
+          ) : (
+            <p className="text-muted-foreground whitespace-pre-wrap min-h-[120px]">
+              {note || 'Click edit to add a note...'}
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* All Chapters Section */}
-      <AllChaptersBySubjectSection />
+      {/* Subjects Quick Access */}
+      <Card className="bg-card/80 backdrop-blur-sm border-border/50 animate-fade-in-up" style={{ animationDelay: '900ms' }}>
+        <CardHeader>
+          <CardTitle>Subjects</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {subjects.map((subject, idx) => {
+              const subjectChapters = chapters.filter(ch => ch.subjectId === subject.id);
+              const completed = subjectChapters.filter(ch => ch.status === 'Completed').length;
+              const total = subjectChapters.length;
+
+              return (
+                <Button
+                  key={subject.id}
+                  variant="outline"
+                  className="h-auto flex-col items-start p-4 hover:bg-primary/10 hover:border-primary transition-smooth icon-animated"
+                  onClick={() => navigate({ to: `/subject/${subject.id}` })}
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <span className="font-semibold text-base">{subject.name}</span>
+                  <span className="text-xs text-muted-foreground mt-1">
+                    {completed}/{total} chapters
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

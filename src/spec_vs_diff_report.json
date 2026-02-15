@@ -1,44 +1,101 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-15T17:55:59.532Z",
-  "summary": "REQ-57 appears implemented by adding a new SubjectCompletionGraph component and rendering it on SubjectPage above the chapter grid, including a slow-fill animation class for newly completed chapters. REQ-58 appears addressed by changing TanStack Router route components to stable named components to avoid hook-order/runtime issues commonly associated with Minified React error #185. However, the diff also introduces an unrequested purple-themed primary color palette in index.css, which conflicts with the BuildRequest constraint to not introduce a blue/purple theme.",
+  "generatedAt": "2026-02-15T20:16:58.465Z",
+  "summary": "Diff implements major parts of the requested UI polish (dark-blue theming via CSS variables/backgrounds, notifications section, new dashboard chart, subject/chapter delete buttons, subject detail persistence hook, and some overlay/z-index fixes). However, several requirements are only partially evidenced or have gaps: missing generated asset files, unclear application of dark-blue styling to all dashboards, missing prefers-reduced-motion handling for icon/chart animations, incomplete evidence for finish-date override/auto-calc UX, and a persistence regression where deleting all chapters may reseed initial data.",
   "missing_requirements": [
     {
-      "id": "REQ-58",
-      "requirement": "Fix the production runtime crash showing “Minified React error #185” by reproducing it in a non-minified/dev environment to obtain the full error message/stack, identifying the root cause, and implementing a code fix so the error no longer occurs during normal app usage.",
-      "reason": "While App.tsx mentions avoiding hook order issues via stable component definitions, the diff summary provides no evidence of the required reproduction step (capturing the full dev error/stack) or explicit root-cause documentation tied to #185 beyond the inline comment. The added AppErrorBoundary is not shown as wired into the app to help capture/confirm the full error either.",
+      "id": "REQ-1",
+      "requirement": "Apply a dark-blue dashboard/background look across all main dashboards (Home/Dashboard, Calendar, Subjects, Notes, Tests) using a cohesive, accessible palette driven by CSS variables/Tailwind tokens.",
+      "reason": "Global dark theme tokens/background were added and Dashboard was updated, but the diff summary does not show updates to CalendarDashboard, Notes, or Tests pages to ensure they share the same cohesive dark-blue dashboard styling (beyond whatever the global CSS provides).",
       "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AppErrorBoundary.tsx"
+        "frontend/src/index.css",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Add subtle, consistent icon animations that respect prefers-reduced-motion.",
+      "reason": "Multiple components add `icon-animated` / `icon-active` classes, but the diff summary does not show any CSS or logic that disables/reduces these animations under `prefers-reduced-motion`.",
+      "evidence": [
+        "frontend/src/components/AnimatedIcon.tsx",
+        "frontend/src/components/BottomNavigation.tsx",
+        "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+        "frontend/src/components/NotificationsSection.tsx",
+        "frontend/src/components/SubjectDeleteButton.tsx",
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Add at least two generated background assets under frontend/public/assets/generated and use them, plus subtle decorative graphics in major panels/screens.",
+      "reason": "CSS and Dashboard reference generated asset paths under `/assets/generated/...`, but the diff summary does not show any new files added under `frontend/public/assets/generated` (only TS/TSX/hooks were added).",
+      "evidence": [
+        "frontend/src/index.css",
+        "frontend/src/pages/Dashboard.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Subject detail area provides in-place edit for (a) number of lectures, (b) target hours, (c) date to finish (where applicable), with clear support for overriding/disabling auto-calc when relevant.",
+      "reason": "In-place edit and persistence hook are present, but the diff summary is truncated before showing whether the UI supports overriding vs auto-calculation of finish dates (e.g., toggling auto-recalc or an explicit override flag). The hook includes `finishDateOverride?: boolean`, but usage isn’t evidenced in the shown SubjectPage snippet.",
+      "evidence": [
+        "frontend/src/hooks/useSubjectDetails.ts",
+        "frontend/src/pages/SubjectPage.tsx",
+        "frontend/src/components/ChapterDetailPanel.tsx"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "Enhance chart animations/transitions while respecting prefers-reduced-motion.",
+      "reason": "A new dashboard chart includes animated/transition classes (`transition-all duration-1000`, `chart-item` delay), but there is no evidence these animations are disabled/reduced under `prefers-reduced-motion`.",
+      "evidence": [
+        "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Guarantee persistence across refresh/close; do not reset data unless user explicitly confirms a reset.",
+      "reason": "`useChapterData` falls back to `INITIAL_CHAPTERS` unless stored chapters exist AND `data.chapters.length > 0`. If a user deletes all chapters (valid persisted empty array), the next load would reseed with `INITIAL_CHAPTERS`, violating the no-auto-reset requirement.",
+      "evidence": [
+        "frontend/src/hooks/useChapterData.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Changed the app’s core theme color variables to a purple hue (e.g., --primary with hue ~280) including corresponding secondary/muted/accent/ring values.",
-      "reason": "Not requested by REQ-57 or REQ-58, and it conflicts with the constraint: “Keep the existing dark-mode theme direction and do not introduce a blue/purple theme.”",
+      "description": "Polling localStorage every second for todos synchronization via setInterval in useTodosAll.",
+      "reason": "BuildRequest did not ask for periodic polling-based storage syncing; it only required persistence and notifications derived from persisted data.",
       "evidence": [
-        "frontend/src/index.css"
+        "frontend/src/hooks/useTodosAll.ts"
       ]
     },
     {
-      "description": "Added a new AppErrorBoundary component with a full-page error UI (card, stack trace, reset/reload actions).",
-      "reason": "Not explicitly requested by REQ-57 or REQ-58; the diff summary does not show it being integrated into App.tsx, so it may be extraneous or incomplete relative to the stated goal.",
+      "description": "Document title set to \"11\" in index.html.",
+      "reason": "BuildRequest did not request changing the HTML title, and this value appears unrelated to any specified requirement.",
       "evidence": [
-        "frontend/src/components/AppErrorBoundary.tsx",
-        "frontend/src/App.tsx"
+        "frontend/index.html"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/index.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/AppErrorBoundary.tsx",
-    "frontend/src/components/SubjectCompletionGraph.tsx",
+    "frontend/src/components/AllChaptersBySubjectSection.tsx",
+    "frontend/src/components/AnimatedIcon.tsx",
+    "frontend/src/components/BottomNavigation.tsx",
+    "frontend/src/components/ChapterDetailPanel.tsx",
+    "frontend/src/components/DashboardCompletionDistributionChart.tsx",
+    "frontend/src/components/NotificationsSection.tsx",
+    "frontend/src/components/SubjectDeleteButton.tsx",
+    "frontend/src/hooks/useChapterData.ts",
+    "frontend/src/hooks/useSubjectDetails.ts",
+    "frontend/src/hooks/useTodosAll.ts",
     "frontend/src/index.css",
-    "frontend/src/pages/Customize.tsx",
     "frontend/src/pages/Dashboard.tsx",
     "frontend/src/pages/SubjectPage.tsx",
     "project_state.json"
