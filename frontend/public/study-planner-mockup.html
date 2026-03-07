@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Study Planner - Standalone Mockup</title>
+
+<!-- React + ReactDOM CDN -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0a1628 0%, #0f2744 50%, #1a3a5c 100%);
+    color: #e0f2ff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .card {
+    background: rgba(15, 39, 68, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #60a5fa;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(10, 22, 40, 0.6);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    color: #e0f2ff;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  input::placeholder {
+    color: #64748b;
+  }
+
+  button {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  button:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  button.secondary {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+  }
+
+  button.secondary:hover {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+
+  button.danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  }
+
+  button.danger:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(220, 38, 38, 0.3);
+  }
+
+  button.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .subject-card {
+    background: rgba(15, 39, 68, 0.9);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .subject-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.2);
+  }
+
+  .chapter-item {
+    background: rgba(10, 22, 40, 0.5);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .chapter-item:hover {
+    background: rgba(10, 22, 40, 0.7);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  .chapter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .chapter-name {
+    font-weight: 600;
+    color: #60a5fa;
+    font-size: 1.1rem;
+  }
+
+  .chapter-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 0.75rem;
+  }
+
+  .chapter-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .date-input-group label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .date-input-group input {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .subjects-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .header-actions {
+      flex-direction: column;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #60a5fa;
+  }
+
+  .info-text {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const STORAGE_KEY = 'study-planner-mockup-data';
+
+function App() {
+  const [subjects, setSubjects] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState("");
+  const [newChapter, setNewChapter] = useState({
+    name: "",
+    totalLectures: "",
+    lectureDuration: "90"
+  });
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        setSubjects(data.subjects || []);
+        setChapters(data.chapters || []);
+      }
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    }
+  }, []);
+
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ subjects, chapters }));
+    } catch (error) {
+      console.error("Failed to save data:", error);
+    }
+  }, [subjects, chapters]);
+
+  function addSubject() {
+    if (!newSubjectName.trim()) return;
+    
+    const newSubject = {
+      id: Date.now().toString(),
+      name: newSubjectName.trim()
+    };
+    
+    setSubjects([...subjects, newSubject]);
+    setNewSubjectName("");
+    setSelectedSubjectId(newSubject.id);
+  }
+
+  function deleteSubject(subjectId) {
+    if (!confirm("Delete this subject and all its chapters?")) return;
+    
+    setSubjects(subjects.filter(s => s.id !== subjectId));
+    setChapters(chapters.filter(c => c.subjectId !== subjectId));
+    
+    if (selectedSubjectId === subjectId) {
+      setSelectedSubjectId("");
+    }
+  }
+
+  function addChapter() {
+    if (!selectedSubjectId || !newChapter.name.trim() || !newChapter.totalLectures) {
+      alert("Please select a subject and fill in chapter name and total lectures.");
+      return;
+    }
+
+    const chapter = {
+      id: Date.now().toString(),
+      subjectId: selectedSubjectId,
+      name: newChapter.name.trim(),
+      totalLectures: parseInt(newChapter.totalLectures),
+      lectureDuration: parseInt(newChapter.lectureDuration),
+      startDate: "",
+      targetDate: ""
+    };
+
+    setChapters([...chapters, chapter]);
+    setNewChapter({ name: "", totalLectures: "", lectureDuration: "90" });
+  }
+
+  function deleteChapter(chapterId) {
+    if (!confirm("Delete this chapter?")) return;
+    setChapters(chapters.filter(c => c.id !== chapterId));
+  }
+
+  function updateChapterDate(chapterId, field, value) {
+    setChapters(chapters.map(c => 
+      c.id === chapterId ? { ...c, [field]: value } : c
+    ));
+  }
+
+  function resetAll() {
+    if (!confirm("Reset all data? This will delete all subjects and chapters.")) return;
+    
+    setSubjects([]);
+    setChapters([]);
+    setSelectedSubjectId("");
+    setNewSubjectName("");
+    setNewChapter({ name: "", totalLectures: "", lectureDuration: "90" });
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  const selectedSubject = subjects.find(s => s.id === selectedSubjectId);
+
+  return (
+    <div className="container">
+      <h1>📚 Study Planner</h1>
+      <p className="subtitle">Standalone single-file mockup with local storage persistence</p>
+
+      <div className="header-actions">
+        <button onClick={resetAll} className="danger small">
+          Reset All Data
+        </button>
+      </div>
+
+      {/* Add Subject Section */}
+      <div className="card">
+        <div className="card-header">
+          <h2 className="card-title">Add Subject</h2>
+        </div>
+        <div className="form-group">
+          <label>Subject Name</label>
+          <input
+            type="text"
+            value={newSubjectName}
+            onChange={(e) => setNewSubjectName(e.target.value)}
+            placeholder="e.g., Mathematics, Physics, Chemistry"
+            onKeyPress={(e) => e.key === 'Enter' && addSubject()}
+          />
+        </div>
+        <button onClick={addSubject}>Add Subject</button>
+      </div>
+
+      {/* Add Chapter Section */}
+      {subjects.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Add Chapter</h2>
+          </div>
+          <div className="form-group">
+            <label>Select Subject</label>
+            <select
+              value={selectedSubjectId}
+              onChange={(e) => setSelectedSubjectId(e.target.value)}
+            >
+              <option value="">-- Choose a subject --</option>
+              {subjects.map(subject => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedSubjectId && (
+            <>
+              <div className="form-group">
+                <label>Chapter Name</label>
+                <input
+                  type="text"
+                  value={newChapter.name}
+                  onChange={(e) => setNewChapter({ ...newChapter, name: e.target.value })}
+                  placeholder="e.g., Calculus Basics"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Total Lectures</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newChapter.totalLectures}
+                    onChange={(e) => setNewChapter({ ...newChapter, totalLectures: e.target.value })}
+                    placeholder="e.g., 10"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Lecture Duration (minutes)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newChapter.lectureDuration}
+                    onChange={(e) => setNewChapter({ ...newChapter, lectureDuration: e.target.value })}
+                    placeholder="e.g., 90"
+                  />
+                </div>
+              </div>
+
+              <button onClick={addChapter}>Add Chapter</button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Subjects and Chapters Display */}
+      {subjects.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">📖</div>
+          <h3>No subjects yet</h3>
+          <p className="info-text">Add your first subject to get started!</p>
+        </div>
+      ) : (
+        <div className="subjects-grid">
+          {subjects.map(subject => {
+            const subjectChapters = chapters.filter(c => c.subjectId === subject.id);
+            
+            return (
+              <div key={subject.id} className="subject-card">
+                <div className="card-header">
+                  <h3 className="card-title">{subject.name}</h3>
+                  <button
+                    onClick={() => deleteSubject(subject.id)}
+                    className="danger small"
+                  >
+                    Delete Subject
+                  </button>
+                </div>
+
+                {subjectChapters.length === 0 ? (
+                  <p className="info-text">No chapters added yet</p>
+                ) : (
+                  subjectChapters.map(chapter => (
+                    <div key={chapter.id} className="chapter-item">
+                      <div className="chapter-header">
+                        <div className="chapter-name">{chapter.name}</div>
+                        <span className="badge">
+                          {chapter.totalLectures} lectures
+                        </span>
+                      </div>
+
+                      <div className="chapter-details">
+                        <div>
+                          <strong>Duration:</strong> {chapter.lectureDuration} min
+                        </div>
+                        <div>
+                          <strong>Total:</strong> {(chapter.totalLectures * chapter.lectureDuration / 60).toFixed(1)} hrs
+                        </div>
+                      </div>
+
+                      <div className="chapter-dates">
+                        <div className="date-input-group">
+                          <label>Start Date</label>
+                          <input
+                            type="date"
+                            value={chapter.startDate}
+                            onChange={(e) => updateChapterDate(chapter.id, 'startDate', e.target.value)}
+                          />
+                        </div>
+                        <div className="date-input-group">
+                          <label>Target Date</label>
+                          <input
+                            type="date"
+                            value={chapter.targetDate}
+                            onChange={(e) => updateChapterDate(chapter.id, 'targetDate', e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="button-group">
+                        <button
+                          onClick={() => deleteChapter(chapter.id)}
+                          className="danger small"
+                          style={{ width: '100%' }}
+                        >
+                          Delete Chapter
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

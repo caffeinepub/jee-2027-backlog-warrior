@@ -1,0 +1,62 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-15T22:29:46.537Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 3,
+    "implemented": 3,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Update the bottom navigation UI so that the main navigation button row (Home, Calendar, Countdown, Notes, Tests) is moved into the left-side menu drawer, while the Subjects bar remains as the only fixed bottom bar element visible outside the menu.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/BottomNavigation.tsx",
+          "frontend/src/components/SubjectsBar.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/BottomNavigation.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Expand the existing left-side menu drawer (TasksDrawer) to include navigation items for all main routes previously shown in the bottom navigation (Home, Calendar, Countdown, Notes, Tests). Each item must close the drawer after navigation.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/TasksDrawer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/TasksDrawer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Adjust layout spacing so page content is not obscured by the remaining fixed Subjects bar at the bottom after removing the main bottom navigation row.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Layout.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/BottomNavigation.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/TasksDrawer.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

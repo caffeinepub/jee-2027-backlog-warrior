@@ -1,0 +1,16 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-15T22:29:46.534Z",
+  "summary": "The diff implements moving the main route navigation into the left TasksDrawer menu, leaving only the SubjectsBar in the fixed bottom bar, and adds bottom padding to prevent content from being obscured by the remaining fixed Subjects bar.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.74,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/components/BottomNavigation.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/TasksDrawer.tsx",
+    "project_state.json"
+  ]
+}

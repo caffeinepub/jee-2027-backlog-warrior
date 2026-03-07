@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-update-the-bottom-navigation-ui-so-that-the-main-navigation-button-row-home-calendar-countdown-notes-tests-is-moved-into-the-left-side-menu-drawer-while-the-subjects-bar-remains-as-the-only-fixed-bottom-bar-element-visible-outside-the-menu",
+      "title": "Update the bottom navigation UI so that the main navigation button row (Home, Calendar, Countdown, Notes, Tests) is moved into the left-side menu drawer, while the Subjects bar remains as the only fixed bottom bar element visible outside the menu.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expand-the-existing-left-side-menu-drawer-tasksdrawer-to-include-navigation-items-for-all-main-routes-previously-shown-in-the-bottom-navigation-home-calendar-countdown-notes-tests-each-item-must-close-the-drawer-after-navigation",
+      "title": "Expand the existing left-side menu drawer (TasksDrawer) to include navigation items for all main routes previously shown in the bottom navigation (Home, Calendar, Countdown, Notes, Tests). Each item must close the drawer after navigation.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-adjust-layout-spacing-so-page-content-is-not-obscured-by-the-remaining-fixed-subjects-bar-at-the-bottom-after-removing-the-main-bottom-navigation-row",
+      "title": "Adjust layout spacing so page content is not obscured by the remaining fixed Subjects bar at the bottom after removing the main bottom navigation row.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Update UI navigation: move the whole bar into the menu, except keep “Subjects” outside the menu",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Move bottom navigation buttons into the left-side menu while keeping Subjects bar visible",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

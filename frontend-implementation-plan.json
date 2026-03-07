@@ -1,0 +1,60 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Move main bottom navigation into TasksDrawer while keeping SubjectsBar fixed",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Remove the main route button row from the fixed bottom bar and keep SubjectsBar as the only persistent bottom element.",
+      "acceptanceCriteria": [
+        "The fixed bottom bar no longer shows the Home/Calendar/Countdown/Notes/Tests button row.",
+        "The fixed bottom bar still shows the existing SubjectsBar with the same subject switching/add/delete behavior.",
+        "All routes and navigation destinations for Home (/), Calendar (/calendar), Countdown (/countdown), Notes (/notes), and Tests (/tests) remain available via the menu drawer.",
+        "Active route styling/affordance is preserved in the new menu entries (the currently active route is visually indicated)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BottomNavigation.tsx",
+          "operation": "modify",
+          "description": "Update BottomNavigation to render only the fixed SubjectsBar (remove the main navItems button row and any now-unused routing/icon/button code), ensuring the SubjectsBar remains visible as the sole fixed bottom element outside the drawer."
+        },
+        {
+          "path": "frontend/src/components/SubjectsBar.tsx",
+          "operation": "modify",
+          "description": "Verify SubjectsBar remains functionally unchanged after BottomNavigation refactor (subject switching and add/delete dialogs/toasts continue working) and ensure its container styling still works when it is the only fixed bottom bar content."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add Home/Calendar/Countdown/Notes/Tests navigation items to TasksDrawer with active-route styling and auto-close behavior on navigation.",
+      "acceptanceCriteria": [
+        "TasksDrawer contains menu items for Home, Calendar, Countdown, Notes, and Tests.",
+        "Clicking any menu item navigates to the correct route and closes the drawer.",
+        "Existing Tasks section functionality (subject selector + todos CRUD) remains intact and usable."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/TasksDrawer.tsx",
+          "operation": "modify",
+          "description": "Expand TasksDrawer navigation section to include buttons for Home (/), Calendar (/calendar), Countdown (/countdown), Notes (/notes), and Tests (/tests). Use TanStack Router route state to apply an active visual style for the current route, and ensure each nav click closes the drawer before navigating. Use shadcn-ui Button/Sheet primitives already in use for consistent drawer UI; Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Adjust page layout bottom padding to match the remaining fixed SubjectsBar height so content is not obscured without leaving excessive blank space.",
+      "acceptanceCriteria": [
+        "On non-customize pages, the main content has sufficient bottom padding so the last interactive content is not hidden behind the fixed Subjects bar.",
+        "No extra unused bottom padding remains that would create an unusually large blank area at the bottom of pages."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Update the non-customize <main> bottom padding (currently pb-20) to a smaller value appropriate for the SubjectsBar-only fixed footer so content clears the bar without creating an oversized blank area."
+        }
+      ]
+    }
+  ]
+}

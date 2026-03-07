@@ -1,0 +1,59 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-bottom-navigation-ui-so-that-the-main-navigation-button-row-home-calendar-countdown-notes-tests-is-moved-into-the-left-side-menu-drawer-while-the-subjects-bar-remains-as-the-only-fixed-bottom-bar-element-visible-outside-the-menu",
+      "featureTitle": "Update the bottom navigation UI so that the main navigation button row (Home, Calendar, Countdown, Notes, Tests) is moved into the left-side menu drawer, while the Subjects bar remains as the only fixed bottom bar element visible outside the menu.",
+      "files": [
+        "frontend/src/components/BottomNavigation.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-expand-the-existing-left-side-menu-drawer-tasksdrawer-to-include-navigation-items-for-all-main-routes-previously-shown-in-the-bottom-navigation-home-calendar-countdown-notes-tests-each-item-must-close-the-drawer-after-navigation",
+      "featureTitle": "Expand the existing left-side menu drawer (TasksDrawer) to include navigation items for all main routes previously shown in the bottom navigation (Home, Calendar, Countdown, Notes, Tests). Each item must close the drawer after navigation.",
+      "files": [
+        "frontend/src/components/TasksDrawer.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-adjust-layout-spacing-so-page-content-is-not-obscured-by-the-remaining-fixed-subjects-bar-at-the-bottom-after-removing-the-main-bottom-navigation-row",
+      "featureTitle": "Adjust layout spacing so page content is not obscured by the remaining fixed Subjects bar at the bottom after removing the main bottom navigation row.",
+      "files": [
+        "frontend/src/components/Layout.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

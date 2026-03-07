@@ -1,0 +1,74 @@
+{
+  "kind": "build_request",
+  "title": "Move bottom navigation buttons into the left-side menu while keeping Subjects bar visible",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Update the bottom navigation UI so that the main navigation button row (Home, Calendar, Countdown, Notes, Tests) is moved into the left-side menu drawer, while the Subjects bar remains as the only fixed bottom bar element visible outside the menu.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "imean make that whole bar  to the menu o except subjjects"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The fixed bottom bar no longer shows the Home/Calendar/Countdown/Notes/Tests button row.",
+        "The fixed bottom bar still shows the existing SubjectsBar with the same subject switching/add/delete behavior.",
+        "All routes and navigation destinations for Home (/), Calendar (/calendar), Countdown (/countdown), Notes (/notes), and Tests (/tests) remain available via the menu drawer.",
+        "Active route styling/affordance is preserved in the new menu entries (the currently active route is visually indicated)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Expand the existing left-side menu drawer (TasksDrawer) to include navigation items for all main routes previously shown in the bottom navigation (Home, Calendar, Countdown, Notes, Tests). Each item must close the drawer after navigation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "make that whole bar  to the menu"
+        ]
+      },
+      "acceptanceCriteria": [
+        "TasksDrawer contains menu items for Home, Calendar, Countdown, Notes, and Tests.",
+        "Clicking any menu item navigates to the correct route and closes the drawer.",
+        "Existing Tasks section functionality (subject selector + todos CRUD) remains intact and usable."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Adjust layout spacing so page content is not obscured by the remaining fixed Subjects bar at the bottom after removing the main bottom navigation row.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "except subjjects"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On non-customize pages, the main content has sufficient bottom padding so the last interactive content is not hidden behind the fixed Subjects bar.",
+        "No extra unused bottom padding remains that would create an unusually large blank area at the bottom of pages."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Keep the existing TanStack Router routes unchanged (no route removals or path changes)."
+  ],
+  "nonGoals": [
+    "Do not change subject creation/deletion rules or subject storage behavior.",
+    "Do not add new backend endpoints or modify the Motoko backend for this change.",
+    "Do not redesign the overall app theme beyond what is necessary to relocate navigation UI."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
